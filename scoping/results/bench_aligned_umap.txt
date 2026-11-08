@@ -1,0 +1,9 @@
+# scoping/bench_aligned_umap.py, run 2026-11-08 on an 8-core / 24 GB Mac (UMAP single-threaded: random_state set)
+24,785 people, 32 windows of 3,091-3,845; 109,863 points
+AlignedUMAP: 7.9 min for 109,863 points
+independent UMAPs: 6.0 min
+              AlignedUMAP: move between neighbouring windows (x RMS radius) median 0.049, p90 0.112, p99 0.291;  15-NN fidelity 0.288
+ independent + Procrustes: move between neighbouring windows (x RMS radius) median 0.269, p90 0.842, p99 2.223;  15-NN fidelity 0.304
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/bench/aligned_living.npz
+      839.41 real       815.94 user        51.50 sys
+          1147256832  maximum resident set size

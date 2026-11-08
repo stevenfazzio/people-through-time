@@ -1,0 +1,197 @@
+793,215 people at or above 300 median views/mo
+
+  read 2025-11
+  read 2025-12
+  read 2026-01
+  read 2026-02
+  read 2026-03
+  read 2026-04
+  read 2026-05
+  read 2026-06
+  read 2026-07
+  read 2026-08
+  read 2026-09
+  read 2026-10
+/Users/stevenfazzio/repos/people-through-time-map/scoping/bot_features.py:50: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  base = pd.concat(base).groupby(level=[0, 1]).sum().unstack(fill_value=0)
+/Users/stevenfazzio/repos/people-through-time-map/scoping/bot_features.py:52: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  cells = pd.concat(cells).groupby(level=[0, 1, 2]).sum().rename("views").reset_index()
+Roster-wide desktop share by language (top 15 languages by views):
+lang
+en    0.247
+ja    0.244
+de    0.278
+fr    0.241
+es    0.185
+ru    0.242
+it    0.177
+zh    0.371
+pt    0.207
+pl    0.259
+ar    0.134
+fa    0.087
+tr    0.179
+nl    0.247
+sv    0.217 
+
+  desktop_share quantiles 1/10/50/90/99/99.9%: [0.084, 0.154, 0.279, 0.468, 0.645, 0.83]; views-weighted mean 0.230
+ excess_desktop quantiles 1/10/50/90/99/99.9%: [-0.144, -0.078, 0.036, 0.215, 0.39, 0.569]; views-weighted mean -0.013
+      app_share quantiles 1/10/50/90/99/99.9%: [0.003, 0.006, 0.018, 0.036, 0.058, 0.08]; views-weighted mean 0.023
+             cv quantiles 1/10/50/90/99/99.9%: [0.074, 0.123, 0.299, 0.892, 1.979, 2.734]; views-weighted mean 0.557
+  excess desktop > 0.2: 92,861 people
+  excess desktop > 0.3: 29,329 people
+  excess desktop > 0.4: 6,725 people
+  excess desktop > 0.5: 1,472 people
+
+Controls:
+       title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+   Cleopatra  -50.5     1197208.5          0.108             0.243          -0.135 en/mobile-web           0.643 0.218    159.0
+Elizabeth_II 1926.0     1189100.5          0.260             0.243           0.017 en/mobile-web           0.356 0.147    216.0
+ Ansel_Adams 1902.0     1081993.0          0.077             0.247          -0.170 en/mobile-web           0.919 0.348     60.0
+Taylor_Swift 1989.0      748691.0          0.265             0.246           0.019 en/mobile-web           0.448 0.452    156.0
+       Jesus    NaN      602772.5          0.299             0.249           0.050 en/mobile-web           0.293 0.267    283.0
+Genghis_Khan    NaN      562403.5          0.274             0.245           0.029 en/mobile-web           0.311 0.137    183.0
+       Plato -424.5      280104.0          0.435             0.270           0.164 en/mobile-web           0.174 0.261    222.0 
+
+Top 40 by median views with excess desktop share > 0.3:
+                             title  birth  median_views  desktop_share  expected_desktop  excess_desktop   top_cell  top_cell_share    cv  n_langs
+                         Bruce_Lee 1940.0      757074.5          0.655             0.244           0.411 en/desktop           0.617 0.824    132.0
+                      Michelangelo 1475.0      421378.0          0.604             0.255           0.348 fr/desktop           0.369 0.396    213.0
+                    Claude_Shannon 1916.0       69848.0          0.552             0.248           0.304 en/desktop           0.367 0.267     69.0
+                     Auguste_Comte 1798.0       48030.5          0.547             0.231           0.316 en/desktop           0.317 0.357    102.0
+                      Robert_Hooke 1635.0       46819.5          0.547             0.239           0.308 en/desktop           0.343 0.255     95.0
+                      Grace_Hopper 1906.0       43385.0          0.591             0.248           0.343 en/desktop           0.394 0.149     73.0
+                  Richard_Stallman 1953.0       41359.5          0.622             0.252           0.370 en/desktop           0.361 0.114    108.0
+                        Aṅgulimāla    NaN       36972.5          0.824             0.247           0.577 en/desktop           0.793 0.394     22.0
+John_McCarthy_(computer_scientist) 1927.0       30898.5          0.585             0.241           0.344 en/desktop           0.414 0.205     64.0
+                     Peter_Drucker 1909.0       30747.0          0.583             0.245           0.338 en/desktop           0.257 0.107     50.0
+                  Guido_van_Rossum 1956.0       29990.5          0.677             0.244           0.433 en/desktop           0.470 0.095     52.0
+                         Vint_Cerf 1943.0       29943.5          0.778             0.247           0.532 en/desktop           0.693 0.310     50.0
+                         Andrew_Ng 1976.0       29551.0          0.598             0.261           0.337 en/desktop           0.446 0.138     32.0
+                    Dennis_Ritchie 1941.0       26253.0          0.586             0.247           0.339 en/desktop           0.389 0.143     84.0
+                     Jonathan_Blow 1971.0       25387.5          0.639             0.247           0.391 en/desktop           0.574 0.394     16.0
+                      Donald_Knuth 1938.0       25164.5          0.663             0.253           0.410 en/desktop           0.448 0.333     81.0
+                Edsger_W._Dijkstra 1930.0       24910.0          0.690             0.248           0.442 en/desktop           0.468 0.236     67.0
+               Jack_Archer_(actor)    NaN       23936.0          0.857             0.247           0.610 en/desktop           0.853 0.659      6.0
+                       Thomas_Kuhn 1922.0       23736.5          0.665             0.241           0.424 en/desktop           0.422 0.249     70.0
+                      Bobby_Kotick 1963.0       23463.0          0.557             0.247           0.310 en/desktop           0.484 0.393     14.0
+                   Alberto_Moravia 1907.0       22798.0          0.665             0.234           0.431 en/desktop           0.532 0.937     66.0
+                   Jennifer_Doudna 1964.0       22657.5          0.570             0.254           0.315 en/desktop           0.398 0.141     74.0
+                  Pierre_de_Fermat 1601.0       22365.5          0.551             0.243           0.308 en/desktop           0.181 0.289     97.0
+                    Norbert_Wiener 1894.0       22060.5          0.549             0.247           0.302 en/desktop           0.280 0.114     64.0
+                      Ken_Thompson 1943.0       22015.5          0.636             0.247           0.389 en/desktop           0.450 0.209     57.0
+              Aristarchus_of_Samos -314.5       21892.5          0.549             0.239           0.310 en/desktop           0.164 0.440     71.0
+                      George_Boole 1815.0       21704.5          0.576             0.247           0.329 en/desktop           0.328 0.147     83.0
+          Frederick_Winslow_Taylor 1856.0       21401.5          0.528             0.227           0.301 en/desktop           0.239 0.183     51.0
+                 Andrey_Kolmogorov 1903.0       21139.0          0.575             0.249           0.326 en/desktop           0.280 0.132     69.0
+                           Martial   50.5       21019.0          0.730             0.247           0.483 en/desktop           0.552 0.303     55.0
+                   Vilfredo_Pareto 1848.0       20900.0          0.551             0.238           0.313 en/desktop           0.224 0.083     73.0
+            Charles_Sanders_Peirce 1839.0       20841.5          0.565             0.242           0.323 en/desktop           0.291 0.073     65.0
+                       Jacob_Grimm 1785.0       20813.5          0.566             0.264           0.303 en/desktop           0.217 0.541     65.0
+                    Albert_Bandura 1925.0       20599.5          0.560             0.235           0.325 en/desktop           0.236 0.155     58.0
+                    Silvina_Ocampo 1903.0       20137.0          0.741             0.231           0.510 fr/desktop           0.637 0.411     33.0
+                    Erving_Goffman 1922.0       19770.0          0.580             0.242           0.338 en/desktop           0.240 0.121     52.0
+                       Craig_Small 1969.0       19706.5          0.955             0.247           0.708 en/desktop           0.955 0.425      2.0
+                 W._Edwards_Deming 1900.0       19464.5          0.638             0.242           0.396 en/desktop           0.403 0.101     34.0
+                 Bjarne_Stroustrup 1950.0       18997.5          0.607             0.248           0.360 en/desktop           0.392 0.173     56.0
+           Mihaly_Csikszentmihalyi 1934.0       18959.5          0.574             0.246           0.327 en/desktop           0.318 0.098     35.0
+
+Proxy roster: top 31,000 by views x age among 561,379 with an enwiki birth year
+       era      n   >0.2   >0.3   >0.4  median excess
+       BCE   1124    456    102      9  0.172
+    1-1499   6054    963    180     14  0.117
+ 1500-1799   3196    367     51      2  0.072
+ 1800-1899   3292    225     31      1  0.066
+ 1900-1949   6564     97     23      7  -0.013
+     1950+  10770     21      2      1  -0.054
+
+BCE: top 12 by score with excess desktop > 0.2
+       title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+   Aristotle -384.0      308581.0          0.462             0.261           0.202    en/desktop           0.178 0.212    234.0
+      Euclid -350.5       67895.0          0.483             0.276           0.207 en/mobile-web           0.177 0.267    170.0
+        Ovid  -43.0       67353.0          0.513             0.279           0.234    en/desktop           0.172 0.287    144.0
+   Euripides -484.5       51246.0          0.494             0.272           0.222 en/mobile-web           0.207 0.363    102.0
+  Democritus -464.5       51387.5          0.486             0.246           0.240    en/desktop           0.172 0.237    105.0
+Eratosthenes -276.0       53971.0          0.469             0.236           0.233 en/mobile-web           0.172 0.262    102.0
+  Parmenides -514.5       35541.0          0.506             0.269           0.237    en/desktop           0.145 0.436     86.0
+       Solon -634.5       29692.5          0.545             0.282           0.263    en/desktop           0.160 0.589     79.0
+      Horace  -65.0       37323.0          0.462             0.248           0.213    en/desktop           0.174 0.126    103.0
+ Anaximander -614.5       29246.0          0.491             0.250           0.242    en/desktop           0.166 0.343     89.0
+        Livy  -50.5       31344.0          0.457             0.243           0.214 en/mobile-web           0.200 0.088     88.0
+    Polybius -204.5       27918.5          0.513             0.246           0.267    en/desktop           0.233 0.150     71.0 
+
+1-1499: top 12 by score with excess desktop > 0.2
+         title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+  Michelangelo 1475.0      421378.0          0.604             0.255           0.348    fr/desktop           0.369 0.396    213.0
+       Tacitus   54.5       48863.0          0.452             0.249           0.204 en/mobile-web           0.234 0.142     92.0
+         Galen  129.0       44744.5          0.527             0.268           0.258    en/desktop           0.184 0.343    117.0
+        Origen  184.5       45673.0          0.447             0.247           0.200 en/mobile-web           0.268 0.190     68.0
+      Plotinus  204.5       31964.0          0.497             0.251           0.246    en/desktop           0.183 0.209     80.0
+      Boethius  477.0       31341.0          0.452             0.242           0.211 en/mobile-web           0.261 0.056     74.0
+     Suetonius   64.5       23491.5          0.494             0.244           0.250    en/desktop           0.251 0.175     72.0
+        Lucian  125.0       22352.5          0.491             0.241           0.250    en/desktop           0.232 0.060     75.0
+       Martial   50.5       21019.0          0.730             0.247           0.483    en/desktop           0.552 0.303     55.0
+Ibn_al-Haytham  964.5       38513.5          0.427             0.224           0.203 en/mobile-web           0.194 0.355     92.0
+        Giotto 1267.0       50200.0          0.497             0.274           0.223    en/desktop           0.138 0.403     93.0
+   Cassius_Dio  154.5       18771.5          0.462             0.246           0.216 en/mobile-web           0.267 0.083     64.0 
+
+1500-1799: top 12 by score with excess desktop > 0.2
+                    title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+           René_Descartes 1596.0      178135.0          0.454             0.243           0.211    en/desktop           0.177 0.130    185.0
+               John_Locke 1632.0      127861.5          0.490             0.243           0.248    en/desktop           0.259 0.135    153.0
+            Francis_Bacon 1561.0       92419.5          0.456             0.246           0.210 en/mobile-web           0.270 0.174    119.0
+Gottfried_Wilhelm_Leibniz 1646.0      101836.5          0.467             0.251           0.216 en/mobile-web           0.196 0.110    159.0
+           Leonhard_Euler 1707.0      109485.5          0.472             0.252           0.220    en/desktop           0.249 0.194    166.0
+          Johannes_Kepler 1571.0       74680.0          0.470             0.254           0.216    en/desktop           0.185 0.172    154.0
+            Thomas_Hobbes 1588.0       76469.0          0.475             0.241           0.234    en/desktop           0.227 0.133    113.0
+ Pieter_Bruegel_the_Elder 1524.5       58866.5          0.467             0.246           0.220    en/desktop           0.183 0.137     86.0
+              Montesquieu 1689.0       69992.5          0.488             0.241           0.246    en/desktop           0.176 0.177    110.0
+               David_Hume 1711.0       74039.0          0.463             0.244           0.219 en/mobile-web           0.243 0.105    112.0
+             Robert_Hooke 1635.0       46819.5          0.547             0.239           0.308    en/desktop           0.343 0.255     95.0
+      Jacques-Louis_David 1748.0       56124.0          0.461             0.244           0.218 en/mobile-web           0.184 0.212     87.0 
+
+1800-1899: top 12 by score with excess desktop > 0.2
+                title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+         Ada_Lovelace 1815.0      176721.0          0.465             0.244           0.221 en/mobile-web           0.298 0.191    113.0
+            Max_Weber 1864.0       98311.0          0.483             0.245           0.238    en/desktop           0.165 0.141    141.0
+     John_Stuart_Mill 1806.0       60936.0          0.491             0.243           0.248    en/desktop           0.266 0.115     95.0
+  James_Clerk_Maxwell 1831.0       57266.5          0.477             0.253           0.225 en/mobile-web           0.248 0.117    141.0
+Alexis_de_Tocqueville 1805.0       46366.5          0.456             0.244           0.213 en/mobile-web           0.226 0.125     78.0
+        Piet_Mondrian 1872.0       65208.0          0.460             0.246           0.214    en/desktop           0.191 0.109     77.0
+       Émile_Durkheim 1858.0       56259.5          0.473             0.235           0.238    en/desktop           0.178 0.140    104.0
+        Carlos_Gardel 1890.0       68403.5          0.498             0.221           0.277    fr/desktop           0.364 0.269     55.0
+           John_Dewey 1859.0       49221.5          0.519             0.244           0.275    en/desktop           0.272 0.102     84.0
+         Gustave_Doré 1832.0       42213.5          0.448             0.240           0.207    en/desktop           0.226 0.087     70.0
+        William_James 1842.0       44258.5          0.479             0.253           0.226    en/desktop           0.272 0.071     89.0
+       Hector_Berlioz 1803.0       36376.5          0.485             0.252           0.232    en/desktop           0.257 0.284    110.0 
+
+1900-1949: top 12 by score with excess desktop > 0.2
+            title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+        Bruce_Lee 1940.0      757074.5          0.655             0.244           0.411    en/desktop           0.617 0.824    132.0
+ John_von_Neumann 1903.0      125802.5          0.458             0.248           0.211 en/mobile-web           0.247 0.118    102.0
+      Karl_Popper 1902.0       68106.5          0.479             0.245           0.234    en/desktop           0.194 0.110     96.0
+   Claude_Shannon 1916.0       69848.0          0.552             0.248           0.304    en/desktop           0.367 0.267     69.0
+       Kurt_Gödel 1906.0       59734.5          0.454             0.248           0.206    en/desktop           0.250 0.170     99.0
+  Pierre_Bourdieu 1930.0       68393.5          0.492             0.243           0.248    en/desktop           0.157 0.103     71.0
+Theodor_W._Adorno 1903.0       52616.5          0.448             0.248           0.200    en/desktop           0.182 0.171     77.0
+   Abraham_Maslow 1908.0       50440.5          0.499             0.240           0.259    en/desktop           0.193 0.153     77.0
+  Jacques_Derrida 1930.0       56826.5          0.458             0.245           0.213 en/mobile-web           0.212 0.103     86.0
+    Italo_Calvino 1923.0       51021.5          0.433             0.225           0.208    en/desktop           0.218 0.226     69.0
+     Grace_Hopper 1906.0       43385.0          0.591             0.248           0.343    en/desktop           0.394 0.149     73.0
+       Paul_Erdős 1913.0       44490.5          0.501             0.249           0.252    en/desktop           0.338 0.195     68.0 
+
+1950+: top 12 by score with excess desktop > 0.2
+           title  birth  median_views  desktop_share  expected_desktop  excess_desktop      top_cell  top_cell_share    cv  n_langs
+  Linus_Torvalds 1969.0      133870.5          0.546             0.248           0.298    en/desktop           0.341 0.424    123.0
+ Tim_Berners-Lee 1955.0       94272.0          0.486             0.251           0.235 en/mobile-web           0.331 0.274    147.0
+      Yann_LeCun 1960.0       64611.5          0.500             0.253           0.246    en/desktop           0.297 0.361     37.0
+  Terry_A._Davis 1969.0       72738.0          0.475             0.243           0.232 en/mobile-web           0.393 0.166     24.0
+   Judith_Butler 1956.0       58713.5          0.491             0.247           0.244    en/desktop           0.258 0.103     70.0
+Richard_Stallman 1953.0       41359.5          0.622             0.252           0.370    en/desktop           0.361 0.114    108.0
+    Paul_Krugman 1953.0       34058.5          0.472             0.250           0.222 en/mobile-web           0.351 0.178     76.0
+        Toby_Fox 1991.0       70672.5          0.485             0.245           0.240    en/desktop           0.369 0.313     35.0
+   Yoshua_Bengio 1964.0       34779.0          0.453             0.245           0.208 en/mobile-web           0.302 0.322     33.0
+ Andrej_Karpathy 1986.0       52778.0          0.515             0.249           0.267    en/desktop           0.402 0.527     23.0
+Guido_van_Rossum 1956.0       29990.5          0.677             0.244           0.433    en/desktop           0.470 0.095     52.0
+    Andrew_Wiles 1953.0       28285.5          0.480             0.249           0.231    en/desktop           0.274 0.214     64.0 
+

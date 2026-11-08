@@ -12,15 +12,42 @@ ruff line-length 120, parquet for tables / npz for vectors, atomic writes,
 `data/` gitignored and expensive.
 
 Status (2026-11-08): roster design settled (views × age, switched from
-log-time stratification the same day); no pipeline stages yet.
+log-time stratification the same day). Stages 00–03 run; the bot filter
+(access-ratio clip) is settled and lives in stage 03.
 `scoping/` holds the one-off analysis behind the decisions below.
+
+## Pipeline
+
+Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
+
+| Stage | What | Output |
+|---|---|---|
+| 00 | Roster: Wikidata humans with ≥1 Wikipedia article (QLever; raw CSV cached in `data/raw/`) | `data/roster.parquet` |
+| 01 | Every roster human's Wikipedia titles (`wb_items_per_site` dump) | `data/sitelinks.parquet` |
+| 01b | enwiki redirect map (`page` + `redirect` dumps) | `data/redirects.parquet` |
+| 02 | Monthly views per (person, language, access method), 12 dumps | `data/pageviews/pageviews_YYYYMM.parquet` |
+| 03 | Per-person monthly totals and median after the bot filter, raw median, access shares, top language | `data/people_views.parquet` |
+
+Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
+people with views per month; desktop share 23–26% every month. Stage 03
+(156 s, 9.8 GB peak): 793,215 people at or above the 300 median-views floor
+raw, 792,471 after the bot filter.
+
+Planned next: birth dates for people
+above the floor (WDQS, chunks of ~1,000 QIDs) → score and roster → leads and
+translation → embeddings → AlignedUMAP → label tracks → frontend.
 
 ## Working rules
 
 - Smoke-test by lowering config knobs (fewer `PAGEVIEW_MONTHS`, smaller
   `MAP_N`), never by adding CLI flags.
-- Never overwrite files in `data/` in place — atomic writes (copy
-  living-people-map's `util.write_parquet_atomic` / `save_npz_atomic`).
+- Never overwrite files in `data/` in place — `util.write_parquet_atomic` /
+  `util.save_npz_atomic`.
+- **QLever results are cached, not re-queried.** Stage 00 reuses
+  `data/raw/roster_qlever.csv` when present (delete it to refresh). The first
+  cache was seeded 2026-11-08 from `data/scoping/qlever/wp_counts.csv` — the
+  identical query, run 2026-11-07 23:03 — because QLever was answering nginx
+  429s again.
 - Long runs: background them with output to `logs/` and check the log.
 - Wikimedia etiquette: descriptive User-Agent with contact info
   (`config.USER_AGENT`), `maxlag=5` on Wikipedia action-API calls but not on
@@ -42,6 +69,10 @@ log-time stratification the same day); no pipeline stages yet.
   dumps (~6 GB each), credited via Wikidata sitelinks for every roster human —
   living-people-map's stage 01e did this for living people only, so the dumps
   must be re-fetched.
+- **2026-11-08 — pageview window = 2025-11..2026-10**, the freshest 12
+  complete months (the October dump was published 2026-11-01). Reusing
+  living-people-map's 2025-07..2026-06 would only have bought comparability:
+  every month had to be re-downloaded either way.
 - **2026-11-07 — ranking by raw median views is rejected.** On the enwiki
   proxy (2.1M enwiki biographies by median enwiki views), the top 25k is 72.7%
   living, 9.1% born before 1900, and 73% identical to living-people-map's
@@ -80,6 +111,20 @@ log-time stratification the same day); no pipeline stages yet.
   4,086–4,470 people; ~137k AlignedUMAP points. A two-handle range slider is
   out: AlignedUMAP can only show slices it precomputed. The frontend
   interpolates positions between neighbouring windows.
+- **2026-11-08 — AlignedUMAP is cheap and smooth enough; defaults kept.**
+  Benchmark (`scoping/bench_aligned_umap.py`, results in
+  `scoping/results/bench_aligned_umap.txt`) on living-people-map's 25k
+  Cohere embeddings cut into this slider structure: 32 windows of
+  3,091–3,845, 109,863 points, **7.9 min** single-threaded, 1.1 GB peak
+  (the real ~137k-point job should take ~10 min). A shared person moves a
+  median **0.049** layout radii between neighbouring windows (p90 0.112, p99
+  0.291) vs 0.269 / 0.842 / 2.223 for independent UMAPs Procrustes-aligned
+  afterwards — ~5× steadier. Cost: 15-NN fidelity to the 1024-d neighbours
+  0.288 vs 0.304. umap-learn 0.5.12 defaults (`alignment_regularisation=1e-2`,
+  `alignment_window_size=3`), family UMAP params (15 neighbours, min_dist
+  0.05, cosine, seed 42). Revisit `alignment_regularisation` only if the
+  frontend shows jumpy motion. Positions saved to
+  `data/bench/aligned_living.npz` for a frontend prototype.
 - **2026-11-07 — embed English text; translate when there's no English
   article.** English lead if the person has an enwiki article, else the lead
   of their most-viewed edition, LLM-translated. Rejected: native-language text
@@ -99,6 +144,46 @@ log-time stratification the same day); no pipeline stages yet.
   page for someone born in 500 BC adds as much score as 30k views/mo would for
   a 25-year-old. So bot filtering matters most in the earliest windows, and
   must run before scoring.
+  **2026-11-08 finding — desktop share is audience, not bots**
+  (`scoping/results/bot_features.txt`, `bot_access_ratio.txt`). Academic
+  subjects run 45–70% desktop on every language (Aristotle, Descartes, Knuth),
+  so a desktop-share filter would cut the earliest eras hardest. Ansel Adams
+  (en 92% mobile-web) and Cleopatra are mobile-skewed, inside the range of
+  real mobile-heavy topics (true crime, celebrities), so the access split
+  can't flag them. A per-language desktop:mobile ratio vs that language's
+  baseline does flag single-cell desktop skew (Tenskwatawa ruwiki 740k
+  desktop / 7k mobile; Harriet Martineau en; Michelangelo fr; Bruce Lee en),
+  and clipping it moves only 12–38 of 31k proxy-roster places.
+  **Early eras** (`desktop_floor.txt`, `edition_floor.txt`): crawler bursts
+  exist (Gungunum: ~2,600 desktop hits on each of 8 editions in 2025-11
+  only), and the median absorbs them. Early pages' extra desktop share is
+  proportional to traffic and dips in summer like student reading, and their
+  desktop series share no crawler schedule (first principal component as
+  strong in mobile). Every page carries a small desktop background (~15/mo on
+  near-unread enwiki pages, ~3/mo on other editions); subtracting even
+  5–10/mo per edition moves 244–381 of 31k proxy places, all marginal ancient
+  royals (Ammuna, Neferu II), whose views are only 2–5% long-tail editions.
+  **Settled 2026-11-08 — access-ratio clip in stage 03**
+  (`config.MAX_DESKTOP_SKEW = 16`, `MAX_MOBILE_SKEW = 8`; no background
+  subtraction). Per (person, language): r = log((D+1)/(M+1)) − log(the
+  language's D/M over every roster human), measured on the cell's **median
+  month**, clipped to [−log 8, +log 16] by shrinking the over-represented side
+  by one fraction in every month. Median month because
+  (`scoping/results/clip_granularity.txt`): with 12-month sums a one-month
+  burst the median already ignores scales the clean months down too
+  (Gungunum −12%, Harriet Martineau −36%, Chen Fan −23%); clipping each month
+  separately is noisy on small cells (2,310 raw survivors fall below the floor
+  vs 615; Martial −22%, Aa −21%). Run: 122k desktop-side and 3.8k mobile-side
+  clips over 6.5M (person, language) cells remove 0.036% of floor survivors'
+  views; 744 fall below the floor; the proxy roster moves 8–9 of 31k places
+  (Aureolus of Aragon: frwiki 11.9k desktop / 515 mobile a year). Cut: steady
+  single-edition crawlers — Fiann Paul (eswiki, 18.0k → 2.3k/mo), Craig Small
+  (19.7k → 2.9k), Charles Stuart (abolitionist), mobile-side Nek and Neige
+  (arzwiki); Michelangelo −13% (frwiki desktop); borderline Martial −10% (enwiki
+  85% desktop, r 2.84). Untouched: bursts (Gungunum, Martineau, Tenskwatawa),
+  Bruce Lee (enwiki r 2.53, inside the band), Ansel Adams and Cleopatra (their
+  mobile traffic affects rank, not membership). `people_views.parquet` keeps
+  `median_views_raw` and `clip_keep` beside the filtered `median_views`.
 
 ## Proposed, not yet settled
 
@@ -118,19 +203,16 @@ log-time stratification the same day); no pipeline stages yet.
 
 ## Open questions
 
-- **Pageview window**: living-people-map's 2025-07..2026-06 (directly
-  comparable) or the freshest trailing 12. `config.PAGEVIEW_MONTHS` holds the
-  fresher one, provisionally.
-- **AlignedUMAP runtime at ~137k points** across 32 slices — benchmark early
-  (umap-learn 0.5.12: `AlignedUMAP(alignment_regularisation=1e-2,
-  alignment_window_size=3)`, `fit(X_list, relations=[dict, ...])`).
 - **English stubs vs rich native articles** (medieval Chinese / Japanese /
   Islamic-world figures): translate the richer article instead? Measure first.
 - **Gender erasure**: pre-modern windows are overwhelmingly male; whether the
   centroid erasure is worth carrying over.
 - **`MAP_N` and `AGE_OFFSET`**: 31k and 0 are provisional — revisit once
   all-language views exist (expect more early, non-Western people than the
-  enwiki proxy shows).
+  enwiki proxy shows). First look (2026-11-08, `edition_floor.txt`): with
+  all-language views and proxy birth years (enwiki category, else Wikidata
+  death − 50), the top 31k is 7.8% BCE and 32% born before 1500, vs 17.9%
+  before 1500 on the enwiki proxy. 177k floor survivors had no proxy date.
 - **Repo name** is a working name; no GitHub remote yet.
 
 ## Scoping data and gotchas (2026-11-07)

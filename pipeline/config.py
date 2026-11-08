@@ -27,24 +27,65 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
 LOG_DIR = REPO_ROOT / "logs"
 
-# --- Roster: Wikidata humans (P31=Q5) with >=1 language-Wikipedia article ---
+DUMPS_DIR = DATA_DIR / "dumps"  # raw downloads; deleted after parsing unless KEEP_RAW_DUMPS
+KEEP_RAW_DUMPS = False
+
+# --- Stage 00: roster = Wikidata humans (P31=Q5) with >=1 language-Wikipedia article ---
 # "Wikipedia" = sites with wikibase:wikiGroup "wikipedia" (on the SITE iri, not
 # the sitelink node). That excludes abstract.wikipedia.org, Wikiquote, Commons.
-WIKIDATA_HUMAN_QID = "Q5"
+QLEVER_URL = "https://qlever.dev/api/wikidata"
+QLEVER_PREFIXES = """PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX p: <http://www.wikidata.org/prop/>
+PREFIX psv: <http://www.wikidata.org/prop/statement/value/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX schema: <http://schema.org/>
+"""
+ROSTER_PARQUET = DATA_DIR / "roster.parquet"  # [qid, n_wikipedias]
 
-# --- Fame metric: median of 12 monthly all-language pageview totals ---
-# PROVISIONAL window. Same 12 months as living-people-map (comparable to it) vs.
-# the freshest trailing 12 is an open question; this is the fresher option.
+# --- Stage 01: Wikipedia sitelinks for every roster human ---
+WB_ITEMS_PER_SITE_URL = "https://dumps.wikimedia.org/wikidatawiki/latest/wikidatawiki-latest-wb_items_per_site.sql.gz"
+SITELINKS_PARQUET = DATA_DIR / "sitelinks.parquet"  # [qid, site, title] (title underscored)
+
+# --- Stage 01b: enwiki redirect map (renames + aliases; non-English redirects NOT resolved) ---
+ENWIKI_DUMP_URL = "https://dumps.wikimedia.org/enwiki/latest/{name}"
+REDIRECTS_PARQUET = DATA_DIR / "redirects.parquet"  # [source_title, target_title] (underscored)
+
+# --- Stage 02: fame metric = median of 12 monthly all-language pageview totals ---
+# Freshest trailing 12 complete months (decided 2026-11-08; the 2026-10 dump
+# was published 2026-11-01). living-people-map's 2025-07..2026-06 window would
+# only have bought comparability: its all-language views covered living people
+# and its raw dumps are gone, so every month had to be re-fetched either way.
 PAGEVIEW_MONTHS = [f"{y}-{m:02d}" for y, m in [(2025, 11), (2025, 12)] + [(2026, m) for m in range(1, 11)]]
 PAGEVIEW_URL_TEMPLATE = (
     "https://dumps.wikimedia.org/other/pageview_complete/monthly/{year}/{year}-{month}/pageviews-{year}{month}-user.bz2"
 )
+PAGEVIEWS_DIR = DATA_DIR / "pageviews"
+PAGEVIEW_WORKERS = 2  # months processed concurrently; dumps.wikimedia.org allows ~2-3 connections
 # Keep the desktop / mobile-web / mobile-app split (living-people-map summed it
-# away). Steady high desktop-only traffic is the first bot-filter signal: Ansel
-# Adams ran ~1.0-1.4M "user" views every month of 2025-07..2026-06, ~2x
-# Elizabeth II. Matters most in the earliest windows, where the floor below is
-# only ~10 views/day.
-KEEP_ACCESS_METHOD_SPLIT = True
+# away): stage 03's bot filter works on the desktop:mobile ratio.
+ACCESS_METHODS = ["desktop", "mobile-web", "mobile-app"]
+
+
+def pageview_month_parquet(month: str) -> Path:
+    """[qid_int, lang, access, views] for one month."""
+    return PAGEVIEWS_DIR / f"pageviews_{month.replace('-', '')}.parquet"
+
+
+# --- Stage 03: per-person view metrics, with the access-ratio bot filter ---
+PEOPLE_VIEWS_PARQUET = DATA_DIR / "people_views.parquet"
+# Bot filter (decided 2026-11-08). Real readers move every access method of a
+# language together; a crawler counted as "user" inflates one. Per (person,
+# language), in its median month: r = log((D + 1) / (M + 1)) - log(that
+# language's D/M over every roster human), D = desktop, M = mobile web + app.
+# r is clipped to [-log MAX_MOBILE_SKEW, +log MAX_DESKTOP_SKEW] by shrinking the
+# over-represented side, by the same fraction in every month. Real audience
+# skew stays well inside (academic pages ~+1..2, true crime ~-1.4). Median
+# month, so one-month bursts are left to the median of monthly totals.
+# Cut, e.g.: Fiann Paul eswiki ~51k desktop / 75 mobile a year, Craig Small en.
+MAX_DESKTOP_SKEW = 16
+MAX_MOBILE_SKEW = 8
+
 
 # --- Roster selection: rank everyone by median_views x age (decided 2026-11-08) ---
 # Lindy reading: something famous for A years can expect ~A more, so today's

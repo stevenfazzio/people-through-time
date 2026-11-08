@@ -1,0 +1,155 @@
+Desktop background: (person, edition) cells with < 2 mobile views/mo: 2,104,953
+  all editions: median desktop 2.6/mo, p25 1.8, p75 3.8
+  by edition (most cells): arz 1.7, ar 2.5, ur 0.7, uk 2.4, fa 1.9, ca 4.2, azb 1.5, no 3.5, eo 2.6, eu 3.6, sv 3.0, hy 2.7 
+
+Birth proxy source: {'enwiki': 561379, 'none': 176622, 'death-50': 55214} 
+
+Proxy roster: top 31,000 of 616,593 dated floor survivors
+       era      n median views editions tail share
+       BCE   2416        1,992       24       0.05
+    1-1499   7643        4,004       23       0.02
+ 1500-1799   2988       10,602       31       0.01
+ 1800-1899   2926       20,926       43       0.01
+ 1900-1949   5719       33,186       36       0.00
+     1950+   9308       62,187       33       0.00
+
+=== subtract 5 desktop views/mo per edition: proxy roster churn 244 of 31,000; median keep in roster 0.99
+          BCE:   2416 ->   2311; keep median 0.96, p10 0.90
+       1-1499:   7643 ->   7527; keep median 0.98, p10 0.95
+    1500-1799:   2988 ->   2987; keep median 0.99, p10 0.98
+    1800-1899:   2926 ->   2934; keep median 0.99, p10 0.98
+    1900-1949:   5719 ->   5782; keep median 1.00, p10 0.99
+        1950+:   9308 ->   9459; keep median 1.00, p10 1.00
+   biggest exits:
+                 title   birth birth_src  median_views  n_editions  tail_share  keep
+                Ammuna -1579.0  death-50         554.0          29        0.32  0.83
+     Kadashman-Enlil_I -1350.5    enwiki         582.0          24        0.22  0.85
+     Semenkare_Nebnuni -1850.0  death-50         504.5          21        0.35  0.84
+           Ishme-Dagan -1950.5    enwiki         485.0          20        0.28  0.86
+            Neferuptah -1850.5    enwiki         497.0          19        0.32  0.87
+Antiochus_XII_Dionysus  -150.5    enwiki         882.5          33        0.24  0.85
+             Neferu_II -2500.5    enwiki         421.5          20        0.32  0.82
+            Yahdun-Lim -1850.5    enwiki         491.5          20        0.35  0.83
+           Shalim-ahum -2050.5    enwiki         466.0          19        0.24  0.87
+              Horus_Sa -2750.0  death-50         397.5          17        0.32  0.83
+               Demades  -384.5    enwiki         787.0          25        0.24  0.88
+             Alcidamas  -400.0  death-50         780.5          22        0.14  0.88
+           Nebiryraw_I -1650.0  death-50         514.0          22        0.31  0.84
+               Eupolis  -444.5    enwiki         763.5          24        0.12  0.87
+            Neferu_III -1950.5    enwiki         473.0          23        0.34  0.84
+   biggest entries:
+                      title  birth birth_src  median_views  n_editions  tail_share  keep
+             Show_Kasamatsu 1992.0    enwiki       50193.0           4         0.0   1.0
+                  Mitsu_Dan 1980.0    enwiki       37096.5          13         0.0   1.0
+             Steve_Spurrier 1945.0    enwiki       21049.0           5         0.0   1.0
+                 Akiko_Yada 1978.0    enwiki       35530.0          12         0.0   1.0
+             Karen_Fukuhara 1992.0    enwiki       50158.5          31         0.0   1.0
+Susumu_Fujita_(businessman) 1973.0    enwiki       32130.5           2         0.0   1.0
+                       Nigo 1970.0    enwiki       30476.5          19         0.0   1.0
+                Igor_Talkov 1956.0    enwiki       24380.5          16         0.0   1.0 
+
+=== subtract 10 desktop views/mo per edition: proxy roster churn 381 of 31,000; median keep in roster 0.99
+          BCE:   2416 ->   2264; keep median 0.93, p10 0.85
+       1-1499:   7643 ->   7446; keep median 0.97, p10 0.92
+    1500-1799:   2988 ->   2988; keep median 0.98, p10 0.96
+    1800-1899:   2926 ->   2938; keep median 0.99, p10 0.97
+    1900-1949:   5719 ->   5822; keep median 0.99, p10 0.99
+        1950+:   9308 ->   9542; keep median 1.00, p10 0.99
+   biggest exits:
+               title   birth birth_src  median_views  n_editions  tail_share  keep
+          Pedubast_I  -850.5    enwiki         720.0          25        0.21  0.79
+         Iddin-Dagan -1950.5    enwiki         520.0          20        0.25  0.76
+           Zidanta_I -1650.0  death-50         559.0          31        0.30  0.73
+   Polemon_of_Athens  -319.0  death-50         874.0          26        0.22  0.80
+  Enlil-kudurri-usur -1250.0  death-50         625.5          25        0.24  0.81
+            Nan_Geng -1458.0  death-50         586.0          22        0.21  0.80
+    Aššur-nādin-šumi  -743.0  death-50         736.0          26        0.26  0.81
+    Ashur-nirari_III -1250.0  death-50         622.0          28        0.30  0.78
+     Sewadjkare_Hori -1696.0  death-50         542.5          20        0.28  0.81
+        Ba_(pharaoh) -2500.5    enwiki         444.0          17        0.26  0.77
+           Sadyattes  -666.0  death-50         743.5          25        0.17  0.82
+              Ammuna -1579.0  death-50         554.0          29        0.32  0.74
+  Sankhenre_Sewadjtu -1750.0  death-50         527.0          20        0.28  0.80
+Seleucus_of_Seleucia  -194.5    enwiki         892.5          24        0.12  0.82
+           Sesheshet -2350.5    enwiki         450.0          17        0.30  0.80
+   biggest entries:
+                      title  birth birth_src  median_views  n_editions  tail_share  keep
+             Show_Kasamatsu 1992.0    enwiki       50193.0           4         0.0   1.0
+             Steve_Spurrier 1945.0    enwiki       21049.0           5         0.0   1.0
+                 Akiko_Yada 1978.0    enwiki       35530.0          12         0.0   1.0
+                  Mitsu_Dan 1980.0    enwiki       37096.5          13         0.0   1.0
+Susumu_Fujita_(businessman) 1973.0    enwiki       32130.5           2         0.0   1.0
+          Brooke_Williamson 1978.0    enwiki       35457.0           1         0.0   1.0
+             Karen_Fukuhara 1992.0    enwiki       50158.5          31         0.0   1.0
+               Belle_Gibson 1991.0    enwiki       48658.5           9         0.0   1.0 
+
+=== subtract 15 desktop views/mo per edition: proxy roster churn 485 of 31,000; median keep in roster 0.99
+          BCE:   2416 ->   2233; keep median 0.91, p10 0.81
+       1-1499:   7643 ->   7383; keep median 0.96, p10 0.90
+    1500-1799:   2988 ->   2985; keep median 0.98, p10 0.95
+    1800-1899:   2926 ->   2942; keep median 0.98, p10 0.97
+    1900-1949:   5719 ->   5846; keep median 0.99, p10 0.98
+        1950+:   9308 ->   9611; keep median 1.00, p10 0.99
+   biggest exits:
+               title   birth birth_src  median_views  n_editions  tail_share  keep
+            Cratinus  -514.5    enwiki         844.5          26        0.15  0.76
+             Wai_Ren -1583.0  death-50         586.5          23        0.21  0.76
+        Shuttarna_II -1450.5    enwiki         607.5          24        0.29  0.75
+              Wo_Jia -1515.0  death-50         595.5          23        0.21  0.77
+         Iah_(queen) -2500.5    enwiki         464.0          20        0.39  0.77
+     Aristo_of_Chios  -350.0  death-50         879.0          25        0.18  0.77
+              Baufra -2650.0  death-50         446.0          14        0.18  0.79
+          Pedubast_I  -850.5    enwiki         720.0          25        0.21  0.74
+         Iddin-Dagan -1950.5    enwiki         520.0          20        0.25  0.72
+     Valerius_Valens   267.0  death-50        1175.0          38        0.21  0.77
+Naram-Sin_of_Assyria -1850.5    enwiki         532.0          19        0.31  0.79
+          Artatama_I -1450.5    enwiki         592.5          21        0.25  0.77
+           Zidanta_I -1650.0  death-50         559.0          31        0.30  0.68
+            Avienius   325.0  death-50        1205.5          26        0.11  0.80
+   Polemon_of_Athens  -319.0  death-50         874.0          26        0.22  0.74
+   biggest entries:
+                       title  birth birth_src  median_views  n_editions  tail_share  keep
+              Show_Kasamatsu 1992.0    enwiki       50193.0           4         0.0   1.0
+              Steve_Spurrier 1945.0    enwiki       21049.0           5         0.0   1.0
+ Susumu_Fujita_(businessman) 1973.0    enwiki       32130.5           2         0.0   1.0
+                  Akiko_Yada 1978.0    enwiki       35530.0          12         0.0   1.0
+           Brooke_Williamson 1978.0    enwiki       35457.0           1         0.0   1.0
+                   Mitsu_Dan 1980.0    enwiki       37096.5          13         0.0   1.0
+Enrique_Hernández_(baseball) 1991.0    enwiki       48611.5          10         0.0   1.0
+                Belle_Gibson 1991.0    enwiki       48658.5           9         0.0   1.0 
+
+=== subtract 20 desktop views/mo per edition: proxy roster churn 567 of 31,000; median keep in roster 0.99
+          BCE:   2416 ->   2205; keep median 0.90, p10 0.78
+       1-1499:   7643 ->   7342; keep median 0.95, p10 0.88
+    1500-1799:   2988 ->   2976; keep median 0.97, p10 0.94
+    1800-1899:   2926 ->   2942; keep median 0.98, p10 0.96
+    1900-1949:   5719 ->   5867; keep median 0.99, p10 0.98
+        1950+:   9308 ->   9668; keep median 0.99, p10 0.99
+   biggest exits:
+           title   birth birth_src  median_views  n_editions  tail_share  keep
+    Khentkaus_II -2500.5    enwiki         516.0          26        0.30  0.69
+    Arik-den-ili -1410.0  death-50         651.5          28        0.33  0.71
+    Enlil-nirari -1356.0  death-50         660.0          27        0.24  0.72
+ Philitas_of_Cos  -350.5    enwiki         922.0          24        0.21  0.75
+    Damiq-ilishu -1850.5    enwiki         560.0          19        0.28  0.74
+           Cebes  -450.0  death-50         876.5          20        0.18  0.73
+        Pacuvius  -220.0    enwiki         962.0          28        0.17  0.76
+        Cratinus  -514.5    enwiki         844.5          26        0.15  0.71
+         Lin_Xin -1150.5    enwiki         673.5          24        0.21  0.75
+         Wai_Ren -1583.0  death-50         586.5          23        0.21  0.73
+Antiochus_Hierax  -275.0  death-50         918.0          24        0.17  0.77
+    Shuttarna_II -1450.5    enwiki         607.5          24        0.29  0.72
+          Wo_Jia -1515.0  death-50         595.5          23        0.21  0.74
+     Iah_(queen) -2500.5    enwiki         464.0          20        0.39  0.75
+ Aristo_of_Chios  -350.0  death-50         879.0          25        0.18  0.73
+   biggest entries:
+                       title  birth birth_src  median_views  n_editions  tail_share  keep
+              Show_Kasamatsu 1992.0    enwiki       50193.0           4         0.0   1.0
+              Steve_Spurrier 1945.0    enwiki       21049.0           5         0.0   1.0
+ Susumu_Fujita_(businessman) 1973.0    enwiki       32130.5           2         0.0   1.0
+           Brooke_Williamson 1978.0    enwiki       35457.0           1         0.0   1.0
+                  Akiko_Yada 1978.0    enwiki       35530.0          12         0.0   1.0
+                   Mitsu_Dan 1980.0    enwiki       37096.5          13         0.0   1.0
+Enrique_Hernández_(baseball) 1991.0    enwiki       48611.5          10         0.0   1.0
+                Belle_Gibson 1991.0    enwiki       48658.5           9         0.0   1.0 
+

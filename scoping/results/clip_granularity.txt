@@ -1,0 +1,58 @@
+cells 6,526,770
+       A 12-month sums: median drop >5% for 1,463 people, >20% for 555; fell below floor 1,246; roster churn vs raw 16
+  B median-month ratio: median drop >5% for 951 people, >20% for 505; fell below floor 615; roster churn vs raw 9
+           C per-month: median drop >5% for 4,950 people, >20% for 645; fell below floor 2,310; roster churn vs raw 32
+A vs B roster diff 16 | A vs C 38 | B vs C 50
+                          title   birth       raw  A 12-month sums  B median-month ratio  C per-month
+                    Ansel_Adams  1902.0 1081993.0        1081984.0             1081993.0    1079155.0
+                   Michelangelo  1475.0  421378.0         338785.0              366847.0     337023.0
+                      Aristotle  -384.0  308581.0         308579.0              308581.0     308571.0
+                            Nek  1972.0   31570.0          21896.0               22021.0      21676.0
+                  Kyösti_Kallio  1873.0   10650.0          10403.0               10560.0      10285.0
+              Harriet_Martineau  1802.0    8182.0           5244.0                8182.0       8137.0
+                    Tenskwatawa  1775.0    5146.0           5052.0                5146.0       5140.0
+                    Craig_Small  1969.0   19706.0           5336.0                2948.0       2741.0
+                     Fiann_Paul  1980.0   18020.0           2442.0                2278.0       2270.0
+                         Ammuna -1579.0     554.0            553.0                 554.0        554.0
+                         Ikunum -1950.0     424.0            420.0                 423.0        419.0
+                       Gungunum -1950.0     423.0            371.0                 422.0        418.0
+                      Neferu_II -2500.0     422.0            421.0                 422.0        418.0
+  Charles_Stuart_(abolitionist)  1783.0    9078.0            227.0                 220.0        190.0
+Cristina_Rodríguez_(journalist)  1972.0    9314.0            153.0                 146.0        138.0
+
+Dropped >10% by A 12-month sums but >8% less by the others (177); top by raw x age:
+                        title   birth    raw  A 12-month sums  B median-month ratio  C per-month
+                     Chen_Fan   118.0 1980.0           1531.0                1980.0       1712.0
+                       Dou_Wu   118.0 1916.0           1634.0                1916.0       1892.0
+        Q61099267 (no enwiki)    97.0 1303.0            890.0                1188.0       1117.0
+            Harriet_Martineau  1802.0 8182.0           5244.0                8182.0       8137.0
+                     Gungunum -1950.0  423.0            371.0                 422.0        418.0
+                   Carl_Nebel  1805.0 5963.0           1681.0                1828.0       1831.0
+       Aristides_Quintilianus   200.0  528.0            286.0                 466.0        456.0
+     Fernando_Niño_de_Guevara  1541.0 1918.0           1104.0                1354.0       1363.0
+         Q1635342 (no enwiki)  1883.0 4830.0            145.0                 167.0        163.0
+Joseph_Anton_Schneiderfranken  1876.0 4211.0           3431.0                4211.0       3780.0
+           John_Thomas_Scharf  1843.0 3280.0            155.0                 229.0        200.0
+    Thomas_Linley_the_younger  1728.0 1504.0           1048.0                1504.0       1174.0
+
+Dropped >10% by B median-month ratio but >8% less by the others (4); top by raw x age:
+                   title  birth    raw  A 12-month sums  B median-month ratio  C per-month
+Francisco_Alarcón_Estaba 1950.0 1839.0            169.0                  87.0        102.0
+     Christina_Henderson 1861.0  442.0            125.0                 113.0        123.0
+               Laura_Dre 1982.0  746.0            169.0                  98.0        173.0
+    Q7279385 (no enwiki) 1970.0  496.0            354.0                 268.0        290.0
+
+Dropped >10% by C per-month but >8% less by the others (625); top by raw x age:
+                        title   birth     raw  A 12-month sums  B median-month ratio  C per-month
+                      Martial    50.0 21019.0          20119.0               18992.0      16326.0
+               Aa_(architect) -1500.0  4468.0           4461.0                4463.0       3518.0
+               Dipylon_Master  -850.0   980.0            665.0                 698.0        592.0
+               Duffy_(singer)  1984.0 65613.0          63182.0               65613.0      57859.0
+            Francisco_Morazán  1792.0 10214.0           9768.0               10209.0       8405.0
+Charles_Stuart_(abolitionist)  1783.0  9078.0            227.0                 220.0        190.0
+                    Mór_Jókai  1825.0  9216.0           8889.0                9216.0       8230.0
+  Joseph_von_Hammer-Purgstall  1774.0  5718.0           3523.0                4041.0       3208.0
+                   Musa_Cälil  1906.0 11388.0          11131.0               11388.0       9798.0
+              Wujihoushizhudi    78.0   607.0            274.0                 363.0        226.0
+          Andrew_S._Tanenbaum  1944.0 12834.0          12480.0               12831.0      11504.0
+        Tranquil_Salvador_III  1967.0 15808.0          15129.0                7536.0       6746.0

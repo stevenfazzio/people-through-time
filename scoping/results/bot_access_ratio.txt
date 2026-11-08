@@ -1,0 +1,174 @@
+  read 2025-11
+  read 2025-12
+  read 2026-01
+  read 2026-02
+  read 2026-03
+  read 2026-04
+  read 2026-05
+  read 2026-06
+  read 2026-07
+  read 2026-08
+  read 2026-09
+  read 2026-10
+r over 529,707 (person, language) cells with >= 12k views/yr
+  quantiles    0.001   0.01   0.05   0.25    0.5   0.75   0.95   0.99  0.999
+  by cell      -1.79  -1.17  -0.86  -0.44  -0.12   0.24   0.79   1.28   2.99
+  by views     -1.57  -1.15  -0.87  -0.51  -0.25   0.05   0.58   1.03   2.53 
+
+Most mobile-skewed cells with >= 1M views/yr:
+                       title lang       D        M     r
+                 Mia_Khalifa   ar   31497  1056982 -1.65
+               Lizzie_Borden   de   89647  1117791 -1.57
+                 Ansel_Adams   en 1104585 13661185 -1.40
+               Lizzie_Borden   fr  126419  1610882 -1.40
+              Yeison_Jiménez   es   74480  1250542 -1.34
+             Nikki_Rodriguez   en   80784   928087 -1.33
+               Pralhad_Joshi   en  134073  1474208 -1.28
+                   Cleopatra   en  807193  8797189 -1.27
+             Melanie_McGuire   en  120183  1286258 -1.26
+              Vogue_Williams   en  130042  1389411 -1.26
+                  Riya_Shibu   en  116710  1241306 -1.25
+                   Cleopatra   fr   91660   979324 -1.22
+      Wade_Wilson_(criminal)   en  496235  5107551 -1.22
+               Lizzie_Borden   es  111251  1652893 -1.21
+                Bruce_Willis   es   73645  1091225 -1.21
+                   Raj_Arjun   en  187396  1907528 -1.21
+            Takeshi_Fukunaga   ja  276059  2834170 -1.20
+Ayesha_Khan_(Indian_actress)   en  111721  1123630 -1.19
+             Sebastian_Croft   en  131729  1314206 -1.19
+                XXXTentacion   en  478315  4770984 -1.19 
+
+Most desktop-skewed cells with >= 300k views/yr:
+              title lang        D       M    r
+        Tenskwatawa   ru   739620    6749 5.84
+  Harriet_Martineau   en   682063   24952 4.42
+George_R._R._Martin   zh   425294   18607 3.66
+       Michelangelo   fr  1894048  164623 3.59
+         Aṅgulimāla   en   380209   52603 3.09
+      Carlos_Gardel   fr   296346   47358 2.98
+          Vint_Cerf   en   264254   61527 2.57
+          Bruce_Lee   en 11780173 2862660 2.53
+       Robert_Hooke   en   200279  109865 1.71
+      Jonathan_Blow   en   197469  111412 1.69
+       Grace_Hopper   en   203710  141960 1.47
+ Cardinal_Richelieu   fr   199036  157581 1.38
+     Linus_Torvalds   en   600431  460780 1.38
+  Masashi_Kishimoto   en   179050  145836 1.32
+     Claude_Shannon   en   298937  244836 1.31
+    Edmund_McMillen   en   172686  146842 1.28
+       John_Carmack   en   171929  151829 1.24
+         Paul_Erdős   en   194636  172316 1.24
+         John_Dewey   en   162586  144244 1.23
+         Yann_LeCun   en   254649  226632 1.23 
+
+=== band [-log 4, +log 4]: 8,371 people lose >20%, 1,286 lose >50%; views removed 0.37%; proxy roster churn 134 of 31,000
+    BCE 1124: out 24; 1-1499 6054: out 65; 1500-1799 3196: out 18; 1800-1899 3292: out 9; 1900-1949 6564: out 9; 1950+ 10770: out 9
+    controls: Cristiano_Ronaldo 1.00, Cleopatra 1.00, Elizabeth_II 1.00, Ansel_Adams 0.99, Bruce_Lee 0.58, Taylor_Swift 1.00, Michelangelo 0.66, Aristotle 0.99, Guido_van_Rossum 0.73, Silvina_Ocampo 0.44, Craig_Small 0.10
+    biggest roster exits (by original score):
+                        title   birth  median_views  keep  n_langs
+        Li_Ying_(Eastern_Han)   110.0        1719.5  0.44      6.0
+              Alberto_Moravia  1907.0       22798.0  0.54     66.0
+                    Andocides  -444.5        1075.5  0.55     27.0
+                     Shen_Yue   441.0        1673.5  0.33     24.0
+                    Vint_Cerf  1943.0       29943.5  0.50     50.0
+               Silvina_Ocampo  1903.0       20137.0  0.44     33.0
+Charles_Stuart_(abolitionist)  1783.0        9077.5  0.01      2.0
+           Engelbert_Kaempfer  1651.0        5390.0  0.71     28.0
+               Annie_Sprinkle  1954.0       26554.5  0.68     25.0
+                         Cedd   624.5        1360.0  0.75     17.0
+        Raymond_V_of_Toulouse  1134.5        2112.0  0.73     25.0
+            Harriet_Martineau  1802.0        8182.0  0.11     45.0
+                      Salvian   404.5        1122.0  0.78     21.0
+                    Madhavdev  1489.0        3310.0  0.80      8.0
+               Odo_of_Orléans   750.5        1383.5  0.84     20.0
+                    Callippus  -374.5         728.0  0.72     29.0
+                       Guo_Xi  1024.5        1712.0  0.85     26.0
+                          Nek  1972.0       31570.0  0.72     31.0
+          Fulcher_of_Chartres  1054.5        1747.0  0.84     28.0
+      Frederick_of_Luxembourg   965.0        1593.5  0.81     21.0
+            Adelaide_of_Tours   824.5        1402.5  0.88     14.0
+                       Ikunum -1950.5         423.5  0.81     26.0
+                     Gungunum -1950.5         423.0  0.30     22.0
+                     Dexippus   214.5         921.0  0.87     26.0
+            Caecilius_Statius  -224.5         738.0  0.87     25.0 
+
+=== band [-log 4, +log 8]: 2,257 people lose >20%, 828 lose >50%; views removed 0.17%; proxy roster churn 38 of 31,000
+    BCE 1124: out 3; 1-1499 6054: out 14; 1500-1799 3196: out 4; 1800-1899 3292: out 4; 1900-1949 6564: out 5; 1950+ 10770: out 8
+    controls: Cristiano_Ronaldo 1.00, Cleopatra 1.00, Elizabeth_II 1.00, Ansel_Adams 0.99, Bruce_Lee 0.78, Taylor_Swift 1.00, Michelangelo 0.71, Aristotle 1.00, Guido_van_Rossum 0.99, Silvina_Ocampo 0.51, Craig_Small 0.16
+    biggest roster exits (by original score):
+                        title   birth  median_views  keep  n_langs
+                     Shen_Yue   441.0        1673.5  0.49     24.0
+               Silvina_Ocampo  1903.0       20137.0  0.51     33.0
+Charles_Stuart_(abolitionist)  1783.0        9077.5  0.01      2.0
+               Annie_Sprinkle  1954.0       26554.5  0.68     25.0
+            Harriet_Martineau  1802.0        8182.0  0.15     45.0
+                    Madhavdev  1489.0        3310.0  0.80      8.0
+                          Nek  1972.0       31570.0  0.72     31.0
+                     Gungunum -1950.5         423.0  0.40     22.0
+           Thomas_R._Marshall  1854.0        9565.5  0.87     54.0
+                Kyösti_Kallio  1873.0       10650.0  0.65     49.0
+                   Amber_Lynn  1964.0       25721.5  0.89     27.0
+                  Domenichino  1581.0        3540.5  0.70     42.0
+         Belladonna_(actress)  1984.5       37345.5  0.95     33.0
+                        Gildo   340.0         918.5  0.85     16.0
+              Vanessa_del_Rio  1952.0       20733.0  0.96     20.0
+         Joseph_Paul_Franklin  1950.0       20120.0  0.97     23.0
+                     Mu_Sheng  1368.0        2323.0  0.92      4.0
+             Salvius_Julianus   150.5         815.0  0.95     22.0
+                Garret_Hobart  1844.0        8398.5  0.95     52.0
+Ali_ibn_Sahl_Rabban_al-Tabari   834.5        1281.5  0.98     18.0
+         Didymus_Chalcenterus   -64.5         729.5  0.96     26.0
+       Reginar_III_of_Hainaut   924.5        1383.0  0.97     14.0
+              Peada_of_Mercia   650.5        1103.0  0.98     24.0
+                       Careca  1960.0       22946.0  0.95     55.0
+                 Helmut_Schön  1915.0       13632.5  0.92     40.0 
+
+=== band [-log 8, +log 8]: 1,675 people lose >20%, 731 lose >50%; views removed 0.13%; proxy roster churn 32 of 31,000
+    BCE 1124: out 3; 1-1499 6054: out 13; 1500-1799 3196: out 4; 1800-1899 3292: out 4; 1900-1949 6564: out 5; 1950+ 10770: out 3
+    controls: Cristiano_Ronaldo 1.00, Cleopatra 1.00, Elizabeth_II 1.00, Ansel_Adams 1.00, Bruce_Lee 0.78, Taylor_Swift 1.00, Michelangelo 0.71, Aristotle 1.00, Guido_van_Rossum 0.99, Silvina_Ocampo 0.51, Craig_Small 0.16
+    biggest roster exits (by original score):
+                        title   birth  median_views  keep  n_langs
+                     Shen_Yue   441.0        1673.5  0.49     24.0
+               Silvina_Ocampo  1903.0       20137.0  0.51     33.0
+Charles_Stuart_(abolitionist)  1783.0        9077.5  0.01      2.0
+            Harriet_Martineau  1802.0        8182.0  0.15     45.0
+                          Nek  1972.0       31570.0  0.74     31.0
+                     Gungunum -1950.5         423.0  0.40     22.0
+           Thomas_R._Marshall  1854.0        9565.5  0.87     54.0
+                Kyösti_Kallio  1873.0       10650.0  0.65     49.0
+                  Domenichino  1581.0        3540.5  0.70     42.0
+                        Gildo   340.0         918.5  0.85     16.0
+         Joseph_Paul_Franklin  1950.0       20120.0  0.97     23.0
+                     Mu_Sheng  1368.0        2323.0  0.92      4.0
+             Salvius_Julianus   150.5         815.0  0.95     22.0
+                Garret_Hobart  1844.0        8398.5  0.95     52.0
+Ali_ibn_Sahl_Rabban_al-Tabari   834.5        1281.5  0.98     18.0
+         Didymus_Chalcenterus   -64.5         729.5  0.96     26.0
+       Reginar_III_of_Hainaut   924.5        1383.0  0.97     14.0
+              Peada_of_Mercia   650.5        1103.0  0.98     24.0
+                       Careca  1960.0       22946.0  0.95     55.0
+                 Helmut_Schön  1915.0       13632.5  0.92     40.0
+            Warda_Al-Jazairia  1939.0       17384.0  0.98     30.0
+         Bernard_II_of_Saxony   994.5        1464.5  0.98     24.0
+                     Sudirman  1916.0       13691.0  0.99     20.0
+                  John_Searle  1932.0       15982.0  1.00     44.0
+         William_I_of_Holland  1164.5        1743.5  0.99     29.0 
+
+=== band [-log 8, +log 16]: 980 people lose >20%, 467 lose >50%; views removed 0.07%; proxy roster churn 12 of 31,000
+    BCE 1124: out 2; 1-1499 6054: out 2; 1500-1799 3196: out 2; 1800-1899 3292: out 2; 1900-1949 6564: out 2; 1950+ 10770: out 2
+    controls: Cristiano_Ronaldo 1.00, Cleopatra 1.00, Elizabeth_II 1.00, Ansel_Adams 1.00, Bruce_Lee 1.00, Taylor_Swift 1.00, Michelangelo 0.79, Aristotle 1.00, Guido_van_Rossum 1.00, Silvina_Ocampo 0.66, Craig_Small 0.28
+    biggest roster exits (by original score):
+                          title   birth  median_views  keep  n_langs
+  Charles_Stuart_(abolitionist)  1783.0        9077.5  0.03      2.0
+              Harriet_Martineau  1802.0        8182.0  0.25     45.0
+                            Nek  1972.0       31570.0  0.74     31.0
+                       Gungunum -1950.5         423.0  0.58     22.0
+                  Kyösti_Kallio  1873.0       10650.0  0.65     49.0
+                    Domenichino  1581.0        3540.5  0.79     42.0
+                          Gildo   340.0         918.5  0.92     16.0
+                         Careca  1960.0       22946.0  0.97     55.0
+                   Helmut_Schön  1915.0       13632.5  0.94     40.0
+              Warda_Al-Jazairia  1939.0       17384.0  0.98     30.0
+                   Ashur-rabi_I -1450.5         431.5  1.00     20.0
+Khumarawayh_ibn_Ahmad_ibn_Tulun   864.0        1290.0  0.99     21.0 
+
