@@ -1,0 +1,42 @@
+36 buckets  REF=2060  K=1000  floor=300
+    bucket  pool_ge_floor  selected  bar_views                                        last_in
+ .....-507            337       337      300.5                                    Ur-Ningirsu
+-507..-244            329       329      303.0                Publius Sulpicius Galba Maximus
+  -244..-8            431       431      300.5          Gnaeus Cornelius Lentulus Marcellinus
+   -8..203            418       418      302.5                                       Cao Chun
+  203..394            443       443      300.0                                        Yang Hu
+  394..564            413       413      301.5                                      Yuan Zhao
+  564..717            560       560      300.5                                       Hugobert
+  717..855            545       545      301.0                         Wang Jian (Former Shu)
+  855..978            619       619      300.0                             Fujiwara no Kaneie
+ 978..1089            808       808      300.5                                 Frozza Orseolo
+1089..1188            985       985      300.0      Gertrude of Babenberg, Duchess of Bohemia
+1188..1278            990       990      300.5                                    Amadeus Aba
+1278..1358            988       988      300.5                                     Al-Nuwayri
+1358..1430            976       976      300.0                                       John Say
+1430..1494           1455      1000      555.5                               Eleanor Beaufort
+1494..1552           1871      1000      722.0                                Joris Hoefnagel
+1552..1604           1772      1000      611.5 Thomas Arundell, 1st Baron Arundell of Wardour
+1604..1651           1746      1000      615.5                         Primary Consort Minhui
+1651..1693           1358      1000      433.0           Alexander Gordon, 2nd Duke of Gordon
+1693..1730           1799      1000      644.5          Princess Christine of Hesse-Rotenburg
+1730..1764           2946      1000     1114.0                                      Ira Allen
+1764..1794           3255      1000     1267.0                     Leopold, Prince of Salerno
+1794..1822           4570      1000     1743.0                       Alexander Turney Stewart
+1822..1846           5496      1000     2207.0                                Adolphus Greely
+1846..1868           7206      1000     2894.5                                 Paul Deschanel
+1868..1888          10379      1000     4795.0                                    Karl Renner
+1888..1905          15460      1000     7665.0                           J. William Fulbright
+1905..1921          19526      1000    11512.0                         John Kenneth Galbraith
+1921..1935          25561      1000    17680.0                                 Farley Granger
+1935..1948          37096      1000    30097.0                                   Leon Panetta
+1948..1960          41288      1000    32783.5                                      Sathyaraj
+1960..1970          44183      1000    41770.0                            Yokozuna (wrestler)
+1970..1979          44253      1000    45323.5                                  Debbie Gibson
+1979..1987          35516      1000    38269.0                                     Tom Basden
+1987..1995          30417      1000    30027.5                             Hikuleo (wrestler)
+1995..2022          39786      1000    30786.0                         Murder of Brianna Ghey
+
+N = 30,842   32 windows of 5 buckets   people/window min/median/max = 1,958/5,000/5,000
+AlignedUMAP points (N x window membership) ~ 154,210
+born before 1500: 32% of roster   before 1900: 70%   buckets ending by 1900: 72% of slider

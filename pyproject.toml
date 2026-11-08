@@ -1,0 +1,33 @@
+[project]
+name = "people-through-time-map"
+version = "0.1.0"
+description = "A semantic map of the most famous people of every era, from all Wikipedias, with a birth-year slider"
+requires-python = ">=3.11"
+# Only what the code in this repo imports today. Add the embedding / UMAP /
+# Toponymy stack (see living-people-map's pyproject) as those stages land.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.0,<3",
+    "pyarrow>=15",
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.4",
+    "pytest>=8",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "util"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

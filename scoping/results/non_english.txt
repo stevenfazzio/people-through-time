@@ -1,0 +1,27 @@
+Wikidata humans (P31=Q5): 13,776,677
+  with >=1 Wikipedia article: 4,848,996
+    with English: 2,155,479 (44.5%)   without: 2,693,517
+
+share WITHOUT an English article, by number of Wikipedia editions:
+   1-1   editions: 2,654,777 people,  81.2% lack English
+   2-2   editions:   788,644 people,  48.2% lack English
+   3-4   editions:   665,342 people,  20.0% lack English
+   5-9   editions:   464,074 people,   5.0% lack English
+  10-19  editions:   196,318 people,   1.1% lack English
+  20-49  editions:    70,442 people,   0.4% lack English
+  50-999 editions:     9,399 people,   0.0% lack English
+top  10,000 by #editions: 0.0% lack English
+top  31,000 by #editions: 0.1% lack English
+top 100,000 by #editions: 0.7% lack English
+
+among people with >=5 editions, by death year (birth dates timed out on QLever):
+                   n lack_english
+era                              
+[-5000, 500)    9422         6.7%
+[500, 1000)     7204         4.3%
+[1000, 1500)   16086         5.8%
+[1500, 1700)   17586         4.5%
+[1700, 1800)   11424         6.4%
+[1800, 1900)   34488         4.4%
+[1900, 1950)   51515         4.2%
+[1950, 2100)  185587         2.9%
