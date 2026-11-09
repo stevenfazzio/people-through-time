@@ -46,8 +46,8 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 07 | Qwen3-Embedding-8B vectors of the leads via OpenRouter (pinned to Nebius), one file per instruction variant (cache: `data/raw/embedding_cache.sqlite`) | `data/embeddings_<variant>.npz` |
 | 07b | Gender erasure: one global centroid direction projected out of the role vectors (`ERASE_GENDER`) | `data/embeddings_role_nogender.npz` (+ `direction`) |
 | 08 | One AlignedUMAP over the 32 slider windows (`config.MAP_EMBEDDING`) | `data/layout_role_nogender.parquet` (window, qid, x, y) |
-| 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
-| 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, so reruns resume) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
+| 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows (with a lineage check against relays), majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
+| 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, names keyed by their cluster's members, so reruns resume and relinking keeps them) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
 | 11 | One name per track from its path of per-window names (Claude, structured self-checking reply), then renaming tracks of a layer that share a name in some window | `data/track_names_role_nogender.parquet` (layer, track, name, windows, gender shares, path, the reply's earliest / latest / candidate) |
 | 11b | Short name (≤ 3 words, ≤ 18 characters) per coarse track, for the timeline chart's ribbons (Claude, same model and cache) | `data/track_short_names_role_nogender.parquet` (layer, track, short_name) |
 | 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, hovercard text | `docs/data/{core.json, points.bin, details.json}` (committed: Pages serves them) |
@@ -117,6 +117,15 @@ strictly within every window. Tree: 93% of fine tracks have a mid parent (4%
 skip to coarse, 3% root), 97% of mid tracks a coarse parent; the median
 track sits 100% under its parent. Same numbers as A+ in
 `scoping/results/label_tracks.txt`. Log: `logs/09_label_tracks.log`.
+
+Stage 09 rerun with the lineage check (2026-11-09; decision below): 2 s.
+Links dropped and rematched 9 / 3 / 3 (fine / mid / coarse; the coarse three
+are the relays); 270 / 111 / 48 tracks; a labelled person's label switches
+in 18.2 / 14.5 / 14.9% of steps (was 17.7 / 14.3 / 14.4: relays hid real
+switches); lowest carrier lineage share left 33 / 30 / 29%. Stage 10 kept all
+2,218 names with no Claude calls; stage 11 cost $0.14 over both rule versions;
+11b and 12 rerun (17 colours for 48 coarse tracks). Pre-check outputs and
+logs: `data/before_lineage/`.
 
 Stage 10 (2026-11-09): 50.5 min, $17.33 (Sonnet 5.5, effort medium; 1,771
 Claude calls, 8.2M input / 90k output tokens; 69 more from the cache of a
@@ -593,7 +602,60 @@ Planned next: see "Frontend, what's left".
   (`src/content/projects/people-through-time.yaml` in stevenfazzio.github.io,
   thumbnail from its `scripts/capture-thumbnails.mjs`).
 
+- **2026-11-09 — lineage check against relays (stage 09).** Found from three
+  odd coarse names Steven flagged: "Thinkers and Nazi Leaders" (holding Neil
+  Armstrong and Rosa Parks), "Novelists and Murderers", "Classical Composers
+  and Screen Actors". The first two were **relays**: linking neighbouring
+  windows alone lets a track's id pass to another group in two steps. c33
+  (thinkers): in window 18, 109 people of c31 "Dictators and Wartime Leaders"
+  crossed into its cluster; in 19 they regrouped with the rest of c31 into
+  the Nazi cluster, and the 101 wearing c33's label outvoted c31's 85, so the
+  Nazi cluster continued c33 and c31 ended (169 of its people were in c31 in
+  window 17, 1 in c33). c34 (novelists): three tracks merged in window 20
+  (novelists 134, religious thinkers 127, politicians and scientists 111:
+  "American Writers, Politicians, and Criminals", Trump, JFK, Bundy, Manson),
+  and the murderers split off in 21 with the novelists' id, though 5 of their
+  97 carriers had been novelists. Also c19 "European Rulers, Saints, and
+  Writers" (saints relayed in at window 8). **Rule**: a cluster continues
+  track t only if its carriers -- the people in both it and t's cluster of
+  the window before, labelled two windows earlier -- were at least 20% in t
+  then (`TRACK_LINEAGE_MIN`, when there are at least 20); otherwise the link
+  is dropped and mutual-best rerun without it, so the cluster can continue
+  the track it does descend from. Carrier shares on the old tracks: coarse 0
+  / 1 / 5% (the relays) then 29%+, mid 0 / 0 / 0% then 30%+, fine 0-14% then
+  33%+. The first version tested all the cluster's people labelled two
+  windows back (also a clean gap, relays 0-5% vs 22%+) but misfired once: the
+  window-5 Byzantine emperors' older members were saints, so it moved them
+  from the Roman track to the saints' -- yet the 90 people carrying the Roman
+  label in were unlabelled or new two windows back, none of them crossers.
+  Rejected: "t must be the largest ancestor" (rejects 14 coarse continuations,
+  near-even merges among them); looking three windows back (catches slower
+  handovers -- c0's Indian rulers to caliphs -- but windows three apart share
+  2 of 5 bins, so a track's own people ageing out shades into drift);
+  semantic tiebreaks from name or member-centroid embeddings (people give the
+  same answer with a clean gap; names are noisy and depend on their
+  neighbours; keeps the LLM out of structure). After: the Nazi cluster
+  continues "Dictators and Wartime Leaders" (13-19), "European Royal
+  Dynasties" (5-13) stands apart from "Christian Saints and European Writers"
+  (4-17), the novelists end as "Anglophone Writers and American Politicians"
+  (15-20) -- but the thinkers track now reaches the murderers ("Thinkers and
+  Murderers", 14-24): absorbed into the window-20 hub, it is bridged back in
+  21, where MLK, Hawking, Malcolm X and Benedict XVI share a cluster with
+  Bundy, Manson and Gacy, new to the window; by 24 the murderers dominate.
+  That is drift by arrival, like c30, not a relay (see "Drift names").
+
 ## Proposed, not yet settled
+
+- **Drift names** (2026-11-09). c30 (composers in 13-16, then actors),
+  "Thinkers and Murderers" (14-24) and "Christian Saints and European
+  Writers" (4-17) are real continuations by people whose population turns
+  over as the window moves, so one name has to stretch over both ends; the
+  window-16 thinkers (Freud, Helen Keller, Rosa Parks) carry "Murderers".
+  Idea: keep the track whole (colour, motion, ribbon) but name it per
+  segment, cut where its members' vectors drift; the ribbon and map label
+  switch names at the cut. `scoping/track_segments.py` already cuts c30 at
+  13-16 | 17-31 (bar cosine 0.732: 6 of 50 coarse tracks cut); rerun it on
+  the relinked tracks.
 
 - **Label tracks, what's left** (see the 2026-11-08 decision). Merge
   flicker: judged acceptable in the animated preview on 2026-11-08
@@ -606,7 +668,20 @@ Planned next: see "Frontend, what's left".
   then per track); stage 09's majority-parent tree stays for the frontend's
   label hierarchy, but Toponymy no longer needs it. Label position = the track's centroid per window,
   interpolated between windows; labels fade in and out as tracks begin and
-  end.
+  end. **Cross-layer links** (measured 2026-11-09, before the lineage check):
+  32 of 43 coarse-track ends are the region dropping below the coarse size
+  and carrying on as one mid cluster that descends from it (for a median 3
+  more windows), and 37 of 39 coarse starts came mostly from one mid cluster
+  -- so a coarse "end" is usually a size-threshold crossing, which on the page
+  recolours and relabels a region that stays put. Considered: a coarse track
+  survives one layer down while its mid cluster lives (the short-merge idea
+  above, with the mid layer as evidence the region still exists). Cost: up to
+  4 more coarse labels per window (9.7 → 13.7), more colours, and it inherits
+  mid-layer drift (of 3 regions that shrank and regrew, only c29 Scientists
+  → c32 Industrialists reads right). Parked until the page shows the
+  crossings jar. General cross-layer links rejected: a track belongs to one
+  layer (name tier, label size and priority, tree, the river's
+  one-coarse-track-per-person split).
 - **Frontend is custom** -- settled 2026-11-09, see the decision "Frontend".
 - **Frontend, what's left** (2026-11-09): a write-up post on stevenfazzio.com
   and the page's "← read the write-up" link; a phone layout (the

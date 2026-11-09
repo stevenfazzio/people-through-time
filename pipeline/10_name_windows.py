@@ -15,7 +15,10 @@ config.NAME_INSTRUCTIONS appended to each prompt; detail levels config.NAME_DETA
 
 Resumable: each named window is saved to config.WINDOW_NAMES_DIR/<window>.json and skipped on a rerun. A
 window with an empty name (Toponymy turns a failed call into an empty name and carries on) is not saved, so
-a rerun retries it -- the successful prompts come from the cache.
+a rerun retries it -- the successful prompts come from the cache. Each saved name carries its cluster's
+member key (a hash of its people), so a saved window is reused only while stage 09 still gives it the same
+clusters, and its names follow their clusters to new track ids when only the linking changed (2026-11-09,
+the lineage check); a window whose clusters changed is named again.
 
 Output: data/window_names_<MAP_EMBEDDING>.parquet: window (int16), layer (int8, 0 = finest), track (int32,
 stage 09's id), size (int32, people in the window), name. Written only once every window is named.
@@ -23,6 +26,8 @@ Logs per window: clusters, Claude calls and cost, and names to review: gendered 
 case, and a name repeated within a layer.
 """
 
+import hashlib
+import json
 import time
 
 import numpy as np
@@ -45,6 +50,30 @@ def local_labels(track: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     codes, uniques = pd.factorize(track[ok], sort=True)
     out[ok] = codes
     return out, np.asarray(uniques)
+
+
+def cluster_key(qids) -> str:
+    """A cluster's identity independent of its track id: a hash of its members."""
+    return hashlib.blake2b("\n".join(sorted(map(str, qids))).encode(), digest_size=8).hexdigest()
+
+
+def window_keys(rows: pd.DataFrame) -> dict[tuple[int, str], int]:
+    """{(layer, member key): track id} for one window's rows of the tracks table."""
+    qids = rows["qid"].astype(str).to_numpy()
+    out = {}
+    for i in range(N_LAYERS):
+        t = rows[f"track_{i}"].to_numpy()
+        for track in np.unique(t[t >= 0]):
+            out[(i, cluster_key(qids[t == track]))] = int(track)
+    return out
+
+
+def reuse_saved(saved: list[dict], rows: pd.DataFrame) -> list[dict] | None:
+    """A saved window's names with today's track ids, or None if its clusters are no longer stage 09's."""
+    keys = window_keys(rows)
+    if any("key" not in e for e in saved) or {(e["layer"], e["key"]) for e in saved} != set(keys):
+        return None
+    return [e | {"track": keys[(e["layer"], e["key"])]} for e in saved]
 
 
 def name_window(w: int, rows: pd.DataFrame, xy: np.ndarray, texts: list[str], emb: np.ndarray, years: np.ndarray,
@@ -80,12 +109,13 @@ def name_window(w: int, rows: pd.DataFrame, xy: np.ndarray, texts: list[str], em
     # Toponymy.fit takes (objects, high-D embeddings, low-D map) -- the reverse of the clusterer's order -- so
     # pass by keyword. The map only matters for clustering, which the pre-fitted clusterer skips.
     model.fit(texts, embedding_vectors=emb, clusterable_vectors=xy)
+    qids = rows["qid"].astype(str).to_numpy()
     entries = []
     for i, names in enumerate(model.topic_names_):
         sizes = np.bincount(labels[i][labels[i] >= 0], minlength=len(names))
         for k, name in enumerate(names):
             entries.append({"window": w, "layer": i, "track": int(track_of[i][k]), "size": int(sizes[k]),
-                            "name": name.strip()})  # fmt: skip
+                            "name": name.strip(), "key": cluster_key(qids[labels[i] == k])})  # fmt: skip
     return entries
 
 
@@ -106,16 +136,24 @@ def main() -> None:
     namer = AsyncClaudeNamer()
     inner = OpenRouterEmbedder(instruction=None, batch_items=config.EMBED_SHORT_BATCH_ITEMS)
     embedder = DirectionRemovedEmbedder(inner, z["direction"])
-    all_entries, missing = [], []
+    all_entries, missing, relinked = [], [], 0
     for w in windows:
         path = config.WINDOW_NAMES_DIR / f"{w:02d}.json"
-        if path.exists():
-            all_entries += pd.read_json(path).to_dict("records")
-            continue
-        tw = time.monotonic()
-        before = dict(namer.usage)
         sel = (tr["window"] == w).to_numpy()
         rows = tr[sel].reset_index(drop=True)
+        if path.exists():
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            entries = reuse_saved(saved, rows)
+            if entries is not None:
+                moved = sum(e["track"] != s["track"] for e, s in zip(entries, saved))
+                if moved:
+                    write_json_atomic(entries, path)
+                    relinked += moved
+                all_entries += entries
+                continue
+            log(f"window {w}: its clusters changed since it was named -- naming it again")
+        tw = time.monotonic()
+        before = dict(namer.usage)
         qids = rows["qid"].astype(str)
         texts = leads.reindex(qids).tolist()
         if any(not isinstance(t, str) or not t for t in texts):
@@ -138,6 +176,8 @@ def main() -> None:
         write_json_atomic(entries, path)
         all_entries += entries
 
+    if relinked:
+        log(f"{relinked} saved names kept with a new track id (same cluster, relinked by stage 09)")
     u = namer.usage
     log(f"Claude: {u['calls']} calls this run ({u['cached']} from cache), {u['input_tokens']:,} input / "
         f"{u['output_tokens']:,} output tokens = ${namer.cost_usd():.2f}; embedding {inner.tokens:,} tokens, "

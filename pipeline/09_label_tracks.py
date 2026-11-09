@@ -17,6 +17,19 @@ smaller side's shared people continues the track. With TRACK_BRIDGE, a track
 that ended is also matched against clusters starting two windows on (bridging
 a one-window gap). Anything unmatched starts a new track.
 
+Lineage check (2026-11-09). Matching neighbouring windows alone lets a track's
+id relay to another group in two steps: people from track B cross into track
+A's cluster, the next window they regroup with the rest of B, and since they
+wore A's label they carry A's id with them ("Thinkers" became the Nazi region
+this way, "Novelists" the murderers). So a cluster continues track t only if
+its carriers -- the people in both it and t's cluster of the window before --
+were mostly in t already: at least config.TRACK_LINEAGE_MIN of those labelled
+two windows earlier (checked when t existed then and at least
+TRACK_LINEAGE_MIN_PEOPLE carriers were labelled). A failing link is dropped
+and the mutual-best matching rerun without it, so the cluster can continue the
+track it does descend from. Bridged links need no check: their carriers were in
+t two windows earlier by definition.
+
 Tree. Each layer is linked on its own, so a track can sit under different
 parents over its life. Its parent is the track one layer up holding most of
 its person-windows (counting those under a named cluster there); a track never
@@ -30,12 +43,14 @@ Outputs:
     parent_layer, parent_track, parent_share (share of its person-windows
     under a named cluster at the parent's layer that are under the parent),
     first_window, last_window, n_windows, n_people, peak_size.
-Logs per layer: labels per window, tracks, unlabelled share, lifetimes, label
-events per step, how often a labelled person's label switches and why
-(boundary crossing vs merge), label motion; then the tree's fit.
+Logs per layer: links the lineage check dropped and what became of them;
+labels per window, tracks, unlabelled share, lifetimes, label events per step,
+how often a labelled person's label switches and why (boundary crossing vs
+merge), label motion, the lowest lineage share left; then the tree's fit.
 """
 
 import time
+from collections import Counter
 
 import numba
 import numpy as np
@@ -85,11 +100,13 @@ def layer_sizes(links: list, ns: list[int], targets=config.LABEL_TARGETS) -> tup
     return sizes, mean
 
 
-def match(lab_a, pid_a, lab_b, pid_b, cand_a=None, cand_b=None, link_min=config.TRACK_LINK_MIN) -> dict[int, int]:
+def match(
+    lab_a, pid_a, lab_b, pid_b, cand_a=None, cand_b=None, link_min=config.TRACK_LINK_MIN, banned=()
+) -> dict[int, int]:
     """Mutual-best matches between the clusters of two windows by shared people: {cluster in b: cluster in a}.
 
-    cand_a / cand_b restrict the clusters that may match. A pair needs >= link_min of the smaller side's
-    people present in both windows (and labelled there).
+    cand_a / cand_b restrict the clusters that may match; banned (a, b) pairs may not match each other. A pair
+    needs >= link_min of the smaller side's people present in both windows (and labelled there).
     """
     na, nb = int(lab_a.max()) + 1, int(lab_b.max()) + 1
     if na <= 0 or nb <= 0:
@@ -105,6 +122,8 @@ def match(lab_a, pid_a, lab_b, pid_b, cand_a=None, cand_b=None, link_min=config.
         n[~np.isin(np.arange(na), list(cand_a))] = 0
     if cand_b is not None:
         n[:, ~np.isin(np.arange(nb), list(cand_b))] = 0
+    for a, b in banned:
+        n[a, b] = 0
     best_b, best_a = n.argmax(1), n.argmax(0)
     out = {}
     for a in range(na):
@@ -114,30 +133,127 @@ def match(lab_a, pid_a, lab_b, pid_b, cand_a=None, cand_b=None, link_min=config.
     return out
 
 
+class Lineage:
+    """The lineage check for links from window w-1 (cluster a, track t) to window w (cluster b): the carriers --
+    people in both a and b -- must mostly have been in t at w-2 already. Without two earlier windows every link
+    passes."""
+
+    def __init__(self, lab, pid, prev=None, old=None, min_share=config.TRACK_LINEAGE_MIN,
+                 min_people=config.TRACK_LINEAGE_MIN_PEOPLE):  # fmt: skip
+        """prev = (labels, person ids, track per cluster) at w-1; old = (person ids, track per person) at w-2."""
+        self.min_share, self.min_people = min_share, min_people
+        self.total: Counter = Counter()
+        self.same: Counter = Counter()
+        self.carried: Counter = Counter()
+        self.alive: set[int] = set()
+        self.track_of_a = np.zeros(0, int)
+        self.dropped: list[dict] = []
+        if prev is None or old is None:
+            return
+        lab_p, pid_p, self.track_of_a = prev
+        pid_o, trk_o = old
+        common, i, j = np.intersect1d(pid, pid_p, assume_unique=True, return_indices=True)
+        _, k, m = np.intersect1d(common, pid_o, assume_unique=True, return_indices=True)
+        b, a, t_old = lab[i][k], lab_p[j][k], trk_o[m]
+        ok = (b >= 0) & (a >= 0) & (t_old >= 0)
+        b, a, t_old = b[ok], a[ok], t_old[ok]
+        same = t_old == self.track_of_a[a]
+        self.total = Counter(zip(a.tolist(), b.tolist()))
+        self.same = Counter(zip(a[same].tolist(), b[same].tolist()))
+        self.carried = Counter(zip(a.tolist(), b.tolist(), t_old.tolist()))
+        self.alive = set(trk_o[trk_o >= 0].tolist())
+
+    def ok(self, a: int, b: int) -> bool:
+        """May cluster b continue cluster a's track? Records the links it refuses."""
+        t = int(self.track_of_a[a]) if len(self.track_of_a) else -1
+        n = self.total[(a, b)]
+        if t not in self.alive or n < self.min_people:
+            return True
+        share = self.same[(a, b)] / n
+        if share >= self.min_share:
+            return True
+        top_t, top_n = max(((tt, c) for (aa, bb, tt), c in self.carried.items() if (aa, bb) == (a, b)),
+                           key=lambda x: x[1])  # fmt: skip
+        self.dropped.append({"cluster": b, "track": t, "n": n, "share": share, "top_track": top_t,
+                             "top_share": top_n / n})  # fmt: skip
+        return False
+
+
+def checked_match(lab_a, pid_a, lab_b, pid_b, lineage: Lineage) -> dict[int, int]:
+    """match(), dropping each pair that fails the lineage check and rematching without it, until all pass."""
+    banned: set[tuple[int, int]] = set()
+    while True:
+        m = match(lab_a, pid_a, lab_b, pid_b, banned=banned)
+        bad = {(a, b) for b, a in m.items() if not lineage.ok(a, b)}
+        if not bad:
+            return m
+        banned |= bad
+
+
 def link_tracks(
-    local: list[np.ndarray], pids: list[np.ndarray], bridge: bool = config.TRACK_BRIDGE
+    local: list[np.ndarray],
+    pids: list[np.ndarray],
+    bridge: bool = config.TRACK_BRIDGE,
+    lineage_min: float = config.TRACK_LINEAGE_MIN,
+    lineage_people: int = config.TRACK_LINEAGE_MIN_PEOPLE,
+    dropped: list | None = None,
 ) -> list[np.ndarray]:
-    """Track id per point of each window (-1 = unclustered), from each window's cluster labels and person ids."""
+    """Track id per point of each window (-1 = unclustered), from each window's cluster labels and person ids.
+
+    Links refused by the lineage check are appended to `dropped` (window, cluster, the track it would have
+    continued, its carriers' lineage share, their largest track two windows back, and what it became).
+    """
     tid: list[np.ndarray] = []
+    trk: list[np.ndarray] = []
     next_id = 0
     for w, lab in enumerate(local):
         ids = np.full(int(lab.max()) + 1, -1)
         if w > 0:
-            for b, a in match(local[w - 1], pids[w - 1], lab, pids[w]).items():
+            prev = (local[w - 1], pids[w - 1], tid[w - 1])
+            old = (pids[w - 2], trk[w - 2]) if w > 1 else None
+            lineage = Lineage(lab, pids[w], prev, old, lineage_min, lineage_people)
+            for b, a in checked_match(local[w - 1], pids[w - 1], lab, pids[w], lineage).items():
                 ids[b] = tid[w - 1][a]
             if bridge and w > 1:
-                prev = set(tid[w - 1].tolist())
-                ended = {c for c, t in enumerate(tid[w - 2]) if t not in prev}
+                alive = set(tid[w - 1].tolist())
+                ended = {c for c, t in enumerate(tid[w - 2]) if t not in alive}
                 open_ = set(np.flatnonzero(ids < 0).tolist())
                 if ended and open_:
                     for b, a in match(local[w - 2], pids[w - 2], lab, pids[w], ended, open_).items():
                         ids[b] = tid[w - 2][a]
+        else:
+            lineage = Lineage(lab, pids[w])
+        first_new = next_id
         for c in np.flatnonzero(ids < 0):
             ids[c] = next_id
             next_id += 1
         tid.append(ids)
-    return [np.where(lab >= 0, ids[np.maximum(lab, 0)], -1) if len(ids) else np.full(len(lab), -1)
-            for lab, ids in zip(local, tid)]  # fmt: skip
+        trk.append(np.where(lab >= 0, ids[np.maximum(lab, 0)], -1) if len(ids) else np.full(len(lab), -1))
+        if dropped is not None:
+            for d in lineage.dropped:
+                became = int(ids[d["cluster"]])
+                dropped.append(d | {"window": w, "became": became, "new": became >= first_new,
+                                    "track_continues": d["track"] in set(ids.tolist())})  # fmt: skip
+    return trk
+
+
+def lineage_shares(pid: np.ndarray, sl: list[slice], track: np.ndarray,
+                   min_people: int = config.TRACK_LINEAGE_MIN_PEOPLE) -> np.ndarray:  # fmt: skip
+    """What the lineage check tests, over the final tracks: for each track in windows w-2, w-1 and w, the share
+    of its carriers (in it at w-1 and w) labelled at w-2 who were in it then (with at least min_people)."""
+    out = []
+    for w in range(2, len(sl)):
+        s0, s1, s2 = sl[w - 2], sl[w - 1], sl[w]
+        common, i, j = np.intersect1d(pid[s2], pid[s1], assume_unique=True, return_indices=True)
+        _, k, m = np.intersect1d(common, pid[s0], assume_unique=True, return_indices=True)
+        t2, t1, t0 = track[s2][i][k], track[s1][j][k], track[s0][m]
+        car = (t2 >= 0) & (t2 == t1) & (t0 >= 0)
+        alive = set(track[s0][track[s0] >= 0].tolist())
+        for t in np.unique(t2[car]):
+            sel = car & (t2 == t)
+            if t in alive and sel.sum() >= min_people:
+                out.append(float((t0[sel] == t).mean()))
+    return np.array(out)
 
 
 def split_share(win: np.ndarray, child: np.ndarray, parent: np.ndarray) -> float:
@@ -223,6 +339,7 @@ def layer_report(win: np.ndarray, pid: np.ndarray, xy: np.ndarray, sl: list[slic
     nxt = cent.reset_index().assign(w=lambda d: d["w"] - 1).set_index(["t", "w"])
     j = cent.join(nxt, rsuffix="_n", how="inner").reset_index()
     motion = np.hypot(j["x"] - j["x_n"], j["y"] - j["y_n"]).to_numpy() / rms[j["w"].to_numpy() + 1]
+    lin = lineage_shares(pid, sl, track)
     return {
         "labels/window": f"{shown.mean():.1f} ({shown.min()}-{shown.max()})",
         "tracks": len(pres),
@@ -237,6 +354,7 @@ def layer_report(win: np.ndarray, pid: np.ndarray, xy: np.ndarray, sl: list[slic
         "toggle": round(toggle / max(steps, 1), 3),
         "motion median": round(float(np.median(motion)), 3),
         "motion p90": round(float(np.quantile(motion, 0.9)), 3),
+        "lineage min": round(float(lin.min()), 2) if len(lin) else np.nan,
     }
 
 
@@ -250,7 +368,8 @@ def main() -> None:
     ns = [s.stop - s.start for s in sl]
     log(f"{config.MAP_EMBEDDING}: {len(lay):,} points in {len(sl)} windows of {min(ns):,}-{max(ns):,}; "
         f"targets {config.LABEL_TARGETS} labels per window (finest first), min_samples {config.LABEL_MIN_SAMPLES}, "
-        f"link >= {config.TRACK_LINK_MIN}, bridge one-window gaps: {config.TRACK_BRIDGE}")  # fmt: skip
+        f"link >= {config.TRACK_LINK_MIN}, bridge one-window gaps: {config.TRACK_BRIDGE}, carriers' lineage >= "
+        f"{config.TRACK_LINEAGE_MIN} (when >= {config.TRACK_LINEAGE_MIN_PEOPLE} carriers)")  # fmt: skip
 
     links = [linkage(xy[s]) for s in sl]
     sizes, mean = layer_sizes(links, ns)
@@ -260,7 +379,15 @@ def main() -> None:
     tracks = np.full((len(lay), len(sizes)), -1, dtype=np.int32)
     for i, m in enumerate(sizes):
         local = [leaf_labels(link, m, n) for link, n in zip(links, ns)]
-        tracks[:, i] = np.concatenate(link_tracks(local, pids))
+        drops: list[dict] = []
+        tracks[:, i] = np.concatenate(link_tracks(local, pids, dropped=drops))
+        log(f"layer {i}: lineage check dropped {len(drops)} links (cluster at window w would have continued "
+            f"track t; share of its carriers labelled at w-2 who were in t; their largest track then):")  # fmt: skip
+        for d in drops:
+            fate = "a new track" if d["new"] else f"continues t{d['became']}"
+            log(f"  w{d['window']:2d} t{d['track']}: {d['share']:.0%} of {d['n']} (t{d['top_track']} "
+                f"{d['top_share']:.0%}) -> {fate}; t{d['track']} "
+                f"{'continues elsewhere' if d['track_continues'] else 'ends'}")  # fmt: skip
     for i in range(len(sizes) - 1):
         split = split_share(win, tracks[:, i], tracks[:, i + 1])
         if split > 0:
@@ -282,7 +409,8 @@ def main() -> None:
     pd.set_option("display.width", 250)
     log("Tracks per layer (switch: share of a person's window steps, labelled on both sides, where the label "
         "changes; merges / boundary: why; toggle: steps between named and unlabelled; motion: label centroid "
-        f"shift per step in layout radii):\n{report.to_string(index=False)}")  # fmt: skip
+        "shift per step in layout radii; lineage min: lowest share of a track's carriers two windows back who "
+        f"were in it then):\n{report.to_string(index=False)}")  # fmt: skip
     for i in range(len(sizes) - 1):
         t = tree[tree["layer"] == i]
         sh = t["parent_share"].dropna()

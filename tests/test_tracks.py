@@ -62,6 +62,64 @@ def test_link_tracks_continue_and_bridge_a_one_window_gap():
     assert t2[3][10] not in {t2[0][0], t2[0][10]}  # without bridging, a new track
 
 
+def test_lineage_check_stops_a_relay_and_rematches():
+    # A = people 0-19, B = 20-49. Window 1: twelve of B (20-31) cross into A's cluster; A keeps its id (20 vs 12)
+    # and B its own (18 vs 12). Window 2: B's 40-49 have left; A's people split in two; the crossers regroup
+    # with B's rest (32-39) -- and, having worn A's label, would carry A's id with them.
+    pids = [np.arange(50), np.arange(50), np.arange(40)]
+    local = [
+        np.r_[np.zeros(20, int), np.ones(30, int)],
+        np.r_[np.zeros(32, int), np.ones(18, int)],
+        np.r_[np.zeros(10, int), np.ones(10, int), np.full(20, 2)],
+    ]
+    a, b = 0, 20
+    t = tracks.link_tracks(local, pids, lineage_min=0.0)
+    assert t[2][20] == t[0][a]  # the relay: the B group now holds A's id ...
+    assert t[2][0] not in {t[0][a], t[0][b]}  # ... and A's own people get a new track
+    drops = []
+    t = tracks.link_tracks(local, pids, lineage_min=0.1, lineage_people=5, dropped=drops)
+    assert t[2][20] == t[0][b] and t[2][39] == t[0][b]  # the B group continues B
+    assert t[2][0] == t[0][a]  # A continues in one of its own pieces
+    assert t[2][10] not in {t[0][a], t[0][b]}  # the other piece is new
+    assert len(drops) == 1
+    d = drops[0]  # the carriers are the twelve crossers, all from B
+    assert (d["window"], d["track"], d["n"], d["share"], d["top_track"]) == (2, t[0][a], 12, 0.0, t[0][b])
+    assert d["became"] == t[0][b] and not d["new"] and d["track_continues"]
+    sl = [slice(0, 50), slice(50, 100), slice(100, 140)]
+    shares = tracks.lineage_shares(np.concatenate(pids), sl, np.concatenate(t), min_people=5)
+    assert len(shares) and shares.min() >= 0.1
+
+
+def test_lineage_check_ignores_older_members_who_dont_carry_the_link():
+    # Track A = people 0-19, S = 20-39. Window 1: newcomers 40-59 join A's cluster. Window 2: A's first people
+    # have left; S's people 20-34 join A's newcomers. The cluster's older members are all from S, but the
+    # people carrying A's label into it are A's newcomers, so it continues A (Roman -> Byzantine rulers).
+    pids = [np.arange(40), np.arange(60), np.arange(20, 60)]
+    local = [
+        np.r_[np.zeros(20, int), np.ones(20, int)],
+        np.r_[np.zeros(20, int), np.ones(20, int), np.zeros(20, int)],
+        np.r_[np.zeros(15, int), np.ones(5, int), np.zeros(20, int)],
+    ]
+    drops = []
+    t = tracks.link_tracks(local, pids, lineage_min=0.2, lineage_people=5, dropped=drops)
+    at = [dict(zip(p.tolist(), x.tolist())) for p, x in zip(pids, t)]
+    assert at[2][40] == at[2][20] == at[0][0]
+    assert drops == []
+
+
+def test_lineage_check_skips_few_carriers_or_new_tracks():
+    lab, pid = np.array([0, 0, 0, 0]), np.arange(4)
+    prev = (np.array([0, 0, 0, 1]), np.arange(4), np.array([7, 9]))  # w-1: clusters 0 (track 7), 1 (track 9)
+    old = (np.arange(4), np.array([7, 8, 8, 5]))  # w-2 tracks per person
+    lin = tracks.Lineage(lab, pid, prev, old, min_share=0.5, min_people=2)
+    assert not lin.ok(0, 0)  # carriers 0-2: one of three was in track 7
+    assert lin.dropped[0]["top_track"] == 8
+    assert tracks.Lineage(lab, pid, prev, old, min_share=0.3, min_people=2).ok(0, 0)
+    assert lin.ok(1, 0)  # track 9 didn't exist at w-2: nothing to check
+    assert tracks.Lineage(lab, pid, prev, old, min_share=0.5, min_people=4).ok(0, 0)  # too few carriers
+    assert tracks.Lineage(lab, pid).ok(0, 0)  # no earlier windows
+
+
 def test_split_share():
     win = np.zeros(6, int)
     child = np.array([0, 0, 1, 1, -1, -1])

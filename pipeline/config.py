@@ -236,6 +236,15 @@ LABEL_TARGETS = (40, 20, 10)  # labels per window, finest layer first
 LABEL_MIN_SAMPLES = 5  # Toponymy's default
 TRACK_LINK_MIN = 0.3  # a match needs this share of the smaller cluster's people present in both windows
 TRACK_BRIDGE = True  # also link a track that ended to a cluster starting two windows on (one-window gap)
+# Lineage check (2026-11-09): stops relays, where a track's id passes to another group within two steps
+# (people cross into track t's cluster, the next window they regroup with their own group and, wearing t's
+# label, win the match). A cluster continues t only if, of its "carriers" -- the people who bring t's label
+# into it, labelled two windows earlier -- at least TRACK_LINEAGE_MIN were in t then; else the link is dropped
+# and the matching rerun without it. Carrier shares before the check: coarse 0 / 1 / 5% (the relays) then
+# 29%+, mid 0 / 0 / 0% then 30%+, fine 0-14% then 33%+. (Testing all of the cluster's people instead
+# misfired where its older members came from elsewhere but didn't carry the link: Roman -> Byzantine rulers.)
+TRACK_LINEAGE_MIN = 0.20
+TRACK_LINEAGE_MIN_PEOPLE = 20  # skip the check when fewer carriers were labelled two windows back
 
 
 def tracks_parquet(variant: str = MAP_EMBEDDING) -> Path:

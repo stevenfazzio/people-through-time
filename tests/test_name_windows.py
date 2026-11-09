@@ -14,6 +14,20 @@ def test_local_labels_renumber_tracks_and_keep_unlabelled():
     assert lab.tolist() == [1, -1, 0, 1, 2, -1]
 
 
+def test_reuse_saved_follows_clusters_not_track_ids():
+    import pandas as pd
+
+    rows = pd.DataFrame({"qid": ["Q1", "Q2", "Q3", "Q4"], "track_0": [5, 5, 6, -1], "track_1": [9, 9, 9, -1],
+                         "track_2": [-1, -1, -1, -1]})  # fmt: skip
+    keys = names.window_keys(rows)
+    saved = [{"window": 0, "layer": i, "track": t, "size": 0, "name": f"n{t}", "key": k} for (i, k), t in keys.items()]
+    relinked = rows.assign(track_0=[6, 6, 5, -1], track_1=[2, 2, 2, -1])  # same clusters, new ids
+    got = {e["name"]: e["track"] for e in names.reuse_saved(saved, relinked)}
+    assert got == {"n5": 6, "n6": 5, "n9": 2}
+    assert names.reuse_saved(saved, rows.assign(track_0=[5, 6, 6, -1])) is None  # a cluster changed
+    assert names.reuse_saved([{k: v for k, v in e.items() if k != "key"} for e in saved], rows) is None  # no keys
+
+
 def test_not_title_case():
     assert not names.not_title_case("Late Romantic and Early Modern Classical Composers")
     assert not names.not_title_case("Princesses and Queens Consort of the European Royal Houses")
