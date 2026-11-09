@@ -20,7 +20,8 @@ stage 07 embeds them twice (plain and role-instructed Qwen3); the map uses
 role, with gender projected out by stage 07b; stage 08 lays out all 32
 windows with one AlignedUMAP; stage 09 clusters each window into three label
 layers and links the clusters into tracks; stage 10 names every window's
-clusters with Toponymy and Claude Sonnet 5.5. `scoping/` holds the one-off analysis behind
+clusters with Toponymy and Claude Sonnet 5.5; stage 11 gives each track one
+name for its whole path. `scoping/` holds the one-off analysis behind
 the decisions below; `curated/` holds hand-made inputs (versioned, unlike
 `data/`).
 
@@ -43,6 +44,7 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 08 | One AlignedUMAP over the 32 slider windows (`config.MAP_EMBEDDING`) | `data/layout_role_nogender.parquet` (window, qid, x, y) |
 | 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
 | 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, so reruns resume) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
+| 11 | One name per track from its path of per-window names (Claude, structured self-checking reply), then renaming tracks of a layer that share a name in some window | `data/track_names_role_nogender.parquet` (layer, track, name, windows, gender shares, path, the reply's earliest / latest / candidate) |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
@@ -129,10 +131,30 @@ TV Actors"; c0 runs from "Ancient Indian Rulers and Buddhists" through
 "Islamic Caliphs and Sultans" and "Mughal Era South Asian Rulers" to "Heads
 of State and Government"). Log: `logs/10_name_windows.log`.
 
-Planned next: stage 11 — one name per track from its path of per-window
-names (LLM), then a check that tracks sharing a window get distinct names →
-frontend. Merge flicker looked acceptable in the preview (see "Label
-tracks, what's left").
+Stage 11 (2026-11-09): 1.9 min, $1.65 (424 Sonnet 5.5 calls, 550k input /
+55k output tokens). 430 track names; 2 pairs of mid tracks shared a name in
+some window and were renamed apart in one round; no gendered or mis-cased
+names left; median 8 / 5 / 4 words fine / mid / coarse (the tiers ask 4–8,
+2–5, 1–4). Prompt per track: layer and length tier, windows and birth
+years, the per-window names with window median birth year and size, the
+best-known people overall and in the first and last windows, and the share
+of women and men. Asked for the name only, Sonnet ignored small early
+windows whatever the wording or effort (c30, composers then actors, stayed
+"American Film and TV Actors") and invented a false umbrella for a drifting
+track ("Infamous Sexual Criminals" over serial killers and adult-film
+performers); a structured reply that states the first and last windows,
+proposes a candidate, checks it against both ends and then gives the final
+name fixed both (c30 "Classical Composers and Screen Actors", c27 "Political
+and Business Elites" after its candidate failed the last windows). Cost of
+honesty: 89% of names join parts with "and" or commas, and mixed tracks read
+oddly ("Thinkers and Nazi Leaders", "Novelists and Murderers", "Mesopotamian
+Kings and Companions of Muhammad") -- geometry signals, per the naming
+decision. Review page: `scoping/track_paths.py` →
+`data/scoping/track_paths.html` (final name over each path). Log:
+`logs/11_name_tracks.log`.
+
+Planned next: frontend (see "Frontend is custom"). Merge flicker looked
+acceptable in the preview (see "Label tracks, what's left").
 
 ## Working rules
 

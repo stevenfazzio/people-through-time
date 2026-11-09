@@ -281,3 +281,16 @@ WINDOW_NAMES_DIR = DATA_DIR / "raw" / "window_names"  # one JSON per named windo
 def window_names_parquet(variant: str = MAP_EMBEDDING) -> Path:
     """[window, layer, track, size, name]: Toponymy's name for each track in each window."""
     return DATA_DIR / f"window_names_{variant}.parquet"
+
+
+# --- Stage 11: one name per track, from its path of per-window names ---
+# Settled 2026-11-08 / 09 (CLAUDE.md, "naming"): the LLM writes one name for a track's
+# whole path, generalizing where its content changes; it never cuts a track. Same model,
+# effort and cache as stage 10; names asked for at the same length tier per layer.
+TRACK_NAME_BEST_KNOWN = 12  # best-known people listed with each track's path
+TRACK_NAME_ROUNDS = 3  # rounds of renaming tracks that share a name in some window
+
+
+def track_names_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """One row per (layer, track): the name its label carries at every slider position, plus its path."""
+    return DATA_DIR / f"track_names_{variant}.parquet"

@@ -23,7 +23,6 @@ Logs per window: clusters, Claude calls and cost, and names to review: gendered 
 case, and a name repeated within a layer.
 """
 
-import re
 import time
 
 import numpy as np
@@ -32,15 +31,11 @@ import pandas as pd
 import config
 from embedder import DirectionRemovedEmbedder, OpenRouterEmbedder
 from namer import AsyncClaudeNamer
+from naming import not_title_case, review  # noqa: F401  (re-exported for tests)
 from util import log, write_json_atomic, write_parquet_atomic
 
 N_LAYERS = 3
 EXEMPLAR_DELIMITERS = ['    * "', '"\n']  # Toponymy's default
-GENDERED = re.compile(r"\b(male|female|men|women|man|woman)\b", re.IGNORECASE)
-SMALL_WORDS = set(
-    "a an and as at by for from in into of on or the to vs with under over after before between during through "
-    "within without upon via per de del la le von van der da di du y al el".split()
-)
 
 
 def local_labels(track: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -50,41 +45,6 @@ def local_labels(track: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     codes, uniques = pd.factorize(track[ok], sort=True)
     out[ok] = codes
     return out, np.asarray(uniques)
-
-
-def not_title_case(name: str) -> bool:
-    """A word starting with a lower-case letter that isn't a small word ("and", "of", ...) Title Case allows;
-    the first word must always be capitalized. Words are whitespace-separated, so "Mid-20th-Century" is one."""
-    words = [w.strip("()[]\"'“”‘’,;:") for w in name.split()]
-    # an elided particle starts a foreign proper name: "all'Italiana", "d'Or"
-    words = [w for w in words if w and w[0].isalpha() and not re.match(r"^(?:all|dell|d|l)['’]", w)]
-    if not words:
-        return False
-    if words[0][0].islower():
-        return True
-    return any(w[0].islower() and w.lower() not in SMALL_WORDS for w in words[1:])
-
-
-def review(entries: list[dict]) -> list[str]:
-    """Names to look at: empty, gendered, not title case, or repeated within a layer."""
-    notes = []
-    for e in entries:
-        tag = f"layer {e['layer']} track {e['track']}"
-        if not e["name"]:
-            notes.append(f"{tag}: EMPTY")
-            continue
-        if GENDERED.search(e["name"]):
-            notes.append(f"{tag}: gendered word: {e['name']}")
-        if not_title_case(e["name"]):
-            notes.append(f"{tag}: not title case: {e['name']}")
-    seen: dict[tuple, int] = {}
-    for e in entries:  # the same track keeps a similar name across windows; only clashes within one matter
-        key = (e.get("window"), e["layer"], e["name"].casefold())
-        if e["name"] and key in seen:
-            notes.append(f"window {e.get('window')} layer {e['layer']}: tracks {seen[key]} and {e['track']} share "
-                         f"the name {e['name']}")  # fmt: skip
-        seen.setdefault(key, e["track"])
-    return notes
 
 
 def name_window(w: int, rows: pd.DataFrame, xy: np.ndarray, texts: list[str], emb: np.ndarray, years: np.ndarray,

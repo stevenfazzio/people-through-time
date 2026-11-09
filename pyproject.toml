@@ -33,7 +33,7 @@ target-version = "py311"
 select = ["E", "F", "I"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["config", "util", "embedder", "namer"]
+known-first-party = ["config", "util", "embedder", "namer", "naming"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

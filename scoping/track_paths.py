@@ -33,6 +33,8 @@ def runs(path: pd.DataFrame) -> list[dict]:
 
 def main() -> None:
     names = pd.read_parquet(config.window_names_parquet())
+    final_path = config.track_names_parquet()
+    final = pd.read_parquet(final_path).set_index(["layer", "track"]) if final_path.exists() else None
     tree = pd.read_parquet(config.track_tree_parquet()).set_index(["layer", "track"])
     tr = pd.read_parquet(config.tracks_parquet(), columns=["window", "qid"])
     years = pd.read_parquet(config.MAP_PEOPLE_PARQUET, columns=["qid", "birth_year_est"])
@@ -47,13 +49,18 @@ def main() -> None:
             rs = runs(path)
             distinct.append(path["name"].nunique() / len(path))
             info = tree.loc[(layer, t)]
+            name = ""
+            if final is not None:
+                fr = final.loc[(layer, t)]
+                flag = " <span class='meta'>(renamed apart from a twin)</span>" if fr["renamed"] else ""
+                name = f"<div class='final'>{html.escape(fr['name'])}{flag}</div>"
             items = "".join(
                 f"<li><span class='w'>w{r['first']}{'' if r['first'] == r['last'] else '–' + str(r['last'])}"
                 f" · {med[r['first']]}{'' if r['first'] == r['last'] else '–' + str(med[r['last']])}</span> "
                 f"{html.escape(r['name'])} <span class='n'>({r['size']})</span></li>"
                 for r in rs
             )
-            blocks.append(f"<div class='track'><h3>{'fmc'[layer]}{t} <span class='meta'>windows "
+            blocks.append(f"<div class='track'>{name}<h3>{'fmc'[layer]}{t} <span class='meta'>windows "
                           f"{int(info['first_window'])}–{int(info['last_window'])}, {int(info['n_people']):,} people, "
                           f"{path['name'].nunique()} distinct names in {len(path)} windows</span></h3>"
                           f"<ul>{items}</ul></div>")  # fmt: skip
@@ -71,15 +78,17 @@ def main() -> None:
     h1 { font-size:20px; margin:0 0 6px; } p.note { color:var(--muted); margin:4px 0 16px; }
     summary { font-size:16px; font-weight:600; cursor:pointer; margin:18px 0 8px; }
     .track { border-top:1px solid var(--line); padding:8px 0 4px; }
-    h3 { font-size:14px; margin:0 0 4px; color:var(--accent); } .meta { color:var(--muted); font-weight:400; }
+    h3 { font-size:13px; margin:0 0 4px; color:var(--accent); font-weight:500; }
+    .final { font-size:16px; font-weight:600; margin:2px 0; } .meta { color:var(--muted); font-weight:400; }
     ul { margin:0; padding-left:18px; } li { margin:1px 0; }
     .w { color:var(--muted); font-variant-numeric:tabular-nums; display:inline-block; min-width:130px; }
     .n { color:var(--muted); font-size:12px; }
     """
     page = (f"<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'>"
             f"<title>Track name paths</title><style>{style}</style></head><body>"
-            f"<h1>Each track's names, window by window (stage 10)</h1><p class='note'>Toponymy named each window "
-            f"on its own; stage 11 will turn each path into one name. Window number · median birth year, then the "
+            f"<h1>Track names (stage 11) and their per-window paths (stage 10)</h1><p class='note'>Bold: the one "
+            f"name stage 11 gave the track. Below it, the names Toponymy gave it in each window on its own. "
+            f"Window number · median birth year, then the "
             f"name, then the track's size in that window (largest, for merged runs). Coarse layer first; tracks "
             f"in order of first appearance.</p>{''.join(sections)}</body></html>")  # fmt: skip
     out = config.DATA_DIR / "scoping" / "track_paths.html"

@@ -22,6 +22,7 @@ empty names.
 
 import asyncio
 import hashlib
+import json
 import sqlite3
 
 import anthropic
@@ -73,16 +74,19 @@ class AsyncClaudeNamer(AsyncLLMWrapper):
             self._semaphore = asyncio.Semaphore(self.max_concurrent_requests)
         return self._semaphore
 
-    def _key(self, system: str | None, user: str) -> str:
-        raw = "\x00".join([self.model, self.effort, system or "", user])
-        return hashlib.sha256(raw.encode()).hexdigest()
+    def _key(self, system: str | None, user: str, schema: dict | None = None) -> str:
+        parts = [self.model, self.effort, system or "", user]
+        if schema is not None:  # only when set, so stage 10's cached keys stay valid
+            parts.append(json.dumps(schema, sort_keys=True))
+        return hashlib.sha256("\x00".join(parts).encode()).hexdigest()
 
     def cost_usd(self) -> float:
         price_in, price_out = PRICE_PER_MTOK[self.model]
         return (self.usage["input_tokens"] * price_in + self.usage["output_tokens"] * price_out) / 1e6
 
-    async def _create(self, system: str | None, user: str) -> str:
-        key = self._key(system, user)
+    async def _create(self, system: str | None, user: str, schema: dict | None = None) -> str:
+        """One reply's text (cached). With a JSON schema, the reply is structured output: valid JSON for it."""
+        key = self._key(system, user, schema)
         row = self.db.execute("SELECT text FROM llm WHERE key = ?", (key,)).fetchone()
         if row is not None:
             self.usage["cached"] += 1
@@ -95,7 +99,8 @@ class AsyncClaudeNamer(AsyncLLMWrapper):
                 # Toponymy's per-call max_tokens sizes only the visible answer; it would
                 # truncate thinking, so the wrapper sets its own ceiling.
                 max_tokens=self.max_tokens,
-                output_config={"effort": self.effort},
+                output_config={"effort": self.effort}
+                | ({"format": {"type": "json_schema", "schema": schema}} if schema else {}),
                 betas=["server-side-fallback-2026-07-01"],
                 fallbacks="default",
                 messages=[{"role": "user", "content": user}],

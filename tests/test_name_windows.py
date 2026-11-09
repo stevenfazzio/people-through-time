@@ -45,3 +45,30 @@ def test_write_json_atomic_round_trips(tmp_path):
     util.write_json_atomic([{"name": "Ötzi"}], path)
     assert json.loads(path.read_text(encoding="utf-8")) == [{"name": "Ötzi"}]
     assert not list(path.parent.glob("*.tmp"))
+
+
+def test_gender_mismatch_uses_the_regions_share():
+    import naming
+
+    assert naming.gender_mismatch("Hollywood Character Actors and Leading Men", female_share=0.40)
+    assert naming.gender_mismatch("American Male Character Actors", female_share=0.09)  # 91% men: under the bar
+    assert not naming.gender_mismatch("American Male Character Actors", female_share=0.02)
+    assert not naming.gender_mismatch("Breaking Bad, Mad Men, and Boardwalk Empire Cast", female_share=0.27)
+    assert naming.gender_mismatch("Notorious Female Criminals", female_share=0.59)
+    assert not naming.gender_mismatch("European Queens Consort", female_share=0.97)
+
+
+def test_summary_kind_spreads_the_detail_levels_over_layers():
+    import naming
+
+    assert "4 to 8" in naming.summary_kind(0)
+    assert "2 to 5" in naming.summary_kind(1)
+    assert "1 to 4" in naming.summary_kind(2)
+
+
+def test_clean_name():
+    import naming
+
+    assert naming.clean_name('"Classical Composers and Hollywood Stars"\n') == "Classical Composers and Hollywood Stars"
+    assert naming.clean_name("Name: **Rulers and Heads of State**.") == "Rulers and Heads of State"
+    assert naming.clean_name("\n  Film and TV Actors  \nextra line") == "Film and TV Actors"
