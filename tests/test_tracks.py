@@ -120,6 +120,55 @@ def test_lineage_check_skips_few_carriers_or_new_tracks():
     assert tracks.Lineage(lab, pid).ok(0, 0)  # no earlier windows
 
 
+def _unit(deg):
+    return np.array([np.cos(np.radians(deg)), np.sin(np.radians(deg))])
+
+
+def test_segment_starts_need_two_windows_in_a_row_and_reanchor():
+    bar = np.cos(np.radians(45))
+    assert tracks.segment_starts([_unit(a) for a in (0, 10, 20, 60, 70, 80)], bar) == [
+        (3, pytest.approx(np.cos(np.radians(60))))
+    ]
+    assert tracks.segment_starts([_unit(a) for a in (0, 60, 10, 20)], bar) == []  # one window out: noise
+    assert tracks.segment_starts([_unit(a) for a in (0, 10, 60)], bar) == []  # the last window alone can't cut
+    starts = tracks.segment_starts([_unit(a) for a in (0, 50, 60, 110, 120)], bar)
+    assert [i for i, _ in starts] == [1, 3]  # anchored at 50 after the first cut, so 110 is cut again
+
+
+def test_neighbour_similarity_takes_the_nearest_other_track():
+    cents = {(0, 0): _unit(0), (1, 0): _unit(30), (2, 0): _unit(100), (0, 1): _unit(0)}  # window 1: alone
+    near = sorted(tracks.neighbour_similarity(cents).round(3).tolist())
+    assert near == sorted([round(np.cos(np.radians(30)), 3)] * 2 + [round(np.cos(np.radians(70)), 3)])
+
+
+def test_refine_bounds_puts_a_turn_window_with_the_side_it_resembles():
+    left = [_unit(a) for a in (0, 5, 10, 70, 80, 85)]  # 70 found far from 0 only at index 4, but is like 80-85
+    assert tracks.refine_bounds(left, [4]) == [3]
+    right = [_unit(a) for a in (0, 5, 10, 15, 80, 85)]
+    assert tracks.refine_bounds(right, [3]) == [4]  # 15 belongs with 0-10
+    assert tracks.refine_bounds([_unit(a) for a in (0, 80)], [1]) == [1]  # each side keeps a window
+
+
+def test_drift_cut_renumbers_the_rest_of_a_track():
+    sl = [slice(0, 2), slice(2, 4), slice(4, 6), slice(6, 8)]
+    track = np.array([5, 7, 5, 7, 5, 7, 5, 7])
+    cents = {(5, 0): _unit(0), (5, 1): _unit(10), (5, 2): _unit(80), (5, 3): _unit(85)}
+    cents |= {(7, w): _unit(180) for w in range(4)}
+    out, cuts = tracks.drift_cut(sl, track, cents, bar=0.5)
+    assert out.tolist() == [5, 7, 5, 7, 8, 7, 8, 7]
+    cos80 = pytest.approx(np.cos(np.radians(80)))
+    assert cuts == [{"track": 5, "from": 5, "new": 8, "window": 2, "found": 2, "cos": cos80}]
+
+
+def test_track_centroids_remove_each_windows_mean():
+    vectors = np.array([[1.0, 0.0], [1.0, 2.0], [3.0, 0.0], [3.0, 2.0]])
+    rows = np.array([0, 1, 2, 3])
+    t = np.array([[0], [1], [0], [1]])  # one window of four points
+    c = tracks.track_centroids(vectors, rows, [slice(0, 4)], t)[0]
+    # window mean (2, 1): track 0 -> mean of (-1, -1), (1, -1) = (0, -1); track 1 -> (0, 1)
+    assert c[(0, 0)] == pytest.approx([0.0, -1.0]) and c[(1, 0)] == pytest.approx([0.0, 1.0])
+
+
 def test_split_share():
     win = np.zeros(6, int)
     child = np.array([0, 0, 1, 1, -1, -1])

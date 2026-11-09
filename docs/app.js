@@ -676,6 +676,18 @@
     const cnt = (TL.counts = trackCounts());
     const vals = {};
     order.forEach((t) => (vals[t] = knotValues(cnt[t])));
+    // A drift cut (stage 09) hands a region from one track straight to the next: at the midpoint between the
+    // old track's last window and the new one's first, each carries half the band, so the river changes colour
+    // there instead of pinching to nothing. (Cuts across a window the region is absent from still taper.)
+    const T = core.tracks, half = core.window_bins / 2;
+    T.from.forEach((f, g) => {
+      if (f < 0 || T.layer[g] !== 2 || T.first[g] !== T.last[f] + 1) return;
+      const t = T.id[f], s = T.id[g], d = T.last[f];
+      const k = 2 * (d + half) + 1; // knot of the midpoint between windows d and d + 1
+      const m = (cnt[t][d] + cnt[s][d + 1]) / 4;
+      vals[t][k] = m;
+      vals[s][k] = m;
+    });
     const K = 2 * core.n_bins + 1;
     let maxSum = 0, maxAlive = 0;
     for (let k = 0; k < K; k++) {

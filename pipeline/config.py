@@ -245,6 +245,16 @@ TRACK_BRIDGE = True  # also link a track that ended to a cluster starting two wi
 # misfired where its older members came from elsewhere but didn't carry the link: Roman -> Byzantine rulers.)
 TRACK_LINEAGE_MIN = 0.20
 TRACK_LINEAGE_MIN_PEOPLE = 20  # skip the check when fewer carriers were labelled two windows back
+# Drift cut (2026-11-09): a track (one colour, one ribbon) claims one region worth one name, so it ends where its
+# content has moved on and a new track takes over. Content = the unit mean of its members' stage 07b vectors
+# with each window's mean removed (else the era drift every track shares hides it). A track is cut at the first
+# of two windows in a row whose content is further from its current segment's first window than a region
+# typically is from its nearest neighbour in the same window: the TRACK_DRIFT_QUANTILE of that nearest-other-
+# region cosine over the layer (coarse: p25 0.21, median 0.31, p75 0.48); then each cut moves so the windows
+# beside it go with the segment they resemble more. Measured, not gapped: Thinkers -> Murderers is found at the
+# median (window 22 at 0.29; the mixed window 21, at 0.34, then joins the murderers) but not at p25.
+TRACK_DRIFT_CUT = True
+TRACK_DRIFT_QUANTILE = 0.5
 
 
 def tracks_parquet(variant: str = MAP_EMBEDDING) -> Path:

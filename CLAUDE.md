@@ -46,11 +46,11 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 07 | Qwen3-Embedding-8B vectors of the leads via OpenRouter (pinned to Nebius), one file per instruction variant (cache: `data/raw/embedding_cache.sqlite`) | `data/embeddings_<variant>.npz` |
 | 07b | Gender erasure: one global centroid direction projected out of the role vectors (`ERASE_GENDER`) | `data/embeddings_role_nogender.npz` (+ `direction`) |
 | 08 | One AlignedUMAP over the 32 slider windows (`config.MAP_EMBEDDING`) | `data/layout_role_nogender.parquet` (window, qid, x, y) |
-| 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows (with a lineage check against relays), majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
+| 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows (with a lineage check against relays), tracks cut where their content drifts, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
 | 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, names keyed by their cluster's members, so reruns resume and relinking keeps them) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
 | 11 | One name per track from its path of per-window names (Claude, structured self-checking reply), then renaming tracks of a layer that share a name in some window | `data/track_names_role_nogender.parquet` (layer, track, name, windows, gender shares, path, the reply's earliest / latest / candidate) |
 | 11b | Short name (≤ 3 words, ≤ 18 characters) per coarse track, for the timeline chart's ribbons (Claude, same model and cache) | `data/track_short_names_role_nogender.parquet` (layer, track, short_name) |
-| 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, hovercard text | `docs/data/{core.json, points.bin, details.json}` (committed: Pages serves them) |
+| 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, drift-cut predecessors, hovercard text | `docs/data/{core.json, points.bin, details.json}` (committed: Pages serves them) |
 | 13 | Link card: headless system Chrome screenshots the page (`uv run --extra publish`) | `docs/social-preview.png` |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
@@ -126,6 +126,16 @@ switches); lowest carrier lineage share left 33 / 30 / 29%. Stage 10 kept all
 2,218 names with no Claude calls; stage 11 cost $0.14 over both rule versions;
 11b and 12 rerun (17 colours for 48 coarse tracks). Pre-check outputs and
 logs: `data/before_lineage/`.
+
+Stage 09 rerun with drift cuts (2026-11-09; decision below): 6 s (loading
+the 4096-d vectors). Drift bars 0.580 / 0.467 / 0.315 (fine / mid / coarse:
+each layer's median window-centred cosine to the nearest other region); cuts
+28 / 17 / 10 in 24 / 17 / 9 tracks, 6 of the 10 coarse ones moved a window
+or two by the boundary refinement; 298 / 128 / 58 tracks; label switches
+20.1 / 16.4 / 16.5% of steps (a cut counts as one). Stage 10 kept every
+name (no calls); stage 11 $0.63 and 11b $0.06 over the unrefined and
+refined runs; stage 12: still 17 colours for 58 coarse tracks. Pre-cut
+outputs: `data/before_drift/`.
 
 Stage 10 (2026-11-09): 50.5 min, $17.33 (Sonnet 5.5, effort medium; 1,771
 Claude calls, 8.2M input / 90k output tokens; 69 more from the cache of a
@@ -642,20 +652,56 @@ Planned next: see "Frontend, what's left".
   Murderers", 14-24): absorbed into the window-20 hub, it is bridged back in
   21, where MLK, Hawking, Malcolm X and Benedict XVI share a cluster with
   Bundy, Manson and Gacy, new to the window; by 24 the murderers dominate.
-  That is drift by arrival, like c30, not a relay (see "Drift names").
+  That is drift by arrival, like c30, not a relay -- fixed by the drift cut
+  (next decision).
+
+- **2026-11-09 — drift cuts: a track is one region worth one name (stage
+  09).** Drifting tracks -- composers then actors (c30), thinkers then
+  murderers, saints then novelists -- are real continuations by people whose
+  population turns over as the window moves, so one name had to stretch over
+  both ends (the window-16 thinkers, Freud and Rosa Parks, read "Thinkers and
+  Murderers"). **Per-segment names rejected** (Steven): keeping a track's
+  colour and ribbon but changing its name partway breaks what colour means --
+  a ribbon claims a cohesive unit worthy of a single label. So such a track
+  ends, and a new one (new colour, new ribbon, own name) takes over. **Test**:
+  content = unit mean of the members' stage 07b vectors with each window's
+  mean removed; a track is cut at the first of two windows in a row further
+  from its segment's first window than a region typically is from its
+  *nearest* neighbour in the same window (median of that cosine per layer,
+  `TRACK_DRIFT_QUANTILE`; coarse 0.31); then each cut moves so the windows
+  beside it go with the segment whose mean they resemble more. Measured on
+  the way (scratch scripts, not kept): the prototype's raw bar
+  (`scoping/track_segments.py`, cosine 0.732 = median between *any* two
+  regions) cut 6 coarse tracks but not Thinkers -> Murderers (its end still
+  0.79 to its start: the era drift all tracks share masks content); after
+  removing window means that bar becomes unreachable (two regions in a window
+  sit at -0.13, while even the window-31 actors keep 0.12 to the window-13
+  composers); jumps between consecutive windows have no gap (0.37 up, led by
+  early rulers whose windows span centuries; composers -> actors is a slide
+  over 13-17, not a jump). Not gapped like the lineage check: at the p25 bar
+  (0.21) Thinkers isn't cut; near p75 (0.5) 12 coarse tracks are, c0 into
+  four. Without the
+  refinement the mixed window 21 (MLK and Hawking with Bundy and Manson)
+  stayed with the thinkers, whose name then still said "Murderers". Coarse
+  result (windows): Indian Buddhism and Dynasties 0-3 -> Islamic and South
+  Asian Rulers 5-15 -> Heads of State and Government 16-29; Ancient Near
+  Eastern Rulers 0 -> Muhammad and His Companions 1-5; Roman Emperors and
+  Rulers 0-4 -> Byzantine and Italian Rulers 5-7; Popes and Iberian Rulers
+  3-4 -> European Royalty 6-12; European Saints, Scholars, and Writers 4-13
+  -> Novelists and Poets 14-17; Russian Tsars and Napoleon 10-11 -> European
+  Royal Families 12-18; American History Figures 10-15 -> Power Elites 16-31;
+  Classical Composers and Hollywood Stars 13-16 -> American Film and TV
+  Actors 17-31; Thinkers and Spiritual Leaders 14-19 -> Murderers and Public
+  Figures 21-24. **Page**: where the new track starts the window after the
+  old one ends (7 of the 10 coarse cuts) the ribbon hands over -- at the
+  midpoint each carries half the band, so the river changes colour without
+  pinching (measured: composers -> actors 34.5 px, 26 at the midpoint, 13 px,
+  the real 871 -> 232 people); a cut across a window the region is absent
+  from tapers as any track end. Points recolour and the label crossfades, as
+  at any track change. Stage 09's tree records `cut_from`; stage 12 exports
+  it as `tracks.from`.
 
 ## Proposed, not yet settled
-
-- **Drift names** (2026-11-09). c30 (composers in 13-16, then actors),
-  "Thinkers and Murderers" (14-24) and "Christian Saints and European
-  Writers" (4-17) are real continuations by people whose population turns
-  over as the window moves, so one name has to stretch over both ends; the
-  window-16 thinkers (Freud, Helen Keller, Rosa Parks) carry "Murderers".
-  Idea: keep the track whole (colour, motion, ribbon) but name it per
-  segment, cut where its members' vectors drift; the ribbon and map label
-  switch names at the cut. `scoping/track_segments.py` already cuts c30 at
-  13-16 | 17-31 (bar cosine 0.732: 6 of 50 coarse tracks cut); rerun it on
-  the relinked tracks.
 
 - **Label tracks, what's left** (see the 2026-11-08 decision). Merge
   flicker: judged acceptable in the animated preview on 2026-11-08
@@ -802,6 +848,11 @@ Planned next: see "Frontend, what's left".
   kept running the old copy (heuristic caching; `?v=` on the page URL doesn't
   reach the script). Re-fetch with `fetch(url, {cache: "reload"})` from the
   console, or serve with a handler that sends `Cache-Control: no-store`.
+- **Pane screenshots are ~800 px wide** whatever the viewport, too coarse for
+  a ribbon's shape: measure it instead, e.g. `path.isPointInFill(new
+  DOMPoint(x, y))` down a column of the timeline SVG (`__ptt.core()` gives
+  the exported data; ribbons are `path.ribbon`, filled with their palette
+  colour).
 
 ## Inherited Wikipedia gotchas (from living-people-map — they will bite again)
 

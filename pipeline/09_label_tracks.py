@@ -30,6 +30,20 @@ and the mutual-best matching rerun without it, so the cluster can continue the
 track it does descend from. Bridged links need no check: their carriers were in
 t two windows earlier by definition.
 
+Drift cut (2026-11-09). A track -- one colour, one ribbon -- claims a region
+worth one name, so with config.TRACK_DRIFT_CUT it ends where its content has
+moved on, and a new track takes over from the next window ("Classical
+Composers" -> "Screen Actors" at window 17). Content is the unit mean of the
+members' stage 07b vectors with each window's mean removed (the era drift every
+track shares otherwise hides it). Walking a track's windows, it is cut at the
+first of two in a row whose content is further from its current segment's first
+window than a region typically is from its nearest neighbour in the same window
+(the TRACK_DRIFT_QUANTILE of that cosine over the layer). Then each cut moves
+so the windows beside it sit with the segment whose mean content they resemble
+more: a mixed window at a turn goes with the side it is closer to (window 21's
+MLK and Hawking with Bundy and Manson go with the murderers). The linking is
+untouched: a cut only renumbers the rest of a track.
+
 Tree. Each layer is linked on its own, so a track can sit under different
 parents over its life. Its parent is the track one layer up holding most of
 its person-windows (counting those under a named cluster there); a track never
@@ -42,15 +56,17 @@ Outputs:
   data/track_tree_<MAP_EMBEDDING>.parquet: layer, track, min_cluster_size,
     parent_layer, parent_track, parent_share (share of its person-windows
     under a named cluster at the parent's layer that are under the parent),
-    first_window, last_window, n_windows, n_people, peak_size.
-Logs per layer: links the lineage check dropped and what became of them;
+    first_window, last_window, n_windows, n_people, peak_size, cut_from (the
+    track this one took over from at a drift cut; -1 otherwise).
+Logs per layer: links the lineage check dropped and what became of them; the
+drift bar and every cut;
 labels per window, tracks, unlabelled share, lifetimes, label events per step,
 how often a labelled person's label switches and why (boundary crossing vs
 merge), label motion, the lowest lineage share left; then the tree's fit.
 """
 
 import time
-from collections import Counter
+from collections import Counter, defaultdict
 
 import numba
 import numpy as np
@@ -256,6 +272,100 @@ def lineage_shares(pid: np.ndarray, sl: list[slice], track: np.ndarray,
     return np.array(out)
 
 
+def track_centroids(vectors: np.ndarray, rows: np.ndarray, sl: list[slice], tracks: np.ndarray) -> list[dict]:
+    """Per layer: {(track, window): unit mean of its members' vectors, each window's mean removed first}.
+    rows[i] is layout point i's row in `vectors`."""
+    out: list[dict] = [{} for _ in range(tracks.shape[1])]
+    for w, s in enumerate(sl):
+        X = vectors[rows[s]].astype(np.float64)
+        X -= X.mean(0)
+        for i in range(tracks.shape[1]):
+            t = tracks[s, i]
+            ks = np.unique(t[t >= 0])
+            if not len(ks):
+                continue
+            C = (t[None, :] == ks[:, None]).astype(np.float64) @ X
+            C /= np.linalg.norm(C, axis=1, keepdims=True)
+            for k, c in zip(ks.tolist(), C):
+                out[i][(k, w)] = c
+    return out
+
+
+def neighbour_similarity(cents: dict) -> np.ndarray:
+    """For each (track, window): cosine to the most similar other track in the same window."""
+    by_window = defaultdict(list)
+    for (_, w), c in cents.items():
+        by_window[w].append(c)
+    out = []
+    for cs in by_window.values():
+        if len(cs) > 1:
+            U = np.array(cs)
+            S = U @ U.T
+            np.fill_diagonal(S, -np.inf)
+            out.extend(S.max(1).tolist())
+    return np.array(out)
+
+
+def segment_starts(vecs: list[np.ndarray], bar: float) -> list[tuple[int, float]]:
+    """Where a track's run of unit vectors is cut: (index, cosine to the previous segment's first vector) at the
+    first of two in a row below `bar` against the current segment's first vector, which then anchors the next."""
+    starts = []
+    anchor = vecs[0]
+    for i in range(1, len(vecs) - 1):
+        c = float(vecs[i] @ anchor)
+        if c < bar and float(vecs[i + 1] @ anchor) < bar:
+            starts.append((i, c))
+            anchor = vecs[i]
+    return starts
+
+
+def refine_bounds(vecs: list[np.ndarray], starts: list[int], max_rounds: int = 50) -> list[int]:
+    """Move each cut so the windows beside it sit with the segment whose mean content they resemble more (a mixed
+    window at a turn goes with the side it is closer to); every segment keeps at least one window."""
+    b = [0, *starts, len(vecs)]
+
+    def mean(lo: int, hi: int) -> np.ndarray:
+        v = np.sum(vecs[lo:hi], 0)
+        return v / np.linalg.norm(v)
+
+    for _ in range(max_rounds):
+        changed = False
+        for j in range(1, len(b) - 1):
+            lo, i, hi = b[j - 1], b[j], b[j + 1]
+            if i - 1 > lo and vecs[i - 1] @ mean(i, hi) > vecs[i - 1] @ mean(lo, i - 1):
+                b[j], changed = i - 1, True
+            elif i + 1 < hi and vecs[i] @ mean(lo, i) > vecs[i] @ mean(i + 1, hi):
+                b[j], changed = i + 1, True
+        if not changed:
+            break
+    return b[1:-1]
+
+
+def drift_cut(sl: list[slice], track: np.ndarray, cents: dict, bar: float) -> tuple[np.ndarray, list[dict]]:
+    """One layer's tracks cut where their content drifts (segment_starts, then refine_bounds); each later
+    segment gets a new id. Returns the new track per point and one record per cut."""
+    out = track.copy()
+    next_id = int(track.max()) + 1
+    windows = defaultdict(list)
+    for k, w in sorted(cents):
+        windows[k].append(w)
+    cuts = []
+    for t, ws in windows.items():
+        vecs = [cents[(t, w)] for w in ws]
+        found = segment_starts(vecs, bar)
+        starts = refine_bounds(vecs, [i for i, _ in found])
+        prev = t
+        for j, (i, (i0, c)) in enumerate(zip(starts, found)):
+            end = starts[j + 1] if j + 1 < len(starts) else len(ws)
+            for w in ws[i:end]:
+                seg = out[sl[w]]
+                seg[track[sl[w]] == t] = next_id
+            cuts.append({"track": t, "from": prev, "new": next_id, "window": ws[i], "found": ws[i0], "cos": c})
+            prev = next_id
+            next_id += 1
+    return out, cuts
+
+
 def split_share(win: np.ndarray, child: np.ndarray, parent: np.ndarray) -> float:
     """Share of (window, child cluster) pairs whose people fall under more than one parent value (-1 included)."""
     ok = child >= 0
@@ -388,6 +498,31 @@ def main() -> None:
             log(f"  w{d['window']:2d} t{d['track']}: {d['share']:.0%} of {d['n']} (t{d['top_track']} "
                 f"{d['top_share']:.0%}) -> {fate}; t{d['track']} "
                 f"{'continues elsewhere' if d['track_continues'] else 'ends'}")  # fmt: skip
+
+    cut_rows = []
+    if config.TRACK_DRIFT_CUT:
+        z = np.load(config.embeddings_npz(config.MAP_EMBEDDING))
+        row_of = pd.Series(np.arange(len(z["qid"])), index=z["qid"].astype(str))
+        rows = row_of.reindex(lay["qid"].astype(str)).to_numpy()
+        if np.isnan(rows.astype(float)).any():
+            raise SystemExit("layout people missing from the embeddings -- rerun stage 07b")
+        cents = track_centroids(z["vectors"], rows.astype(int), sl, tracks)
+        for i in range(len(sizes)):
+            near = neighbour_similarity(cents[i])
+            bar = float(np.quantile(near, config.TRACK_DRIFT_QUANTILE))
+            tracks[:, i], cuts = drift_cut(sl, tracks[:, i], cents[i], bar)
+            q = np.quantile(near, [0.25, 0.5, 0.75])
+            log(f"layer {i}: drift bar {bar:.3f} (nearest other region's cosine, window-centred: p25 {q[0]:.2f}, "
+                f"median {q[1]:.2f}, p75 {q[2]:.2f}); {len(cuts)} cuts in {len({c['track'] for c in cuts})} "
+                "tracks (track: window of the cut, cosine to the segment start -> new track)")  # fmt: skip
+            by_track = defaultdict(list)
+            for c in cuts:
+                moved = f" (found at w{c['found']})" if c["found"] != c["window"] else ""
+                by_track[c["track"]].append(f"w{c['window']}{moved} {c['cos']:.2f} -> t{c['new']}")
+            for t, parts in by_track.items():
+                log(f"  t{t}: " + "; ".join(parts))
+            cut_rows += [{"layer": i, "track": c["new"], "cut_from": c["from"]} for c in cuts]
+
     for i in range(len(sizes) - 1):
         split = split_share(win, tracks[:, i], tracks[:, i + 1])
         if split > 0:
@@ -401,6 +536,9 @@ def main() -> None:
 
     tree = parent_tree(tracks).merge(track_stats(win, pid, tracks), on=["layer", "track"], validate="1:1")
     tree.insert(2, "min_cluster_size", tree["layer"].map(dict(enumerate(sizes))))
+    cut_from = pd.DataFrame(cut_rows, columns=["layer", "track", "cut_from"]).astype(int)
+    tree = tree.merge(cut_from, on=["layer", "track"], how="left", validate="1:1")
+    tree["cut_from"] = tree["cut_from"].fillna(-1).astype(np.int32)
     write_parquet_atomic(tree, config.track_tree_parquet())
     log(f"Wrote {config.track_tree_parquet()} ({len(tree):,} tracks)")
 

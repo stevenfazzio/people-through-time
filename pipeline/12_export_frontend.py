@@ -13,7 +13,8 @@ Written to config.FRONTEND_DATA_DIR:
   window: nobody's place in their window changes, but the layout's breathing between windows goes away).
 - core.json, loaded with it: per person name, birth year and its label, bin, first window and window count
   (a person in bin b is in windows b-4..b, clipped), marker radius; per window its people's birth-year range;
-  every track's name (and short name for the coarse layer), lifetime and colour; label centroids per (window,
+  every track's name (and short name for the coarse layer), lifetime, colour and the track it took over from
+  at a stage 09 drift cut (its index, -1 for none: the page hands the ribbon over there); label centroids per (window,
   track) with the track's size there (the ribbons' thickness); the coarse ribbons' order; the palette.
 - details.json, fetched after the first paint: short description, lead excerpt, thumbnail, article, the
   language a translated lead came from, death year, monthly views.
@@ -338,6 +339,10 @@ def main() -> None:
     names = names.sort_values(["layer", "track"]).reset_index(drop=True)
     names = names.merge(shorts, on=["layer", "track"], how="left")
     names["short_name"] = names["short_name"].fillna("")
+    cut_from = pd.read_parquet(config.track_tree_parquet(), columns=["layer", "track", "cut_from"])
+    names = names.merge(cut_from, on=["layer", "track"], how="left", validate="1:1")
+    if names["cut_from"].isna().any():
+        raise SystemExit("tracks missing from stage 09's tree -- rerun stages 09-11")
     gid = {(int(r.layer), int(r.track)): i for i, r in enumerate(names.itertuples())}
     coarse = names[names["layer"] == COARSE]
     cfirst, clast = coarse["first_window"].to_numpy(), coarse["last_window"].to_numpy()
@@ -428,6 +433,7 @@ def main() -> None:
             "first": names["first_window"].astype(int).tolist(),
             "last": names["last_window"].astype(int).tolist(),
             "color": names["color"].astype(int).tolist(),
+            "from": [gid[int(r.layer), int(r.cut_from)] if r.cut_from >= 0 else -1 for r in names.itertuples()],
         },
         "coarse": {
             "order": [gid[COARSE, int(t)] for t in order],
