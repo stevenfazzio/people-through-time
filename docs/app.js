@@ -201,6 +201,7 @@
     if (w < 80 || h < 80) return;
     const fit = fitZoom();
     S.zoom = S.zoom0 = fit.zoom;
+    S.fitTarget = fit.target;
     S.fitted = true;
     deckgl.setProps({ initialViewState: { target: fit.target, zoom: fit.zoom, minZoom: fit.zoom - 1.5, maxZoom: fit.zoom + 7 } });
   }
@@ -220,6 +221,7 @@
     const fit = mw >= 80 && mh >= 80 ? fitZoom() : { target: [0, 0, 0], zoom: 6 };
     S.fitted = mw >= 80 && mh >= 80;
     S.zoom = S.zoom0 = fit.zoom;
+    S.fitTarget = fit.target;
     deckgl = new deck.Deck({
       parent: $("map"),
       views: new deck.OrthographicView({ id: "ortho", flipY: true }),

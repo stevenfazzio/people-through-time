@@ -1,5 +1,5 @@
 [project]
-name = "people-through-time-map"
+name = "people-through-time"
 version = "0.1.0"
 description = "A semantic map of the most famous people of every era, from all Wikipedias, with a birth-year slider"
 requires-python = ">=3.11"
@@ -24,6 +24,9 @@ dependencies = [
 dev = [
     "ruff>=0.4",
     "pytest>=8",
+]
+publish = [
+    "playwright>=1.48",
 ]
 
 [tool.ruff]

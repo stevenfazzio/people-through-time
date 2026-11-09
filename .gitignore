@@ -1,5 +1,5 @@
 # Data is expensive to regenerate but never committed
-data/
+/data/
 
 # Logs from long-running pipeline stages
 logs/
@@ -17,5 +17,3 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Frontend data written by stage 12 (rebuildable; publish decision pending)
-docs/data/

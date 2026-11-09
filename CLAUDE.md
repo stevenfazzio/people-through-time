@@ -11,8 +11,10 @@ stages, `pipeline/config.py` as the single source of knobs, no CLI args, uv +
 ruff line-length 120, parquet for tables / npz for vectors, atomic writes,
 `data/` gitignored and expensive.
 
-Status (2026-11-09): frontend v1 runs locally (custom deck.gl page in `docs/`,
-stages 11b-12; see "Frontend" below). Earlier status (2026-11-08): roster design settled (views × age, switched from
+Status (2026-11-09): live at https://stevenfazzio.com/people-through-time/
+(public repo stevenfazzio/people-through-time, GitHub Pages from `docs/` on
+`main`; see "Publishing"). Frontend v1 is a custom deck.gl page in `docs/`
+(stages 11b-13; see "Frontend" below). Earlier status (2026-11-08): roster design settled (views × age, switched from
 log-time stratification the same day). Stages 00–08 run; the bot filter
 (access-ratio clip) is settled and lives in stage 03; birth years (with
 fallbacks and the round-century fix) come from stage 04; stage 05 picks the
@@ -48,7 +50,8 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, so reruns resume) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
 | 11 | One name per track from its path of per-window names (Claude, structured self-checking reply), then renaming tracks of a layer that share a name in some window | `data/track_names_role_nogender.parquet` (layer, track, name, windows, gender shares, path, the reply's earliest / latest / candidate) |
 | 11b | Short name (≤ 3 words, ≤ 18 characters) per coarse track, for the timeline chart's ribbons (Claude, same model and cache) | `data/track_short_names_role_nogender.parquet` (layer, track, short_name) |
-| 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, hovercard text | `docs/data/{core.json, points.bin, details.json}` (gitignored) |
+| 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, hovercard text | `docs/data/{core.json, points.bin, details.json}` (committed: Pages serves them) |
+| 13 | Link card: headless system Chrome screenshots the page (`uv run --extra publish`) | `docs/social-preview.png` |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
@@ -575,6 +578,18 @@ Planned next: see "Frontend, what's left".
     gzipped bulk). Kept external, not inlined: one inline file would make
     every visitor wait for all 13 MB.
 
+- **2026-11-09 — Publishing.** Public repo `stevenfazzio/people-through-time`,
+  GitHub Pages (legacy build) from `docs/` on `main`, served at
+  https://stevenfazzio.com/people-through-time/ through the user site's custom
+  domain, as the sibling maps are. `docs/data/` is committed (13.4 MB): CI
+  can't rebuild it, since `data/` stays local. Head carries OG / Twitter card
+  tags; the card is stage 13's screenshot of window 16 at the page's own
+  framing with the title panel hidden (zooming in cropped the top and bottom
+  labels in the 1200 x 630 frame). The site's favicon reaches the page from
+  the domain root. Listed on the stevenfazzio.com projects index
+  (`src/content/projects/people-through-time.yaml` in stevenfazzio.github.io,
+  thumbnail from its `scripts/capture-thumbnails.mjs`).
+
 ## Proposed, not yet settled
 
 - **Label tracks, what's left** (see the 2026-11-08 decision). Merge
@@ -590,9 +605,8 @@ Planned next: see "Frontend, what's left".
   interpolated between windows; labels fade in and out as tracks begin and
   end.
 - **Frontend is custom** -- settled 2026-11-09, see the decision "Frontend".
-- **Frontend, what's left** (2026-11-09): publishing (no remote; `docs/data/`
-  is gitignored, so decide whether to commit it or build it in CI); Open Graph
-  tags and a link-preview screenshot (datamap skill); a phone layout (the
+- **Frontend, what's left** (2026-11-09): a write-up post on stevenfazzio.com
+  and the page's "← read the write-up" link; a phone layout (the
   timeline needs a different shape at 375 px); whether labels crossfading
   during a drag read as flicker; the palette's tone (bright on dark -- review
   by eye); search over more than names and short descriptions.
@@ -649,7 +663,9 @@ Planned next: see "Frontend, what's left".
   no en/mul Wikidata label; the page shows the enwiki title, else the
   top-language title (慈雲院 (豊臣秀長室), whose translated lead says "Jiun-in").
   The hovercard's description is the enwiki short description, else Wikidata's.
-- **Repo name** is a working name; no GitHub remote yet.
+- **Repo name** -- settled 2026-11-09: `people-through-time` (the site's naming
+  policy wants 2-3 words; the URL path is the repo name). The local folder is
+  still `~/repos/people-through-time-map`.
 
 ## Scoping data and gotchas (2026-11-07)
 

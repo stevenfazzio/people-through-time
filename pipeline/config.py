@@ -1,4 +1,4 @@
-"""Central configuration for the people-through-time-map pipeline.
+"""Central configuration for the people-through-time pipeline.
 
 All knobs live here -- no CLI args (family convention shared with
 living-people-map / movie-madness-map / steam-atlas / jeopardy-wikipedia-map).
@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PROJECT_NAME = "people-through-time-map"
+PROJECT_NAME = "people-through-time"  # the GitHub repo and the stevenfazzio.com path (2026-11-09)
 PROJECT_TAGLINE = "A semantic map of the most famous people of every era"
 
 # Wikimedia REQUIRES a descriptive User-Agent with real contact info --
@@ -328,3 +328,13 @@ MARKER_RADIUS_PX = (1.4, 5.5)  # by log(score), smallest to largest
 COLOR_BUFFER_WINDOWS = 1
 COLOR_LIGHTNESS = (55, 85)  # glasbey lightness bounds: points sit on a dark background
 UNLABELLED_COLOR = "#5b6472"  # points outside every coarse track
+
+SITE_URL = f"https://stevenfazzio.com/{PROJECT_NAME}/"  # GitHub Pages from docs/ on main
+
+
+# --- Stage 13: the link card, a screenshot of the page itself (decided 2026-11-09) ---
+# Rendered by system Chrome through Playwright (the publish extra), 1200 x 630 at 2x, downsampled. The title
+# panel is hidden (link previews print og:title under the image); the timeline stays, as the page's signature.
+SOCIAL_PREVIEW_PNG = FRONTEND_DIR / "social-preview.png"
+SOCIAL_PREVIEW_WINDOW = 16  # the page's opening window: born 1831-1924
+SOCIAL_PREVIEW_ZOOM = 0.0  # zoom levels beyond the page's fit
