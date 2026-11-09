@@ -553,7 +553,10 @@ Planned next: see "Frontend, what's left".
     datamapplot: the overview shows mostly coarse labels and finer ones appear
     as zooming spreads them. Collisions are resolved on the CPU each frame
     (project the ~70-90 candidates, greedy by priority, padded boxes [10, 6]
-    px) with a 180 ms crossfade. deck.gl's CollisionFilterExtension was tried
+    px) with a 180 ms crossfade. The title panel counts as a placed box, a
+    label whose anchor is off screen is skipped, and one whose text runs past
+    an edge is nudged back inside (added after the live page, in a 760 px
+    pane, hid the top coarse label under the panel). deck.gl's CollisionFilterExtension was tried
     first, as datamapplot uses it, and let partly overlapping labels through:
     it tests each label only at its anchor against a picking-colour collision
     map, and even padded background boxes at test scale 2.5 didn't stop it
