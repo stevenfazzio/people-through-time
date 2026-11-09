@@ -216,6 +216,7 @@
       outlineColor: [13, 16, 21, 235],
       getTextAnchor: "middle",
       getAlignmentBaseline: "center",
+      getPixelOffset: (d) => d.off,
     };
     const [mw, mh] = mapSize();
     const fit = mw >= 80 && mh >= 80 ? fitZoom() : { target: [0, 0, 0], zoom: 6 };
@@ -366,14 +367,24 @@
     const step = lastPlace ? Math.min(1, (now - lastPlace) / LABEL_FADE_MS) : 1;
     lastPlace = now;
     if (!labelVis) labelVis = new Float32Array(core.tracks.name.length);
-    const placed = [];
+    // The title panel counts as a placed label, so no label hides under it.
+    const [mw, mh] = mapSize();
+    const panel = $("title").getBoundingClientRect();
+    const placed = panel.width ? [[panel.left - 4, panel.right + 4, panel.top - 4, panel.bottom + 4]] : [];
+    const EDGE = 4;
     const target = new Uint8Array(labelVis.length);
     cands.sort((a, b) => b.prio - a.prio);
     for (const c of cands) {
       if (!vp) { target[c.g] = c.layer === 2 ? 1 : 0; continue; }
       const [sx, sy] = vp.project([c.x, c.y]);
+      if (sx < 0 || sx > mw || sy < 0 || sy > mh) continue; // anchor off screen
       const [w, h] = labelSize(c.g);
-      const box = [sx - w / 2 - LABEL_PAD[0], sx + w / 2 + LABEL_PAD[0], sy - h / 2 - LABEL_PAD[1], sy + h / 2 + LABEL_PAD[1]];
+      // A label whose anchor is on screen but whose text runs off an edge is nudged back inside.
+      const dx = Math.max(0, EDGE - (sx - w / 2)) - Math.max(0, sx + w / 2 - (mw - EDGE));
+      const dy = Math.max(0, EDGE - (sy - h / 2)) - Math.max(0, sy + h / 2 - (mh - EDGE));
+      const x = sx + dx, y = sy + dy;
+      const box = [x - w / 2 - LABEL_PAD[0], x + w / 2 + LABEL_PAD[0], y - h / 2 - LABEL_PAD[1], y + h / 2 + LABEL_PAD[1]];
+      c.off = [dx, dy];
       if (placed.some((b) => box[0] < b[1] && b[0] < box[1] && box[2] < b[3] && b[2] < box[3])) continue;
       placed.push(box);
       target[c.g] = 1;
@@ -395,7 +406,8 @@
       let rgb = st.color || mix(coarseRgb[T.id[c.g]], [255, 255, 255], 0.35);
       let alpha = a;
       if (S.hlTrack >= 0 && c.layer === 2 && T.id[c.g] !== S.hlTrack) alpha *= 0.3;
-      out[c.layer].push({ text: trackText[c.g], x: c.x, y: c.y, color: [rgb[0], rgb[1], rgb[2], Math.round(255 * alpha)] });
+      out[c.layer].push({ text: trackText[c.g], x: c.x, y: c.y, off: c.off || [0, 0],
+        color: [rgb[0], rgb[1], rgb[2], Math.round(255 * alpha)] });
     }
     if (settling) queueRender();
     return out;
