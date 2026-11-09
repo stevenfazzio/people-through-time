@@ -1,0 +1,25 @@
+Baseline, year-precision birth and death, BCE: median life 57 (n=992)
+Baseline, year-precision birth and death, 1-1499: median life 57 (n=16,288)
+Baseline, year-precision birth and death, 1500+: median life 72 (n=240,028)
+
+By precision and roundness, stated years (life = death - stated birth; deaths at year precision):
+ prec side      kind    n  n_with_death  median_life death_before_birth
+    7   CE     round 6409          2368         21.0              28.7%
+    7   CE not round 3967          1692         50.0               5.0%
+    7  BCE     round 1318           539         92.0               2.2%
+    7  BCE not round  641           278         49.0              10.4%
+    6   CE     round    7             3       -263.0             100.0%
+    6   CE not round  254           177         51.0               2.3%
+    6  BCE     round   28             1        711.0               0.0%
+    6  BCE not round  108            20         55.5              10.0%
+    8   CE     round 1041           602         58.0               0.3%
+    8   CE not round  711           266         55.0               0.4%
+    8  BCE     round   87            56         46.5               0.0%
+    8  BCE not round   25            14         50.0               0.0%
+
+Century-precision years, last two digits: {0: 5437, 50: 3619, 1: 2290, 53: 787, 99: 35, 90: 32}
+
+Coarse births (precision <= 7) with a year-precision death:
+  C as stated                | CE: median life 38, death<birth 18.2%, life>122 4.1% (n=4,242) | BCE: median life 76, death<birth 5.1%, life>122 14.2% (n=838)
+  A midpoint, every coarse   | CE: median life 52, death<birth 5.6%, life>122 3.0% (n=4,242) | BCE: median life 48, death<birth 9.5%, life>122 2.5% (n=838)
+  B midpoint, round only     | CE: median life 52, death<birth 4.0%, life>122 1.2% (n=4,242) | BCE: median life 49, death<birth 8.8%, life>122 1.2% (n=838)

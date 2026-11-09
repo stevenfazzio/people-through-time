@@ -30,17 +30,10 @@ import numpy as np
 import pandas as pd
 
 import config
-from util import download, parse_dump_title, write_parquet_atomic
+from util import download, parse_dump_title, site_for_wiki_code, write_parquet_atomic
 
-# pageview dump wiki codes use hyphens; Wikidata site ids use underscores,
-# plus a few legacy ids that don't follow the rule.
-SPECIAL_SITE_IDS = {"be-tarask": "be_x_oldwiki", "gsw": "alswiki", "lzh": "zh_classicalwiki", "nan": "zh_min_nanwiki"}
 ACCESS_INDEX = {a.encode(): i for i, a in enumerate(config.ACCESS_METHODS)}
 LANG_BITS, ACCESS_BITS = 12, 2  # key = ((qid << 12) | lang_idx) << 2 | access_idx; qid < 2**49 fits int64
-
-
-def site_for_wiki_code(lang: str) -> str:
-    return SPECIAL_SITE_IDS.get(lang, lang.replace("-", "_") + "wiki")
 
 
 def build_lookup() -> dict[bytes, int]:

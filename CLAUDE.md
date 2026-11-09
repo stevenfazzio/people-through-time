@@ -12,9 +12,14 @@ ruff line-length 120, parquet for tables / npz for vectors, atomic writes,
 `data/` gitignored and expensive.
 
 Status (2026-11-08): roster design settled (views × age, switched from
-log-time stratification the same day). Stages 00–03 run; the bot filter
-(access-ratio clip) is settled and lives in stage 03.
-`scoping/` holds the one-off analysis behind the decisions below.
+log-time stratification the same day). Stages 00–06 run; the bot filter
+(access-ratio clip) is settled and lives in stage 03; birth years (with
+fallbacks and the round-century fix) come from stage 04; stage 05 picks the
+31k roster and its slider bins; stage 06 fetches and translates the leads;
+stage 07 embeds them twice (plain and role-instructed Qwen3); the map uses
+role, with no gender erasure. `scoping/` holds the one-off analysis behind
+the decisions below; `curated/` holds hand-made inputs (versioned, unlike
+`data/`).
 
 ## Pipeline
 
@@ -27,15 +32,46 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 01b | enwiki redirect map (`page` + `redirect` dumps) | `data/redirects.parquet` |
 | 02 | Monthly views per (person, language, access method), 12 dumps | `data/pageviews/pageviews_YYYYMM.parquet` |
 | 03 | Per-person monthly totals and median after the bot filter, raw median, access shares, top language | `data/people_views.parquet` |
+| 04 | Wikidata dates (birth, death, baptism, floruit, work start), gender, label, description for people above the floor (WDQS, per-chunk cache in `data/raw/wikidata_facts/`) | `data/people_facts.parquet` |
+| 05 | Fame score, top `MAP_N` roster after `curated/birth_year_overrides.csv`, slider bin, enwiki and top-language titles | `data/map_people.parquet` |
+| 06 | English lead per roster person (enwiki intro, else the top edition's intro translated by Claude), enwiki short description, thumbnail (caches in `data/raw/leads/`, `data/raw/translations/`) | `data/leads.parquet` |
+| 07 | Qwen3-Embedding-8B vectors of the leads via OpenRouter (pinned to Nebius), one file per instruction variant (cache: `data/raw/embedding_cache.sqlite`) | `data/embeddings_<variant>.npz` |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
 (156 s, 9.8 GB peak): 793,215 people at or above the 300 median-views floor
-raw, 792,471 after the bot filter.
+raw, 792,471 after the bot filter. Stage 04 fetch (2026-11-08): 793 WDQS
+queries of 1,000 QIDs, ~5 s each, 75 min including a restart (a body cut off
+mid-stream; now retried) and 9 transient 429/502s; a rebuild from the cache
+takes ~4 min. 94.0% have a P569, 1.0% a fallback, 4.9% (38,873) no birth year.
+Stage 05 (12 s, 2026-11-08): bar 1,741,680 views/mo × years; 36 bins from
+10,546 BC–651 BC (803 people) down to 3–4 years wide in 1940–1990, 687–1,016
+per bin; 32 windows of 4,131–4,420, 137,579 AlignedUMAP points; 289 roster
+people (0.9%) have no enwiki article, 188 of them Japanese-led.
 
-Planned next: birth dates for people
-above the floor (WDQS, chunks of ~1,000 QIDs) → score and roster → leads and
-translation → embeddings → AlignedUMAP → label tracks → frontend.
+Stage 06 (2026-11-08): 1,534 enwiki requests of 20 titles in 16 min at
+~96/min with 2 workers, no 429s or maxlag. An enwiki page is used only if it
+is the person's own article: 72 roster sitelinks are redirects, mostly renames
+and joint articles (Cyril and Methodius, Askold and Dir, the Two Qiaos — kept,
+so such pairs share a lead and a map position), but 9 redirect to another
+human's article (Heather McCartney → Paul McCartney, Ariston of Athens →
+Plato, Princess Sophie → Marie Antoinette, five Three Kingdoms figures →
+their commanders), whose intro, short description and thumbnail would all be
+the wrong person's. Those, Sulayman ibn Khalid (enwiki page gone) and Romuald
+(empty TextExtracts intro) fall to their top edition. Result: 30,700 enwiki
+leads (median 802 chars, p10 246), 297 translated (median ~356 chars; sources
+median 122 chars, CJK expanding ×3–5 in English), 3 Wikidata-description
+fallbacks (Romuald, Hyunri, Heather McCartney). Translation: Claude Opus 5.5
+at low effort with `fallbacks: "default"`, ~$1.76 in all, no refusals; output
+read clean (no preambles). Thumbnail 85%, enwiki short description 98.6%. A
+rebuild from the caches takes ~10 s.
+
+Stage 07 (2026-11-08): ~15 min per variant with 4 workers, 32 transient
+429/529s from Nebius (529 "worker overloaded" crashed the first run until
+every 5xx was retried); $0.05 (plain) + $0.09 (role, the instruction adds
+tokens). Same text twice on Nebius: cosine 0.9999; Nebius vs DeepInfra 0.997.
+
+Planned next: AlignedUMAP (stage 08) → label tracks → frontend.
 
 ## Working rules
 
@@ -133,7 +169,11 @@ translation → embeddings → AlignedUMAP → label tracks → frontend.
   template). Sizing (`scoping/results/non_english.txt`): of people with 10+
   editions only ~1% lack English, 0.1% of the top 31k by edition count; among
   5+ editions, 2.9–6.7% by death era, highest in antiquity. So a few hundred to
-  ~2k translations, mostly in early windows. Check afterwards: kNN purity of an
+  ~2k translations, mostly in early windows. Real roster (stage 05): only 289
+  (0.9%) lack an enwiki article — 188 Japanese-, 43 Chinese-, 22 Arabic-led;
+  39 BCE, 128 born 1–1499. Stage 06 translates the intro only (`exintro`),
+  as decided; Japanese intros are often one sentence, so translated leads run
+  shorter than English ones (median 356 vs 802 chars). Check afterwards: kNN purity of an
   `is_translated` flag (same diagnostic as gender purity). Mark translated
   text in the hovercard; link to the source-language article.
 - **2026-11-07 — bot filtering via the access-method split.** Keep desktop /
@@ -184,6 +224,63 @@ translation → embeddings → AlignedUMAP → label tracks → frontend.
   Bruce Lee (enwiki r 2.53, inside the band), Ansel Adams and Cleopatra (their
   mobile traffic affects rank, not membership). `people_views.parquet` keeps
   `median_views_raw` and `clip_keep` beside the filtered `median_views`.
+- **2026-11-08 — birth year = Wikidata P569, with fallbacks; the undated are
+  unscoreable.** WDQS, not QLever (30 s cap, lockouts): chunked `VALUES`
+  queries fit easily in WDQS's 60 s. Pick: preferred > normal, highest
+  precision, lower median; round century/millennium values to their midpoint
+  (gotcha below). Fallback when there is no usable P569, in order: baptism,
+  floruit − 46, work-period start − 20, death − 71 (`BIRTH_FALLBACK_OFFSETS` =
+  median gap to P569 among people with both, measured on this run). Births or
+  deaths after 2026 count as missing; death before birth or a life over 122
+  (both at year precision) → no birth year (`birth_source = "conflict"`, 76
+  people: longevity claimants such as Li Ching-Yuen and Thomas Parr, Emperor
+  Jimmu's legendary dates, typos like Marie Marvingt "born 2015"). Of 792k
+  above the floor, 38,873 have no birth year, but only 11–58 of them would
+  clear the roster bar at age 25–60 (`scoping/results/birth_coverage.txt`):
+  mostly living Japanese idols, internet personalities and Indian actors with
+  no P569 (Sophie Rain, Jūtarō Yamanaka), plus D. B. Cooper. Fallbacks place
+  ~870 of the previewed 31k (764 by death year: Leonidas I, Edward the
+  Confessor, the historical Jesus).
+- **2026-11-08 — curated birth-year overrides; no age cap.** Rule (header of
+  `curated/birth_year_overrides.csv`): override only a *historical* person
+  whose Wikidata birth year comes from a traditional or religious chronology
+  and sits centuries from the scholarly dating; legendary figures with no
+  scholarly date (Ishmael, Shaodian, Gao Yao, Parashara) keep their
+  traditional dates. Ranges become midpoints, as in stage 04. A scan of all
+  792k floor survivors (Alvar/Nayanar names, Kali Yuga years, year-precise
+  births before −2600) found five, all Tamil saints: Bhoothath and
+  Thirumazhisai Alvar (−4202 → 650; Lochtefeld via enwiki *Alvars*: the first
+  Alvars belong to the 7th century), Madhurakavi and Thondaradippodi Alvar
+  (−3101 / −2813 → 750, alongside Nammalvar, Andal and Thiruppaan, whom
+  Wikidata already dates to 750), Kannappa Nayanar (−3101 → 650; enwiki
+  *Nayanars*: 6th–8th centuries). The four Alvars fall below the bar at
+  their real dates; Kannappa stays, moving from the first bin to bin 6.
+  Stage 05 warns when Wikidata's year changes under an override. **No age
+  cap for prehistoric remains**: the 300 floor is already the only bar for
+  anyone born more than ~5,800 years ago, a 5,000-year cap changes no roster
+  place and 3,000 years swaps 66 marginal ancients. The roster's 29 remains
+  (Ötzi, Cheddar Man, mostly Iron Age bog bodies) stay; the bog bodies span
+  several windows and should form their own region.
+
+- **2026-11-08 — embedding variant = role (instructed), no erasure.** Comparison (
+  `scoping/embed_variants.py` → `scoping/results/embed_variants.txt`, UMAP
+  panels in `data/scoping/embed_variants.html`). Role instruction: "Identify
+  what the person described in this Wikipedia article opening is known for:
+  their role, their field, and the society they lived in". Within-window
+  15-NN purity, plain → role: role category (keyword from the short
+  description) 0.754 → 0.788 (chance 0.255; higher in every era); top
+  language 0.836 → 0.835 (chance 0.564); **gender 0.908 → 0.945** (chance
+  0.663); translated leads' neighbours translated 0.177 → 0.145 (chance 0.010
+  — and 3.7× the rate of same-language untranslated people, so not just
+  culture); birth-year locality equal. The variants share 63% of neighbours.
+  Probes: plain leans to the person's family and circle (Napoleon → Carlo,
+  Louis, Letizia Bonaparte; Leonardo → his mother, Lisa del Giocondo), role
+  to their peers (Napoleon → his marshals; Leonardo → Raphael, Perugino;
+  Genghis Khan → the later khans; Taylor Swift → country singers). Cost of
+  role: stronger gender separation (Cleopatra → only Ptolemaic queens) —
+  which erasure would remove (see Gender erasure; not adopted). Chosen for
+  the peer grouping; gender separation is judged on the rendered map. Plain
+  stays embedded for a side-by-side if needed.
 
 ## Proposed, not yet settled
 
@@ -204,15 +301,51 @@ translation → embeddings → AlignedUMAP → label tracks → frontend.
 ## Open questions
 
 - **English stubs vs rich native articles** (medieval Chinese / Japanese /
-  Islamic-world figures): translate the richer article instead? Measure first.
-- **Gender erasure**: pre-modern windows are overwhelmingly male; whether the
-  centroid erasure is worth carrying over.
-- **`MAP_N` and `AGE_OFFSET`**: 31k and 0 are provisional — revisit once
-  all-language views exist (expect more early, non-Western people than the
-  enwiki proxy shows). First look (2026-11-08, `edition_floor.txt`): with
+  Islamic-world figures): translate the richer article instead? First
+  measurement (stage 06 log): of 7,676 roster people whose most-viewed edition
+  isn't English, 1,724 have an enwiki lead under 300 chars (ja 577, zh 254,
+  ru 177, ar 146) — e.g. "Kyōzō Nagatsuka is a Japanese actor.", "Servius
+  Sulpicius Galba was a consul of Rome in 144 BC." Not yet compared with the
+  native leads' length; English stubs are common for moderns too, so check
+  whether thin text actually misplaces people once the map exists.
+- **Gender erasure** (tested 2026-11-08, `scoping/gender_erasure.py`,
+  `gender_erasure_window.py`; panels in `data/scoping/gender_erasure.html`).
+  Centroid (project out the female − male mean direction) and LEACE are
+  indistinguishable again, as in living-people-map. Fit on the 30,925
+  male/female people, applied to all, role variant: within-window 15-NN gender
+  purity 0.945 → 0.802, 2-d (UMAP, windows 1/12/27) 0.933 → 0.752 (chance
+  0.67); role, top language and birth-year locality unchanged; 85% of
+  neighbours kept. Plain + erasure lands at 0.783 / 0.729 with less role
+  structure (role kNN 0.751 vs 0.787). Probes de-gender sensibly (Cleopatra →
+  Ptolemies of both sexes; Frida Kahlo → + Picasso, Dalí; Marie Curie → +
+  Rutherford, Langevin). A *global* eraser leaves gender linearly decodable
+  within each window (probe AUC 0.98–0.995; the direction differs by era),
+  but per-window erasers, which kill that (0.50), move the 2-d purity only
+  0.752 → 0.735; re-erasing after renormalizing (3 rounds) 0.741. The
+  residue is the text itself ("actress", "queen", pronouns) — nonlinear,
+  out of reach of linear erasure. **Decided 2026-11-08: no erasure for
+  now.** Add it only if the rendered map shows gender organizing it in a way
+  worth removing, not preemptively. If it comes back: one global centroid
+  projection (simplest to explain; per-window adds little), applied also to
+  Toponymy's keyphrase and name embeddings so labels share the points' space.
+  The `concept-erasure` dependency stays for the scoping scripts.
+- **`MAP_N` and `AGE_OFFSET`**: 31k and 0 are what stage 05 builds with,
+  still provisional until the map can be looked at. Real data gives history
+  more room than the enwiki proxy did (19 of 36 bins before 1903), so nothing
+  argues for `AGE_OFFSET = 20`. First look (2026-11-08, `edition_floor.txt`): with
   all-language views and proxy birth years (enwiki category, else Wikidata
   death − 50), the top 31k is 7.8% BCE and 32% born before 1500, vs 17.9%
   before 1500 on the enwiki proxy. 177k floor survivors had no proxy date.
+  **With stage 04's birth years** (`birth_coverage.txt`): 8.4% BCE, 33.3%
+  before 1500, 52.0% before 1900, 29.9% born 1950+; the bar is ~1.74M
+  views × years, so BCE admits down to ~380 views/mo — the floor is the binding
+  constraint there.
+- **Score as a display variable.** Cleopatra is #1 by score (1.19M views/mo
+  × 2,094 years), ahead of Alexander and Jesus; her traffic is the suspected,
+  unverified crawler case above. Harmless for membership, but if score ever
+  sizes markers or orders labels, check her monthly series first.
+- **Missing labels**: 19 roster people have no en/mul Wikidata label and 104
+  no description; the frontend should fall back to the article title.
 - **Repo name** is a working name; no GitHub remote yet.
 
 ## Scoping data and gotchas (2026-11-07)
@@ -233,10 +366,22 @@ translation → embeddings → AlignedUMAP → label tracks → frontend.
   exist on humans (group `"abstract"`).
 - **Wikidata birth dates carry several statements and precisions**: Plato's
   preferred P569 is −428 at *decade* precision beside normal-rank day values
-  for −428 and −426; Julius Caesar has four. Pick preferred > normal (drop deprecated),
-  then highest precision; keep precision so century-dated people land by
-  midpoint (the earliest bins span centuries). QLever's
-  `YEAR()` returns −428 for `-0428-…`.
+  for −428 and −426; Julius Caesar has four. Stage 04 picks preferred > normal
+  (drop deprecated), then highest precision, then the lower median year.
+  **A round century-precision year is a boundary, not a birth year**
+  (`scoping/results/century_precision.txt`): CE 1600 at precision 7 means "16th
+  century" and is its *last* year (Malyuta Skuratov died 1573, "born 1600";
+  Kamehameha I "born 1800"); as stated, 28.7% of round CE century births come
+  after the person's death. BCE −900 is "9th century BC" and its *earliest*
+  year (median gap to death 92 vs ~57 for year-precision ancients). Values
+  ending in 01 are the other boundary. Non-round years are estimates
+  (Pythagoras −582 at century precision; his year-precision values run
+  −569..−581). Stage 04 moves round values (ending 00/01, millennia likewise)
+  to the midpoint and keeps the rest. Oddity: 787 century-precision births are
+  exactly 1953. **WDQS returns BCE years in astronomical
+  numbering** (Julius Caesar −0099 = 100 BC; Confucius −0550 = 551 BC), so
+  age = 2026 − year needs no year-zero fix. QLever's `YEAR()` returns −428
+  for `-0428-…`.
 - enwiki birth categories as a cross-check: 89.1% of enwiki biographies have
   one, 97% at year precision; 375 conflicting-year pages, 21 born after death,
   35 lifespans > 122 — Wikidata will have its own junk (see living-people-map's

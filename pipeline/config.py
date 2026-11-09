@@ -86,6 +86,19 @@ PEOPLE_VIEWS_PARQUET = DATA_DIR / "people_views.parquet"
 MAX_DESKTOP_SKEW = 16
 MAX_MOBILE_SKEW = 8
 
+# --- Stage 04: Wikidata facts (dates, gender, label, description) for everyone above the floor ---
+WDQS_URL = "https://query.wikidata.org/sparql"
+WDQS_CHUNK = 1_000  # QIDs per VALUES query: 3-5 s each on 2026-11-08, far inside WDQS's 60 s
+WDQS_SLEEP = 1.0  # between queries; WDQS allows a client ~60 s of query time per minute
+FACTS_RAW_DIR = DATA_DIR / "raw" / "wikidata_facts"  # per-chunk raw rows, the resumable checkpoint
+PEOPLE_FACTS_PARQUET = DATA_DIR / "people_facts.parquet"
+# Fallback birth year when there is no usable P569: the first of baptism, floruit,
+# work-period start, death, minus its offset. Offsets = median gap to P569 among
+# people with both at year precision (measured on the 2026-11-08 run over 792k
+# people; stage 04 prints the medians again on every build).
+BIRTH_FALLBACK_OFFSETS = {"baptism": 0, "floruit": 46, "work_start": 20, "death": 71}
+MAX_LIFESPAN = 122  # longer, or death before birth (both at year precision): no birth year
+
 
 # --- Roster selection: rank everyone by median_views x age (decided 2026-11-08) ---
 # Lindy reading: something famous for A years can expect ~A more, so today's
@@ -97,10 +110,18 @@ MAX_MOBILE_SKEW = 8
 # moderns harder, gives history more room); 0 keeps the one-sentence story.
 FAME_REFERENCE_YEAR = 2026
 AGE_OFFSET = 0
-MAP_N = 31_000  # PROVISIONAL: revisit with all-language views + an AlignedUMAP benchmark
+# PROVISIONAL. First real-data build (2026-11-08, all-language views + Wikidata
+# birth years): 52% born before 1900, 19 of 36 bins; AlignedUMAP at this size ~10 min.
+MAP_N = 31_000
 # Applied BEFORE ranking. Without it the formula admits BCE people at ~190
-# views/mo (~6/day) -- inside crawler noise.
+# views/mo (~6/day) -- inside crawler noise. It is the binding bar for anyone
+# born more than ~5,800 years ago, so no age cap is needed (a 5,000-year cap
+# changes no roster place; 3,000 years swaps 66).
 MIN_MEDIAN_VIEWS = 300
+# Hand-curated birth years for historical people whose Wikidata date comes from
+# a traditional chronology (the rule is in the file's header). Versioned, not in data/.
+BIRTH_YEAR_OVERRIDES_CSV = REPO_ROOT / "curated" / "birth_year_overrides.csv"
+MAP_PEOPLE_PARQUET = DATA_DIR / "map_people.parquet"  # stage 05: the roster, one row per person, rank order
 
 
 def fame_score(median_views, birth_year):
@@ -127,7 +148,48 @@ def bin_edges(birth_years) -> np.ndarray:
     return edges
 
 
-# --- Text to embed ---
+# --- Stage 06: the text to embed = each person's Wikipedia lead, in English ---
 # English lead when the person has an enwiki article; otherwise the lead of
-# their most-viewed edition, LLM-translated to English (decided 2026-11-07).
-TRANSLATE_NON_ENGLISH = True
+# their most-viewed edition, translated to English by Claude (decided 2026-11-07).
+WIKI_API_URL = "https://{lang}.wikipedia.org/w/api.php"  # lang = pageview-dump code (stage 03's top_lang)
+LEAD_BATCH = 20  # titles per request: the exlimit maximum for intro extracts
+LEAD_WORKERS = 2  # concurrent requests; extracts take ~0.1-1.3 s on enwiki
+LEAD_MIN_INTERVAL = 0.4  # s between request starts across workers: <= 150/min of Wikimedia's ~200/min budget
+THUMB_SIZE = 320  # px, hovercard thumbnail width
+LEADS_RAW_DIR = DATA_DIR / "raw" / "leads"  # <site>.jsonl, one record per requested title: the resumable cache
+TRANSLATIONS_DIR = DATA_DIR / "raw" / "translations"  # <qid>.json, reused while source text and prompt are unchanged
+TRANSLATE_MODEL = "claude-opus-5-5"
+TRANSLATE_EFFORT = "low"  # faithful translation of a few paragraphs needs little reasoning
+TRANSLATE_WORKERS = 4
+LEADS_PARQUET = DATA_DIR / "leads.parquet"
+
+
+# --- Stage 07: embeddings (Qwen3-Embedding-8B through OpenRouter; decided 2026-11-08) ---
+# The family's current embedder (tv-tropes-map, deity-map); replaces
+# living-people-map's Cohere embed-v4.0. $0.01 per million tokens on 2026-11-08.
+EMBED_API_URL = "https://openrouter.ai/api/v1/embeddings"
+EMBED_MODEL = "qwen/qwen3-embedding-8b"
+# Pinned, fallbacks off (see embedder.py). Nebius is the one provider listing
+# bf16; DeepInfra (unstated precision) and SiliconFlow (fp8) also serve it.
+# Toponymy's naming stage must use the same provider.
+EMBED_PROVIDER = "Nebius"
+EMBED_BATCH_ITEMS = 32
+EMBED_BATCH_CHARS = 120_000
+EMBED_WORKERS = 4
+EMBED_CACHE = DATA_DIR / "raw" / "embedding_cache.sqlite"  # keyed by model, provider and the exact text sent
+# Qwen3-Embedding takes a task instruction ("Instruct: ...\nQuery:<text>").
+# Both variants are embedded; scoping/embed_variants.py compares them.
+EMBED_INSTRUCTIONS = {
+    "plain": None,
+    "role": "Identify what the person described in this Wikipedia article opening is known for: their role, their "
+    "field, and the society they lived in",
+}
+# The variant later stages use (decided 2026-11-08): "role" groups people with
+# their peers (Napoleon -> his marshals) where "plain" leans to family and circle;
+# its cost, stronger gender separation, is judged on the rendered map. No erasure.
+EMBED_VARIANT = "role"
+
+
+def embeddings_npz(variant: str = EMBED_VARIANT) -> Path:
+    """[qid, vectors] row-aligned with map_people.parquet (rank order)."""
+    return DATA_DIR / f"embeddings_{variant}.npz"

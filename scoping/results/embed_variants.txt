@@ -1,0 +1,91 @@
+31,000 people, 32 windows of 4,131-4,420; k = 15
+Instruction (role): Identify what the person described in this Wikipedia article opening is known for: their role, their field, and the society they lived in
+
+Role categories (earliest keyword in the enwiki short description, else Wikidata's):
+role
+film & tv               6811
+royalty & nobility      6369
+politics & law          2662
+music                   2172
+other                   2085
+military                1770
+sport                   1765
+thought & science       1595
+writing                 1582
+religion                1522
+family of the famous     775
+business                 702
+visual arts              696
+crime                    368
+unknown                   99
+remains                   27
+
+== kNN purity within windows (mean over windows) ==
+                              purity        chance          lift       
+variant                        plain   role  plain   role  plain   role
+measure                                                                
+birth-year rank distance       0.200  0.202  0.333  0.333   0.60   0.61
+gender                         0.908  0.945  0.663  0.663   1.37   1.42
+role                           0.754  0.788  0.255  0.255   2.96   3.10
+top language                   0.836  0.835  0.564  0.564   1.48   1.48
+translated (their neighbours)  0.177  0.145  0.010  0.010  17.00  13.88
+
+== By era: role and top-language purity (lift over chance) ==
+  windows 0-7 (to ~1140): plain role 2.43; plain top_lang 2.06; plain sex 1.23; role role 2.60; role top_lang 2.07; role sex 1.29
+  8-15 (~990-1830): plain role 4.06; plain top_lang 1.74; plain sex 1.31; role role 4.25; role top_lang 1.73; role sex 1.37
+  16-23 (~1830-1950): plain role 4.21; plain top_lang 1.30; plain sex 1.39; role role 4.43; role top_lang 1.30; role sex 1.44
+  24-31 (1944-2013): plain role 2.62; plain top_lang 1.22; plain sex 1.61; role role 2.70; role top_lang 1.22; role sex 1.66
+
+Neighbours shared by the two variants: 63.3%
+
+== Probes: 8 nearest neighbours in the person's central window ==
+
+Confucius (-550), window 0:
+  plain: Dong Zhongshu (-178); Xunzi (-312); Mencius (-371); Laozi (-579); Mozi (-469); Gongsun Hong (-199); Zengzi (-503); Zhuang Zhou (-368)
+  role : Xunzi (-312); Mencius (-371); Dong Zhongshu (-178); Zengzi (-503); Zisi (-482); Bu Shang (-506); Laozi (-579); Lu Jia (-239)
+
+Cleopatra (-68), window 0:
+  plain: Caesarion (-46); Ptolemy XIII Theos Philopator (-61); Cleopatra I Syra (-203); Ptolemy I Soter (-365); Pothinus (-50); Cleopatra III of Egypt (-160); Cleopatra Thea (-163); Cleopatra Selene of Egypt and Syria (-134)
+  role : Cleopatra III of Egypt (-160); Arsinoe IV of Egypt (-67); Cleopatra V of Egypt (-99); Cleopatra Selene of Egypt and Syria (-134); Berenice IV of Egypt (-76); Ptolemy XIII Theos Philopator (-61); Caesarion (-46); Berenice III (-114)
+
+Avicenna (980), window 5:
+  plain: Averroes (1126); Abu Bakr al-Razi (866); Avempace (1095); Ibn Tufayl (1110); Ibn Zuhr (1091); Ibn Arabi (1165); Ibn Hazm (994); Al-Kindi (801)
+  role : Abu Bakr al-Razi (866); Averroes (1126); Avempace (1095); Al-Ghazali (1056); Sadr al-Din al-Qunawi (1207); Ibn Tufayl (1110); Fakhr al-Din al-Razi (1150); Farabi (870)
+
+Murasaki Shikibu (970), window 5:
+  plain: Fujiwara no Tametoki (949); Sei Shōnagon (966); Fujiwara no Shōshi (988); Sugawara no Takasue no musume (1008); Fujiwara no Michitsuna no Haha (935); Fujiwara no Teishi (977); Izumi Shikibu (976); Shikishi-naishinnō (1149)
+  role : Sei Shōnagon (966); Fujiwara no Shōshi (988); Sugawara no Takasue no musume (1008); Fujiwara no Tametoki (949); Izumi Shikibu (976); Fujiwara no Michitsuna no Haha (935); Fujiwara no Teishi (977); Ise (872)
+
+Hildegard of Bingen (1098), window 6:
+  plain: Hrotsvitha (935); Hermann of Reichenau (1013); Herrad of Landsberg (1130); Mechtilde (1241); Gertrude the Great (1256); Albertus Magnus (1200); Mechthild of Magdeburg (1207); Bridget of Sweden (1303)
+  role : Mechtilde (1241); Gertrude the Great (1256); Hrotsvitha (935); Hermann of Reichenau (1013); Herrad of Landsberg (1130); Mechthild of Magdeburg (1207); Kassia (810); Notker the Stammerer (840)
+
+Genghis Khan (1162), window 7:
+  plain: Chagatai Khan (1183); Gegeen Khan (1302); Yesugei (1135); Jochi (1182); Kublai Khan (1215); Güyük Khan (1206); Börte (1161); Jamukha (1162)
+  role : Kublai Khan (1215); Yesui (1161); Chagatai Khan (1183); Jochi (1182); Güyük Khan (1206); Ögedei Khan (1186); Möngke Khan (1209); Khabul Khan (1085)
+
+Leonardo da Vinci (1452), window 9:
+  plain: Michelangelo (1475); Andrea del Verrocchio (1435); Caterina di Meo Lippi (1436); Francesco Melzi (1492); Lisa del Giocondo (1479); Leon Battista Alberti (1404); Filippo Brunelleschi (1377); Raphael (1483)
+  role : Raphael (1483); Michelangelo (1475); Filippo Brunelleschi (1377); Gentile da Fabriano (1370); Filippino Lippi (1457); Leon Battista Alberti (1404); Pietro Perugino (1448); Andrea del Sarto (1486)
+
+Napoleon (1769), window 12:
+  plain: Napoleon III (1808); Joachim Murat (1767); Carlo Bonaparte (1746); Michel Ney (1769); Louis Bonaparte (1778); Napoleon II (1811); Luis Alejandro Berthier (1753); Maria-Letizia Bonaparte (1750)
+  role : André Masséna (1758); Napoleon III (1808); Jean-Baptiste Bessières (1768); Jean Lannes (1769); Jean-de-Dieu Soult (1769); Luis Alejandro Berthier (1753); Louis-Nicolas Davout (1770); Alexander I of Russia (1777)
+
+Marie Curie (1867), window 15:
+  plain: Irène Joliot-Curie (1897); Pierre Curie (1859); Frédéric Joliot-Curie (1900); Antoine Henri Becquerel (1852); Ève Curie (1904); Chien-Shiung Wu (1912); Lise Meitner (1878); Wilhelm Röntgen (1845)
+  role : Irène Joliot-Curie (1897); Pierre Curie (1859); Frédéric Joliot-Curie (1900); Antoine Henri Becquerel (1852); Lise Meitner (1878); Chien-Shiung Wu (1912); Sophie Germain (1776); Wilhelm Röntgen (1845)
+
+Frida Kahlo (1907), window 17:
+  plain: Diego Rivera (1886); Guillermo Kahlo (1871); Remedios Varo (1908); Leonora Carrington (1917); Yayoi Kusama (1929); Georgia O'Keeffe (1887); Amrita Sher-Gil (1913); Käthe Kollwitz (1867)
+  role : Diego Rivera (1886); Leonora Carrington (1917); Remedios Varo (1908); David Alfaro Siqueiros (1896); Amrita Sher-Gil (1913); Paula Modersohn-Becker (1876); Georgia O'Keeffe (1887); Tamara de Lempicka (1898)
+
+Pelé (1940), window 21:
+  plain: Eusébio (1942); Garrincha (1933); Mário Zagallo (1931); Just Fontaine (1933); Ferenc Puskás (1927); Carlos Alberto Torres (1944); Jairzinho (1944); Didi (1928)
+  role : Garrincha (1933); Mário Zagallo (1931); Jairzinho (1944); Eusébio (1942); Carlos Alberto Torres (1944); Ferenc Puskás (1927); Didi (1928); Rivelino (1946)
+
+Taylor Swift (1989), window 31:
+  plain: Carrie Underwood (1983); Lady Gaga (1986); Miley Cyrus (1992); Billie Eilish (2001); Ariana Grande (1993); Beyoncé (1981); Katy Perry (1984); Ed Sheeran (1991)
+  role : Carrie Underwood (1983); Olivia Rodrigo (2003); Billie Eilish (2001); Katy Perry (1984); Kacey Musgraves (1988); Ariana Grande (1993); Beyoncé (1981); Miranda Lambert (1983)
+
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/embed_variants.html

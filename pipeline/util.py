@@ -60,6 +60,104 @@ def qlever_csv(query: str, timeout: float = 600) -> str:
     raise RuntimeError("QLever: still rate-limited after 5 attempts")
 
 
+class WdqsTimeout(RuntimeError):
+    """WDQS hit its 60 s query limit; the same query will time out again, so split it instead."""
+
+
+def wdqs_select(session: requests.Session, query: str, timeout: float = 120, tries: int = 6) -> list[dict[str, str]]:
+    """POST a SELECT to WDQS; rows as {variable: value}. Retries 429/5xx and network errors, not timeouts.
+
+    No maxlag: on wikidata.org it also counts query-service update lag and can
+    refuse every read for long stretches (wikimedia-data skill).
+    """
+    for attempt in range(tries):
+        wait = 30 * (attempt + 1)
+        try:
+            resp = session.post(
+                config.WDQS_URL,
+                data={"query": query},
+                headers={"Accept": "application/sparql-results+json"},
+                timeout=timeout,
+            )
+        except requests.RequestException as exc:  # incl. ChunkedEncodingError: a body cut off mid-stream
+            log(f"WDQS {type(exc).__name__}; retry {attempt + 1} in {wait}s")
+            time.sleep(wait)
+            continue
+        text = resp.content.decode("utf-8", errors="replace")
+        if "TimeoutException" in text:
+            raise WdqsTimeout(f"WDQS timed out (HTTP {resp.status_code})")
+        if resp.status_code in (429, 500, 502, 503, 504):
+            retry_after = resp.headers.get("Retry-After", "")
+            wait = int(retry_after) if retry_after.isdigit() else wait
+            log(f"WDQS HTTP {resp.status_code}; retry {attempt + 1} in {wait}s")
+            time.sleep(wait)
+            continue
+        if resp.status_code != 200:
+            raise RuntimeError(f"WDQS HTTP {resp.status_code}: {text[:300]}")
+        return [{k: v["value"] for k, v in b.items()} for b in json.loads(text)["results"]["bindings"]]
+    raise RuntimeError(f"WDQS: still failing after {tries} attempts")
+
+
+def _wiki_post(session: requests.Session, api_url: str, params: dict, timeout: float, tries: int) -> dict:
+    for attempt in range(tries):
+        wait = 10 * (attempt + 1)
+        try:
+            resp = session.post(api_url, data=params, timeout=timeout)
+            if resp.status_code in (429, 500, 502, 503, 504):
+                retry_after = resp.headers.get("Retry-After", "")
+                wait = int(retry_after) if retry_after.isdigit() else wait
+                log(f"{api_url} HTTP {resp.status_code}; retry {attempt + 1} in {wait}s")
+                time.sleep(wait)
+                continue
+            if resp.status_code != 200:
+                raise RuntimeError(f"{api_url} HTTP {resp.status_code}: {resp.text[:300]}")
+            data = resp.json()
+        except (requests.RequestException, ValueError) as exc:  # network errors, bodies cut off mid-stream
+            log(f"{api_url} {type(exc).__name__}; retry {attempt + 1} in {wait}s")
+            time.sleep(wait)
+            continue
+        error = data.get("error")
+        if error and error.get("code") == "maxlag":
+            retry_after = resp.headers.get("Retry-After", "")
+            wait = int(retry_after) if retry_after.isdigit() else 5
+            log(f"{api_url} maxlag ({error.get('info', '')}); retry {attempt + 1} in {wait}s")
+            time.sleep(wait)
+            continue
+        if error:
+            raise RuntimeError(f"{api_url} API error: {error}")
+        return data
+    raise RuntimeError(f"{api_url}: still failing after {tries} attempts")
+
+
+def wiki_query(session: requests.Session, api_url: str, params: dict, before_request=None, timeout: float = 60,
+               tries: int = 6) -> dict:  # fmt: skip
+    """One action=query on a Wikipedia, following `continue`: {"pages": [...], "normalized": [...], "redirects": [...]}.
+
+    POST, because batches of non-Latin titles overflow the GET URL limit (HTTP 414).
+    maxlag=5 (fine on Wikipedia, unlike wikidata.org). Pages are merged across
+    continuations, since each prop may arrive in a different one. `before_request`,
+    if given, is called before every request (a shared rate limiter).
+    """
+    base = {"action": "query", "format": "json", "formatversion": "2", "maxlag": "5", **params}
+    pages: dict = {}
+    out: dict = {"normalized": [], "redirects": []}
+    cont: dict = {}
+    while True:
+        if before_request is not None:
+            before_request()
+        data = _wiki_post(session, api_url, {**base, **cont}, timeout, tries)
+        query = data.get("query", {})
+        for page in query.get("pages", []):
+            pages.setdefault(page.get("pageid") or page["title"], {}).update(page)
+        out["normalized"] += query.get("normalized", [])
+        out["redirects"] += query.get("redirects", [])
+        if "continue" not in data:
+            break
+        cont = data["continue"]
+    out["pages"] = list(pages.values())
+    return out
+
+
 def download(url: str, dest: Path) -> Path:
     """Resumable curl download with the project User-Agent. Skips if dest exists."""
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -157,6 +255,16 @@ def parse_dump_title(raw: str) -> str:
     if len(raw) >= 2 and raw.startswith('"') and raw.endswith('"'):
         return raw[1:-1].replace('\\"', '"').replace("\\\\", "\\")
     return raw
+
+
+# pageview dump wiki codes use hyphens; Wikidata site ids use underscores,
+# plus a few legacy ids that don't follow the rule.
+SPECIAL_SITE_IDS = {"be-tarask": "be_x_oldwiki", "gsw": "alswiki", "lzh": "zh_classicalwiki", "nan": "zh_min_nanwiki"}
+
+
+def site_for_wiki_code(lang: str) -> str:
+    """Pageview-dump language code ('zh-min-nan', 'en') -> Wikidata sitelink site id ('zh_min_nanwiki', 'enwiki')."""
+    return SPECIAL_SITE_IDS.get(lang, lang.replace("-", "_") + "wiki")
 
 
 def log(msg: str) -> None:

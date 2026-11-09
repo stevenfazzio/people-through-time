@@ -1,0 +1,28 @@
+{'window': 1, 'method': 'none', 'probe AUC in window': 1.0, 'gender kNN': 0.966, 'chance': 0.749, 'role kNN': 0.705, 'gender 2d': 0.963, 'role 2d': 0.687}
+{'window': 1, 'method': 'global x1', 'probe AUC in window': 0.984, 'gender kNN': 0.864, 'chance': 0.749, 'role kNN': 0.699, 'gender 2d': 0.835, 'role 2d': 0.684}
+{'window': 1, 'method': 'global x1, no renorm', 'probe AUC in window': 0.984, 'gender kNN': 0.864, 'chance': 0.749, 'role kNN': 0.699}
+{'window': 1, 'method': 'global x3', 'probe AUC in window': 0.982, 'gender kNN': 0.842, 'chance': 0.749, 'role kNN': 0.695, 'gender 2d': 0.817, 'role 2d': 0.677}
+{'window': 1, 'method': 'window x1', 'probe AUC in window': 0.424, 'gender kNN': 0.836, 'chance': 0.749, 'role kNN': 0.693, 'gender 2d': 0.812, 'role 2d': 0.671}
+{'window': 1, 'method': 'window x3', 'probe AUC in window': 0.083, 'gender kNN': 0.843, 'chance': 0.749, 'role kNN': 0.695, 'gender 2d': 0.804, 'role 2d': 0.669}
+{'window': 12, 'method': 'none', 'probe AUC in window': 1.0, 'gender kNN': 0.946, 'chance': 0.687, 'role kNN': 0.696, 'gender 2d': 0.922, 'role 2d': 0.67}
+{'window': 12, 'method': 'global x1', 'probe AUC in window': 0.994, 'gender kNN': 0.814, 'chance': 0.687, 'role kNN': 0.694, 'gender 2d': 0.761, 'role 2d': 0.671}
+{'window': 12, 'method': 'global x1, no renorm', 'probe AUC in window': 0.994, 'gender kNN': 0.814, 'chance': 0.687, 'role kNN': 0.694}
+{'window': 12, 'method': 'global x3', 'probe AUC in window': 0.992, 'gender kNN': 0.794, 'chance': 0.687, 'role kNN': 0.691, 'gender 2d': 0.749, 'role 2d': 0.66}
+{'window': 12, 'method': 'window x1', 'probe AUC in window': 0.552, 'gender kNN': 0.787, 'chance': 0.687, 'role kNN': 0.686, 'gender 2d': 0.745, 'role 2d': 0.658}
+{'window': 12, 'method': 'window x3', 'probe AUC in window': 0.114, 'gender kNN': 0.792, 'chance': 0.687, 'role kNN': 0.688, 'gender 2d': 0.746, 'role 2d': 0.667}
+{'window': 27, 'method': 'none', 'probe AUC in window': 1.0, 'gender kNN': 0.927, 'chance': 0.573, 'role kNN': 0.883, 'gender 2d': 0.909, 'role 2d': 0.877}
+{'window': 27, 'method': 'global x1', 'probe AUC in window': 0.991, 'gender kNN': 0.743, 'chance': 0.573, 'role kNN': 0.884, 'gender 2d': 0.661, 'role 2d': 0.872}
+{'window': 27, 'method': 'global x1, no renorm', 'probe AUC in window': 0.989, 'gender kNN': 0.743, 'chance': 0.573, 'role kNN': 0.884}
+{'window': 27, 'method': 'global x3', 'probe AUC in window': 0.969, 'gender kNN': 0.73, 'chance': 0.573, 'role kNN': 0.876, 'gender 2d': 0.657, 'role 2d': 0.871}
+{'window': 27, 'method': 'window x1', 'probe AUC in window': 0.516, 'gender kNN': 0.704, 'chance': 0.573, 'role kNN': 0.884, 'gender 2d': 0.649, 'role 2d': 0.874}
+{'window': 27, 'method': 'window x3', 'probe AUC in window': 0.109, 'gender kNN': 0.679, 'chance': 0.573, 'role kNN': 0.871, 'gender 2d': 0.644, 'role 2d': 0.869}
+
+Mean over the three windows:
+                      probe AUC in window  gender kNN  chance  role kNN  gender 2d  role 2d
+method                                                                                     
+none                                1.000       0.946    0.67     0.761      0.931    0.745
+global x1                           0.990       0.807    0.67     0.759      0.752    0.743
+global x1, no renorm                0.989       0.807    0.67     0.759        NaN      NaN
+global x3                           0.981       0.789    0.67     0.754      0.741    0.736
+window x1                           0.497       0.776    0.67     0.754      0.735    0.734
+window x3                           0.102       0.772    0.67     0.752      0.731    0.735

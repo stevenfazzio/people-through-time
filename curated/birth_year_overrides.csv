@@ -1,0 +1,16 @@
+# Hand-curated birth years, applied by stage 05 over stage 04's birth_year_est.
+#
+# Rule (2026-11-08): override only a HISTORICAL person whose Wikidata birth year
+# comes from a traditional or religious chronology and sits centuries away from
+# the scholarly dating. Legendary figures with no scholarly date (Ishmael,
+# Shaodian, Gao Yao, Parashara) stay at their traditional dates. Ranges become
+# their midpoint, as stage 04 does for century-precision dates (7th century -> 650).
+#
+# wikidata_year = stage 04's birth_year when the row was written. Stage 05 warns
+# when it changes: Wikidata may have been fixed, and the row may be stale.
+qid,label,wikidata_year,birth_year,source
+Q3537100,Bhoothath Alvar,-4202,650,"enwiki Alvars (2026-11-08), citing Lochtefeld, Illustrated Encyclopedia of Hinduism: the first three Alvars (Poigai, Bhoothath, Pey) belong to the 7th century CE. Wikidata's -4202 is the traditional Dvapara Yuga date."
+Q4458118,Thirumazhisai Alvar,-4202,650,"Traditionally a contemporary of the first three Alvars (same Dvapara Yuga date in Wikidata), so dated with them: 7th century CE per Lochtefeld (enwiki Alvars). His enwiki article says 4th-9th century CE."
+Q3523946,Madhurakavi Alvar,-3101,750,"Disciple and elder contemporary of Nammalvar, whom scholars date to the 8th century CE (enwiki Nammalvar) and Wikidata to 750. -3101 is the traditional start of the Kali Yuga."
+Q4460484,Thondaradippodi Alvar,-2813,750,"enwiki Alvars: the twelve Alvars flourished in the 5th-8th centuries CE. Traditionally later than Nammalvar and Andal, whom Wikidata dates to 750. Wikidata's -2813 is the traditional date."
+Q6363995,Kannappa Nayanar,-3101,650,"One of the 63 Nayanars, who lived in the 6th to 8th centuries CE (enwiki Nayanars), midpoint 650. -3101 is the traditional start of the Kali Yuga."

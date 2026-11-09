@@ -1,0 +1,89 @@
+30,925 of 31,000 people male/female (7,095 female)
+
+== 1. Held-out gender probe AUC (0.5 = nothing linear left) ==
+{'variant': 'plain', 'method': 'none', 'global': 1.0, 'window 1': 1.0, 'window 12': 1.0, 'window 27': 1.0}
+{'variant': 'plain', 'method': 'centroid', 'global': 0.629, 'window 1': 0.701, 'window 12': 0.752, 'window 27': 0.686}
+{'variant': 'plain', 'method': 'leace', 'global': 0.634, 'window 1': 0.696, 'window 12': 0.75, 'window 27': 0.682}
+{'variant': 'role', 'method': 'none', 'global': 1.0, 'window 1': 1.0, 'window 12': 1.0, 'window 27': 1.0}
+{'variant': 'role', 'method': 'centroid', 'global': 0.722, 'window 1': 0.767, 'window 12': 0.807, 'window 27': 0.787}
+{'variant': 'role', 'method': 'leace', 'global': 0.717, 'window 1': 0.756, 'window 12': 0.801, 'window 27': 0.779}
+variant   method  global  window 1  window 12  window 27
+  plain     none   1.000     1.000      1.000      1.000
+  plain centroid   0.629     0.701      0.752      0.686
+  plain    leace   0.634     0.696      0.750      0.682
+   role     none   1.000     1.000      1.000      1.000
+   role centroid   0.722     0.767      0.807      0.787
+   role    leace   0.717     0.756      0.801      0.779
+(window columns: the eraser refit on that window's train split -- the per-window ceiling)
+
+Within-window probe on GLOBALLY erased vectors (what the map would get):
+  plain none     w1 1.000  w12 1.000  w27 1.000
+  plain centroid w1 0.984  w12 0.993  w27 0.986
+  plain leace    w1 0.984  w12 0.995  w27 0.986
+  role  none     w1 1.000  w12 1.000  w27 1.000
+  role  centroid w1 0.984  w12 0.994  w27 0.991
+  role  leace    w1 0.984  w12 0.995  w27 0.991
+
+== 2. Within-window 15-NN purity in the embedding space ==
+variant   method  gender  role  top language  translated  kept neighbours
+  plain     none   0.908 0.754         0.836       0.177            1.000
+  plain centroid   0.783 0.751         0.837       0.187            0.861
+  plain    leace   0.785 0.751         0.837       0.185            0.864
+   role     none   0.945 0.788         0.835       0.145            1.000
+   role centroid   0.802 0.787         0.839       0.159            0.848
+   role    leace   0.804 0.787         0.839       0.159            0.853
+chance: gender 0.663, role 0.255, top language 0.564, translated 0.010
+
+== 3. 2-d purity, UMAP per window (windows [1, 12, 27]) ==
+{'variant': 'plain', 'method': 'none', 'gender 2d': 0.874, 'role 2d': 0.711}
+{'variant': 'plain', 'method': 'centroid', 'gender 2d': 0.729, 'role 2d': 0.707}
+{'variant': 'plain', 'method': 'leace', 'gender 2d': 0.729, 'role 2d': 0.708}
+{'variant': 'role', 'method': 'none', 'gender 2d': 0.933, 'role 2d': 0.745}
+{'variant': 'role', 'method': 'centroid', 'gender 2d': 0.752, 'role 2d': 0.743}
+{'variant': 'role', 'method': 'leace', 'gender 2d': 0.757, 'role 2d': 0.742}
+variant   method  gender 2d  role 2d
+  plain     none      0.874    0.711
+  plain centroid      0.729    0.707
+  plain    leace      0.729    0.708
+   role     none      0.933    0.745
+   role centroid      0.752    0.743
+   role    leace      0.757    0.742
+
+== 4. Probes (role variant): 8 nearest neighbours in the central window ==
+
+Cleopatra (-68), window 0:
+  none    : Cleopatra III of Egypt (F); Arsinoe IV of Egypt (F); Cleopatra V of Egypt (F); Cleopatra Selene of Egypt and Syria (F); Berenice IV of Egypt (F); Ptolemy XIII Theos Philopator (M); Caesarion (M); Berenice III (F)
+  centroid: Ptolemy XIII Theos Philopator (M); Caesarion (M); Cleopatra III of Egypt (F); Ptolemy VI (M); Ptolemy XII Auletes (M); Ptolemy VIII Physcon (M); Arsinoe IV of Egypt (F); Cleopatra V of Egypt (F)
+  leace   : Ptolemy XIII Theos Philopator (M); Caesarion (M); Cleopatra III of Egypt (F); Ptolemy VI (M); Arsinoe IV of Egypt (F); Ptolemy VIII Physcon (M); Ptolemy XII Auletes (M); Cleopatra V of Egypt (F)
+
+Hildegard of Bingen (1098), window 6:
+  none    : Mechtilde (F); Gertrude the Great (F); Hrotsvitha (F); Hermann of Reichenau (M); Herrad of Landsberg (F); Mechthild of Magdeburg (F); Kassia (F); Notker the Stammerer (M)
+  centroid: Mechtilde (F); Hermann of Reichenau (M); Notker the Stammerer (M); Gertrude the Great (F); Hrotsvitha (F); Hugh of Saint Victor (M); Herrad of Landsberg (F); Mechthild of Magdeburg (F)
+  leace   : Mechtilde (F); Hermann of Reichenau (M); Notker the Stammerer (M); Gertrude the Great (F); Hrotsvitha (F); Hugh of Saint Victor (M); Herrad of Landsberg (F); Mechthild of Magdeburg (F)
+
+Murasaki Shikibu (970), window 5:
+  none    : Sei Shōnagon (F); Fujiwara no Shōshi (F); Sugawara no Takasue no musume (F); Fujiwara no Tametoki (M); Izumi Shikibu (F); Fujiwara no Michitsuna no Haha (F); Fujiwara no Teishi (F); Ise (F)
+  centroid: Sei Shōnagon (F); Fujiwara no Shōshi (F); Fujiwara no Tametoki (M); Sugawara no Takasue no musume (F); Izumi Shikibu (F); Fujiwara no Michitsuna no Haha (F); Fujiwara no Teishi (F); Fujiwara no Michitsuna (M)
+  leace   : Sei Shōnagon (F); Fujiwara no Shōshi (F); Fujiwara no Tametoki (M); Sugawara no Takasue no musume (F); Izumi Shikibu (F); Fujiwara no Michitsuna no Haha (F); Fujiwara no Teishi (F); Ise (F)
+
+Napoleon (1769), window 12:
+  none    : André Masséna (M); Napoleon III (M); Jean-Baptiste Bessières (M); Jean Lannes (M); Jean-de-Dieu Soult (M); Luis Alejandro Berthier (M); Louis-Nicolas Davout (M); Alexander I of Russia (M)
+  centroid: André Masséna (M); Napoleon III (M); Jean-Baptiste Bessières (M); Jean Lannes (M); Luis Alejandro Berthier (M); Jean-de-Dieu Soult (M); Michel Ney (M); Louis-Nicolas Davout (M)
+  leace   : André Masséna (M); Napoleon III (M); Jean-Baptiste Bessières (M); Jean Lannes (M); Luis Alejandro Berthier (M); Jean-de-Dieu Soult (M); Michel Ney (M); Louis-Nicolas Davout (M)
+
+Marie Curie (1867), window 15:
+  none    : Irène Joliot-Curie (F); Pierre Curie (M); Frédéric Joliot-Curie (M); Antoine Henri Becquerel (M); Lise Meitner (F); Chien-Shiung Wu (F); Sophie Germain (F); Wilhelm Röntgen (M)
+  centroid: Irène Joliot-Curie (F); Pierre Curie (M); Frédéric Joliot-Curie (M); Antoine Henri Becquerel (M); Wilhelm Röntgen (M); Paul Langevin (M); Lise Meitner (F); Ernest Rutherford (M)
+  leace   : Irène Joliot-Curie (F); Pierre Curie (M); Frédéric Joliot-Curie (M); Antoine Henri Becquerel (M); Wilhelm Röntgen (M); Paul Langevin (M); Lise Meitner (F); Chien-Shiung Wu (F)
+
+Frida Kahlo (1907), window 17:
+  none    : Diego Rivera (M); Leonora Carrington (F); Remedios Varo (F); David Alfaro Siqueiros (M); Amrita Sher-Gil (F); Paula Modersohn-Becker (F); Georgia O'Keeffe (F); Tamara de Lempicka (F)
+  centroid: Diego Rivera (M); David Alfaro Siqueiros (M); Leonora Carrington (F); Remedios Varo (F); Amrita Sher-Gil (F); Pablo Picasso (M); Salvador Dalí (M); Paula Modersohn-Becker (F)
+  leace   : Diego Rivera (M); David Alfaro Siqueiros (M); Leonora Carrington (F); Remedios Varo (F); Amrita Sher-Gil (F); Pablo Picasso (M); Salvador Dalí (M); Paula Modersohn-Becker (F)
+
+Taylor Swift (1989), window 31:
+  none    : Carrie Underwood (F); Olivia Rodrigo (F); Billie Eilish (F); Katy Perry (F); Kacey Musgraves (F); Ariana Grande (F); Beyoncé (F); Miranda Lambert (F)
+  centroid: Carrie Underwood (F); Billie Eilish (F); Olivia Rodrigo (F); Katy Perry (F); Kacey Musgraves (F); Morgan Wallen (M); Ariana Grande (F); Beyoncé (F)
+  leace   : Carrie Underwood (F); Billie Eilish (F); Olivia Rodrigo (F); Katy Perry (F); Kacey Musgraves (F); Ariana Grande (F); Morgan Wallen (M); Beyoncé (F)
+
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/gender_erasure.html

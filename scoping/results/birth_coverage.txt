@@ -1,0 +1,174 @@
+792,471 people above the floor; 753,598 with a birth year; MAP_N = 31,000
+Score of the last person admitted: 1,742,072 (views/mo x years)
+
+== 1. Roster preview by era (share of roster; lowest views admitted) ==
+              n  min_views  share
+era                              
+BCE        2602      379.0   8.4%
+1-1499     7734      894.5  24.9%
+1500-1799  2927     3421.0   9.4%
+1800-1899  2867     7943.5   9.2%
+1900-1949  5610    13890.5  18.1%
+1950+      9260    22926.0  29.9%
+before 1500: 33.3%; before 1900: 52.0%; born 1900+ with no death date: 32.8%
+
+Birth source in the roster:
+birth_source
+P569          30134
+death           764
+floruit          83
+work_start       16
+baptism           3
+
+P569 precision in the roster (6 millennium, 7 century, 8 decade, 9 year, 11 day):
+birth_precision
+6         140
+7        2395
+8         276
+9        6085
+10        166
+11      21072
+<NA>      866
+
+Coarse-precision (< year) births from 1500 on in the roster: 72
+      qid                label                                                                                        description  median_views  birth_year_est birth_source  birth_precision
+Q11514803                 <NA>                                                                                               <NA>       59628.5            1550         P569                7
+   Q72296 man in the Iron Mask                                     17th century prisoner, among the most famous in French history       70330.5            1640         P569                8
+  Q209535      False Dmitriy I                                                                         Tsar of Russia (1605–1606)       38550.5            1550         P569                7
+  Q214910         Kamehameha I                                                         founder and ruler of the Kingdom of Hawaii       50424.5            1750         P569                7
+   Q59658          Sawney Bean                           semi-mythical head of a 48-member clan in 15th- or 16th-century Scotland       27700.0            1550         P569                7
+ Q1849828             Muramasa                                                                                Japanese swordsmith       18790.5            1500         P569                6
+  Q529197      Lope de Aguirre                                                                        Basque Spanish conquistador       13992.5            1510         P569                8
+  Q167654           Frans Hals                                                                          Dutch painter (1580–1666)       15012.5            1582         P569                8
+ Q1945341  Monster of Florence                                                                         unidentified serial killer       82819.5            1950         P569                7
+  Q540851     Malyuta Skuratov                                                                    Russian executioner (died 1573)       12636.0            1550         P569                7
+  Q469791      False Dmitry II                                                                    pretender to the Russian throne       11812.5            1550         P569                7
+  Q390933         Ivan Susanin                                                 Russian martyr, a peasant from the village Domnino       11638.5            1550         P569                7
+  Q447655    Victor of Aveyron                                                           feral child found in 18th century France       22338.5            1780         P569                8
+Q11161448           Ii Naotora                                                                       daimyō of the Sengoku period       11062.0            1550         P569                7
+   Q58682             Tank Man anonymous man who stood in front of a column of Chinese tanks during the Tiananmen Square protests       68670.5            1950         P569                7
+
+Fallback-dated people in the roster, by views:
+      qid                             label                                                                                      description  median_views  birth_year_est birth_source
+   Q44228                        Leonidas I                                                          King of Sparta from c. 489 BC to 480 BC       94157.5            -550        death
+   Q51666                  historical Jesus                                                                     Jesus as a historical person       93056.5             -41        death
+Q98382011                          Ea-nāṣir                                                              18th-century BC Babylonian merchant       43146.5           -1796      floruit
+  Q128538               Luke the Evangelist                                                                      one of the four evangelists       63945.0               4      floruit
+  Q130005              Edward the Confessor                                                    Anglo-Saxon King of England from 1042 to 1066      117938.0             995        death
+  Q234451                            Himiko                                                                 3rd century queen of Yamataikoku       44856.0             177        death
+  Q298039                    Empress Lü Zhi                                                   Empress Regent of the Han dynasty (241–180 BC)       36439.0            -250        death
+  Q551700                     Kennewick Man                         Prehistoric Paleoamerican man found in Kennewick, Washington, US in 1996        7495.5           -7321        death
+  Q355121                    Penitent Thief                           Christian saint; thief pardoned by Jesus on the cross in Luke 23:39-43       33025.5             -38        death
+  Q197481                          Zhao Yun                                                              Chinese military general (died 229)       30533.5             158        death
+  Q715607                           Valmiki      Celebrated as the harbinger-poet in Sanskrit literature and the author of the epic Ramayana       25128.5            -196      floruit
+   Q43963                   Jack the Ripper                                                          unidentified 19th century serial killer      298901.5            1842      floruit
+    Q7011                          Kalidasa A classical Sanskrit writer widely regarded as the greatest poet and dramatist of ancient India.       31611.5             304      floruit
+  Q272326                         Æthelwulf                                                                                   King of Wessex       40206.5             787        death
+  Q274545 Quintus Fabius Maximus Verrucosus                                                    Roman statesman and general (c. 280 – 203 BC)       20529.0            -273        death
+  Q243245                          Ertuğrul                                                                 Ottoman ruler, father of Osman I       56623.0            1210        death
+  Q106771                           Hor-Aha                                                                                 Egyptian pharaoh        8846.5           -3096      floruit
+  Q242267                           Bardiya                                                          Son of Cyrus the Great (died c. 522 BC)       16833.0            -592        death
+  Q263779                 Maria al-Qibtiyya                                                                     One of Muhammad's concubines       29357.0             566        death
+ Q5965196                     Hōjō Tokiyuki                                                                                 Japanese samurai       56699.0            1282        death
+
+== 2. The undated ==
+38,873 undated (76 conflicts)
+  would clear the bar at age 25: 11
+  would clear the bar at age 40: 34
+  would clear the bar at age 60: 58
+  with a description mentioning 'born': 1,128
+
+Most-viewed undated people:
+       qid                          label                                                                           description  median_views     gender top_lang
+Q128567830                    Sophie Rain                                                         American Internet personality      241034.5     female       en
+   Q348970                   D. B. Cooper                                     unidentified man who hijacked an airplane in 1971      160832.0       male       en
+Q106994579                Jūtarō Yamanaka                                                          Japanese male idol and actor      144538.5       male       ja
+Q106994662                    Shunta Sono                                                             Japanese actor and singer      116003.0       male       ja
+ Q42310314                      Raj Arjun                                                                          Indian actor       93581.5       male       en
+   Q200188                  Emperor Jimmu                                                          first human emperor of Japan       89003.0       male       ja
+Q131919780                     Shawn Ryan                                                      American podcaster and Navy SEAL       87160.5       male       en
+Q125179438               Jodi Hildebrandt                             American counselor and convicted child abuser (born 1969)       78436.0     female       en
+ Q66365004                Yūko Natsuyoshi                                                      Japanese stage and voice actress       75473.5     female       ja
+Q134524432                  Shabana Azeez                                                                    Australian actress       73678.5     female       en
+Q136908316                 Matt Danzeisen                                                       American financier and investor       72897.5       male       en
+Q131623323             Stephen Wilson Jr.                                                    American rock and country musician       68754.5       male       en
+Q100454034               Takuto Teranishi                                                            Japanese actor and tarento       64004.5       male       ja
+Q130460515                Ella Bruccoleri                                                                       British actress       63609.0     female       en
+Q116776106                  PUPPET SUNSUN                                                                     Japanese YouTuber       62540.0       <NA>       ja
+Q134529175                      Comatozze                                                          Russian pornographic actress       61402.5     female       ru
+Q122828657                  Vic Michaelis                                                  American-Canadian comedian and actor       56912.5 non-binary       en
+ Q76846293                     Ali Siddiq                                                                     American comedian       56700.5       male       en
+ Q28871462               Shashwat Sachdev                                                             music composer from India       56640.5       male       en
+Q134731703                  Matt Dinniman American speculative fiction writer, best known for Dungeon Crawler Carl novel series       56505.0       male       en
+Q109920333                     Gus Wenner                                                           American magazine executive       53978.0       male       en
+Q101199732                  Hidaka Ukisho                                     Japanese singer, television personality and actor       53776.5       male       ja
+Q113645757            Pradeep Ranganathan                                                                  Indian film director       52227.5       male       en
+Q121139689 Abu Hafs al-Hashimi al-Qurashi                                                Caliph of the Islamic State since 2023       50107.5       male       en
+ Q48765485                 Ikumi Hasegawa                                                                Japanese voice actress       50066.0     female       ja
+Q119307125                Jyoti Deshpande                                                                  Indian film producer       49849.5     female       en
+Q123406157                        Rurutan                                               Japanese female YouTuber and sex worker       48210.0     female       ja
+Q138480939                  Danish Pandor                                                                Indian actor and model       47303.0       male       en
+  Q6174074                    Jeff Hiller                                                                        American actor       46835.0       male       en
+   Q743170                      Hua Mulan                                                      Chinese legendary female warrior       46707.5     female       en
+
+Occupation words in the 2,000 most-viewed undated descriptions:
+description
+<NA>          1180
+actress        253
+actor          227
+player          82
+singer          69
+politician      65
+youtuber        41
+musician        32
+model           20
+rapper          18
+wrestler         6
+streamer         5
+dj               2
+
+== 3. Conflicts, by views ==
+       qid                 label                                                          description  median_views  birth_year  death_year
+   Q200188         Emperor Jimmu                                         first human emperor of Japan       89003.0        -710        -584
+   Q304690         Li Ching-Yuen   Chinese martial artist and herbalist who claimed extreme longevity       35796.0        1577        1933
+   Q148028              Zaro Ağa                                 Turkish supercentenarian (1764–1934)        8599.0        1764        1934
+Q134616901             Pata Seca                                                                 <NA>        6573.0        1827        1958
+  Q2349607      Shirali Muslumov            disputed claimant to extreme longevity record (1805–1973)        6220.5        1805        1973
+  Q1106783            Karni Mata                                                    Hindu folk deitie        5831.0        1387        1538
+   Q469752        Marie Marvingt                               French athlete and aviator (1875-1963)        5719.0        2015        1963
+  Q7585809             Sri Chand                                                     Guru Nanak's son        4735.0        1494        1629
+   Q657399           Thomas Parr                                                   longevity claimant        4610.0        1483        1635
+  Q5411491          Felicia Tang                               American actress and model (1977-2009)        4069.0        2022        2009
+  Q7285802            Rajashekar                                                 Indian film director        3950.0        1992        1991
+Q111362647 Swami Shivananda Baba                               Indian saint, Padma Bhushan recipient.        3733.5        1896        2025
+   Q527384       Acharya Pingala Ancient inventor of binary numbers, combinatorics, and matrix rules.        3624.0        -149          67
+   Q310878         Seth-Peribsen                                               ancient Egyptian ruler        3607.0       -2774       -2649
+ Q26710852            Mbah Gotho                 Indonesian man who allegedly lived to the age of 146        3578.0        1870        2017
+
+== 4. Oldest 25 people in the roster ==
+      qid                 label                                                                                  description  median_views  birth_year_est birth_source  birth_precision
+  Q675738 Arlington Springs Man                              Paleoindian remains discovered on Santa Rosa Island, California        1598.5          -10546      floruit             <NA>
+ Q1988410        Femme de Peñon                                 Paleo-Indian human whose skull has been found in Mexico City         813.0          -10500         P569                6
+ Q4508563           Cheddar Man                         remains of a 8150 BC human male found in Cheddar Gorge, Somerset, UK       13529.0           -8500         P569                6
+  Q455750       Koelbjerg Woman Paleolithic bog body found in Denmark that is known for being the oldest bog body ever found        2869.0           -7999         P569                6
+  Q551700         Kennewick Man                     Prehistoric Paleoamerican man found in Kennewick, Washington, US in 1996        7495.5           -7321        death             <NA>
+ Q6981339           Barum Woman                                                           Mesolithic Swedish museum skeleton         755.0           -6500         P569                6
+  Q636510              Trijntje                    oldest human skeleton found in the Netherlands (about 5500 before Christ)         417.5           -5500         P569                6
+ Q4458118 Thirumazhisai Aazhwar                                                                             tamil poet-saint         878.5           -4202         P569                9
+ Q3537100       Bhoothath Alvar                                                one of the twelve alvar saints of South India         762.5           -4202         P569                9
+Q57497453                  Wash                                               possibly an ancient Egyptian predynastic ruler         697.5           -3546      floruit             <NA>
+  Q270394                  Mekh                                                                     last predynastic Pharaoh         686.5           -3500         P569                6
+ Q1057764              Ni-Neith                                                                    predynastic Egyptian king         789.5           -3500         P569                6
+ Q1989882                 Neheb                                                                             Egyptian pharaoh         540.5           -3500         P569                6
+  Q266668                 Khayu                                                                             Egyptian pharaoh         979.0           -3500         P569                6
+ Q1417153          Finger Snail                                                             ancient Egyptian ruler (Pharaoh)        1712.5           -3500         P569                6
+  Q318613            Scorpion I                                                                    predynastic Egypt pharaoh        8822.5           -3500         P569                6
+  Q268593                Wazner                                                                        ancient Egyptian king         689.5           -3500         P569                6
+  Q268620                   Tiu                                                                     ancient Egyptian pharaoh         870.0           -3500         P569                6
+Q94699497                  Fish                                                predynastic pharaoh of Upper Egypt (disputed)        1515.0           -3500         P569                6
+  Q268647                 Neheb                                                                               Egyptian ruler        1291.0           -3500         P569                6
+  Q219809           Scorpion II              second of two kings of that name during the Protodynastic Period of Upper Egypt       11440.0           -3500         P569                6
+  Q794867                  Bull            provisional name of the second known predynastic Egypt ruler (existence disputed)        3352.5           -3500         P569                6
+Q28220082                Kushim                                                                person named in Kushim Tablet        8179.0           -3450         P569                7
+  Q171291                  Ötzi                                                     well-preserved natural prehistoric mummy      116096.0           -3274         P569                9
+  Q268580                Hsekiu                                                                             Egyptian Pharaoh        1702.5           -3221        death             <NA>
