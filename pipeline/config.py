@@ -294,3 +294,37 @@ TRACK_NAME_ROUNDS = 3  # rounds of renaming tracks that share a name in some win
 def track_names_parquet(variant: str = MAP_EMBEDDING) -> Path:
     """One row per (layer, track): the name its label carries at every slider position, plus its path."""
     return DATA_DIR / f"track_names_{variant}.parquet"
+
+
+# --- Stage 11b: short names for the timeline chart's ribbons (decided 2026-11-09) ---
+# The page's slider is a ThemeRiver of the coarse tracks with each name inside its ribbon. Ribbons are thin
+# (the median coarse track peaks at 9% of a window: ~18 px in a 200 px chart), so only 12-22 of the 50 full
+# names fit; up to ~16 characters, 19-29 would. The chart uses the full name where it fits, else this short
+# one, else none (the name shows on hover). Same model, effort and cache as stages 10-11.
+SHORT_NAME_LAYERS = (2,)  # the chart shows the coarse layer only
+SHORT_NAME_MAX_WORDS = 3
+SHORT_NAME_MAX_CHARS = 18
+SHORT_NAME_ROUNDS = 2  # retries for names over the limit or shared by tracks alive in the same window
+
+
+def short_names_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """[layer, track, short_name] for the layers in SHORT_NAME_LAYERS."""
+    return DATA_DIR / f"track_short_names_{variant}.parquet"
+
+
+# --- Stage 12: export for the custom deck.gl page (decided 2026-11-09) ---
+# The page is hand-written in docs/ (index.html, app.js, style.css; the family's GitHub Pages folder); stage 12
+# writes what it loads into docs/data/: core.json + points.bin first (positions, names, labels, ribbons), then
+# details.json in the background (hovercard text). docs/data/ is gitignored until publishing is decided.
+FRONTEND_DIR = REPO_ROOT / "docs"
+FRONTEND_DATA_DIR = FRONTEND_DIR / "data"
+# Each window is centred and scaled to RMS radius 1 before export: AlignedUMAP's windows breathe (RMS radius
+# 6.7 -> 3.95 -> 5.9 across the slider), which at the rim swamps the real motion (median 0.058 radii).
+NORMALIZE_WINDOWS = True
+EXCERPT_MAX_CHARS = 280  # whole sentences of the lead's first paragraph, parentheticals dropped
+MARKER_RADIUS_PX = (1.4, 5.5)  # by log(score), smallest to largest
+# Coarse tracks get colours no track alive within this many windows of them has (interval colouring): a
+# track that ends and one that starts next door never share a colour, so colour never implies continuity.
+COLOR_BUFFER_WINDOWS = 1
+COLOR_LIGHTNESS = (55, 85)  # glasbey lightness bounds: points sit on a dark background
+UNLABELLED_COLOR = "#5b6472"  # points outside every coarse track

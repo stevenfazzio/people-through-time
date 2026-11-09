@@ -17,6 +17,7 @@ dependencies = [
     "plotly>=7.1.0",
     "concept-erasure>=0.2.4",
     "toponymy>=0.5.4",
+    "glasbey>=0.4.0",
 ]
 
 [project.optional-dependencies]

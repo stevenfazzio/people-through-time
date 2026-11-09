@@ -211,6 +211,20 @@ def write_json_atomic(obj, path: Path) -> None:
         raise
 
 
+def write_bytes_atomic(data: bytes, path: Path) -> None:
+    """Write bytes to a temp file in the same directory, check the size, then rename over the destination."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=path.suffix + ".tmp")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        assert Path(tmp).stat().st_size == len(data), f"size mismatch writing {path}"
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
+
+
 def save_npz_atomic(path: Path, **arrays) -> None:
     """np.savez_compressed to a temp file in the same directory, verify, atomic rename.
 

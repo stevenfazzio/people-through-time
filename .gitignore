@@ -16,3 +16,6 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Frontend data written by stage 12 (rebuildable; publish decision pending)
+docs/data/

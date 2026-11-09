@@ -11,7 +11,8 @@ stages, `pipeline/config.py` as the single source of knobs, no CLI args, uv +
 ruff line-length 120, parquet for tables / npz for vectors, atomic writes,
 `data/` gitignored and expensive.
 
-Status (2026-11-08): roster design settled (views × age, switched from
+Status (2026-11-09): frontend v1 runs locally (custom deck.gl page in `docs/`,
+stages 11b-12; see "Frontend" below). Earlier status (2026-11-08): roster design settled (views × age, switched from
 log-time stratification the same day). Stages 00–08 run; the bot filter
 (access-ratio clip) is settled and lives in stage 03; birth years (with
 fallbacks and the round-century fix) come from stage 04; stage 05 picks the
@@ -21,7 +22,8 @@ role, with gender projected out by stage 07b; stage 08 lays out all 32
 windows with one AlignedUMAP; stage 09 clusters each window into three label
 layers and links the clusters into tracks; stage 10 names every window's
 clusters with Toponymy and Claude Sonnet 5.5; stage 11 gives each track one
-name for its whole path. `scoping/` holds the one-off analysis behind
+name for its whole path; stage 11b gives each coarse track a short name for the
+timeline chart; stage 12 exports what the page in `docs/` loads. `scoping/` holds the one-off analysis behind
 the decisions below; `curated/` holds hand-made inputs (versioned, unlike
 `data/`).
 
@@ -45,6 +47,8 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
 | 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, so reruns resume) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
 | 11 | One name per track from its path of per-window names (Claude, structured self-checking reply), then renaming tracks of a layer that share a name in some window | `data/track_names_role_nogender.parquet` (layer, track, name, windows, gender shares, path, the reply's earliest / latest / candidate) |
+| 11b | Short name (≤ 3 words, ≤ 18 characters) per coarse track, for the timeline chart's ribbons (Claude, same model and cache) | `data/track_short_names_role_nogender.parquet` (layer, track, short_name) |
+| 12 | Frontend export: windows normalized, positions quantized, label centroids and sizes, ribbon order, colours, hovercard text | `docs/data/{core.json, points.bin, details.json}` (gitignored) |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
@@ -153,8 +157,25 @@ decision. Review page: `scoping/track_paths.py` →
 `data/scoping/track_paths.html` (final name over each path). Log:
 `logs/11_name_tracks.log`.
 
-Planned next: frontend (see "Frontend is custom"). Merge flicker looked
-acceptable in the preview (see "Label tracks, what's left").
+Stage 11b (2026-11-09): 60 Sonnet 5.5 calls, $0.10. Full names already within
+the limit are kept as they are (Western Painters, Star Athletes); 7 were too
+long after the first ask, 2 still are after two re-ask rounds (c27 "Political
+& Business" 20 characters, c34 "Novelists & Killers" 19) and are kept, since the
+page decides what fits; no two tracks alive together share one. E.g. c30
+"Composers & Actors", c17 "Popes & Monarchs", c4 "Kings & Companions". Log:
+`logs/11b_short_names.log`.
+
+Stage 12 (2026-11-09): 4 s. 17 colours for the 50 coarse tracks (1-window
+buffer; 12 without); ribbon-order flow cost 12,944 → 3,376 people × tracks in
+between; lead excerpts median 197 characters, 390 cut mid-sentence; 19 names
+from a title. Files: core.json 1.41 MB (0.48 MB gzipped), points.bin 0.69 MB
+(0.60), details.json 11.29 MB (3.79), page 0.05 MB: **13.44 MB raw, 4.89 MB
+gzipped**, plus deck.gl 9.1.15 from unpkg (1.60 MB, 0.44 MB gzipped), the
+Google fonts and thumbnails fetched on hover. Log: `logs/12_export_frontend.log`.
+Serve `docs/` (it fetches its data files, so no `file://`):
+`python3 -m http.server 8771 --bind 127.0.0.1 --directory docs`.
+
+Planned next: see "Frontend, what's left".
 
 ## Working rules
 
@@ -478,6 +499,82 @@ acceptable in the preview (see "Label tracks, what's left").
   per request: one kept across Toponymy's event loops threw harmless "Event
   loop is closed" tracebacks.
 
+- **2026-11-09 — Frontend: a custom deck.gl page whose slider is a
+  ThemeRiver of the coarse tracks.** Discussed and agreed with Steven before
+  building; the timeline-as-slider was his addition (after Priestley's *Chart
+  of Biography*, streamgraphs / ThemeRiver and Sparks's *Histomap*).
+  - **Renderer**: plain JS on deck.gl 9.1.15 (the version datamapplot 0.7.3
+    loads, pinned from unpkg), no build step: `docs/index.html`, `app.js`,
+    `style.css`, hand-written and versioned. datamapplot + `custom_js` was
+    rejected: its point layer, label layer, search and hover picking all
+    assume one fixed point set, so only the title panel would have survived.
+  - **Slider**: s over the 32 windows, continuous while dragging -- a person
+    in windows w and w + 1 glides between their two positions, one in only one
+    fades in or out in place; labels the same with their track's centroid --
+    and it eases (420 ms) to the nearest window on release, since only windows
+    are real layouts and clusters. Arrow keys step a window, play runs at 0.75
+    windows/s, pausing settles. Opens on window 16 (born 1831-1924).
+  - **Window normalization** (stage 12, `NORMALIZE_WINDOWS`): each window is
+    centred and scaled to RMS radius 1. AlignedUMAP's windows breathe (RMS
+    radius 6.7 at window 0, 3.95 at 14, 5.9 at 31; window 12 → 13 shrinks
+    11%), which at the rim was bigger than a typical person's real move
+    (median 0.058 radii). A similarity transform per window: nobody's place in
+    their window changes, and a fixed camera stays framed.
+  - **Timeline / slider**: SVG under the map (27vh, 190-270 px). x = the 36
+    equal-count bins with year ticks at their true positions -- uneven in
+    years, as Histomap's axis is -- and the window on the map is a 5-bin band
+    with the rest shaded; drag it or click anywhere. One ribbon per coarse
+    track, as thick as its people in each window (window w's count at its
+    centre bin w + 2.5; the half-window midpoint is 0 where a track starts or
+    ends, so ribbons taper; first and last windows extend to the edges), drawn
+    as a uniform cubic B-spline of stacked control points (smooth, never below
+    zero, stacked boundaries coincide). Centred like ThemeRiver, 2 px gaps,
+    scaled to the largest labelled total; people outside every coarse track
+    are left out, so the river narrows where few people fall into big clusters
+    (coarse coverage 58-92% by window). Ribbon order: one fixed order (no
+    crossings), from the tracks' mean height on the map, then single-track
+    moves while they lower the people × tracks stacked between the two ends of
+    each coarse-track flow between windows (merges, splits). Ribbon label:
+    the full name where it fits horizontally inside the ribbon at 13-9 px,
+    else stage 11b's short name, else none (tooltip on hover); 21 of 50 at
+    1440 px wide. Hovering a ribbon highlights its people on the map (others
+    at 10% alpha); hovering a person highlights their ribbon.
+  - **Colour**: points by coarse track (grey `#5b6472` outside every coarse
+    track; blended while a person changes track). Interval colouring with a
+    1-window buffer, so no two coarse tracks alive within a window of each
+    other share a colour and colour never implies continuity: 17 glasbey
+    colours (CVD-safe, lightness 55-85 for the dark background). Ribbons share
+    them, so the chart is the legend.
+  - **Labels on the map**: all three layers, pixel sizes 12 / 14 / 17 (fine /
+    mid / coarse), priority coarse > mid > fine, then region size, as in
+    datamapplot: the overview shows mostly coarse labels and finer ones appear
+    as zooming spreads them. Collisions are resolved on the CPU each frame
+    (project the ~70-90 candidates, greedy by priority, padded boxes [10, 6]
+    px) with a 180 ms crossfade. deck.gl's CollisionFilterExtension was tried
+    first, as datamapplot uses it, and let partly overlapping labels through:
+    it tests each label only at its anchor against a picking-colour collision
+    map, and even padded background boxes at test scale 2.5 didn't stop it
+    here (not fully diagnosed).
+  - **Hovercard** (living-people-map's layout, dark): coarse-region pill in
+    its colour, name, short description, Born / Died / Views rows, thumbnail,
+    lead excerpt (whole sentences of the first paragraph up to 280 characters,
+    parentheticals dropped), footer. Born is "c. X" at decade precision or
+    coarser and "c. X (est.)" when stage 04 inferred it from death, floruit or
+    work start. Translated leads say "Translated by Claude from the Japanese
+    Wikipedia"; click opens the article the lead came from (the source edition
+    for translated leads, which also fixes the 9 whose enwiki title redirects
+    to someone else; Wikidata for the 3 description leads).
+  - **Search**: names (and short descriptions once details.json is in) of all
+    31k, every token matched; tiers -- tokens start words of the name, are in
+    the name, are in the description -- each in fame order. Typing dims
+    non-matches on the map; picking a result moves the slider to the person's
+    middle window, flies there and pins their card.
+  - **Data**: core.json + points.bin first (positions as uint16 per (person,
+    window), person by person in rank order; names, windows, labels, ribbon
+    order, palette), details.json fetched after the first paint (the 3.8 MB
+    gzipped bulk). Kept external, not inlined: one inline file would make
+    every visitor wait for all 13 MB.
+
 ## Proposed, not yet settled
 
 - **Label tracks, what's left** (see the 2026-11-08 decision). Merge
@@ -492,12 +589,13 @@ acceptable in the preview (see "Label tracks, what's left").
   label hierarchy, but Toponymy no longer needs it. Label position = the track's centroid per window,
   interpolated between windows; labels fade in and out as tracks begin and
   end.
-- **Frontend is custom.** datamapplot can't animate positions: in 0.7.3's
-  `datamap.js` the only deck.gl `transitions` are on `getFillColor`
-  (colormap switches), and the histogram only highlights a selection. Either
-  a custom deck.gl page or a datamapplot page whose point and label layers
-  are replaced via `custom_js` (keeps hovercards, search, title panel —
-  untested). Likely the largest engineering piece.
+- **Frontend is custom** -- settled 2026-11-09, see the decision "Frontend".
+- **Frontend, what's left** (2026-11-09): publishing (no remote; `docs/data/`
+  is gitignored, so decide whether to commit it or build it in CI); Open Graph
+  tags and a link-preview screenshot (datamap skill); a phone layout (the
+  timeline needs a different shape at 375 px); whether labels crossfading
+  during a drag read as flicker; the palette's tone (bright on dark -- review
+  by eye); search over more than names and short descriptions.
 
 ## Open questions
 
@@ -544,10 +642,13 @@ acceptable in the preview (see "Label tracks, what's left").
   constraint there.
 - **Score as a display variable.** Cleopatra is #1 by score (1.19M views/mo
   × 2,094 years), ahead of Alexander and Jesus; her traffic is the suspected,
-  unverified crawler case above. Harmless for membership, but if score ever
-  sizes markers or orders labels, check her monthly series first.
-- **Missing labels**: 19 roster people have no en/mul Wikidata label and 104
-  no description; the frontend should fall back to the article title.
+  unverified crawler case above. Harmless for membership. Since 2026-11-09
+  log(score) sizes the map's markers (1.4-5.5 px); on a log scale she is
+  barely bigger than Alexander, but her monthly series is still unchecked.
+- **Missing labels** (resolved 2026-11-09 in stage 12): 19 roster people have
+  no en/mul Wikidata label; the page shows the enwiki title, else the
+  top-language title (慈雲院 (豊臣秀長室), whose translated lead says "Jiun-in").
+  The hovercard's description is the enwiki short description, else Wikidata's.
 - **Repo name** is a working name; no GitHub remote yet.
 
 ## Scoping data and gotchas (2026-11-07)
@@ -592,6 +693,21 @@ acceptable in the preview (see "Label tracks, what's left").
 - **macOS `grep -F -f` with ~10k patterns is unusably slow** (24 min and not
   done on a 2.5 GB gz); slicing each SQL row from both ends in Python parsed
   all 200M+ categorylinks rows in under 90 s.
+
+## Frontend gotchas (2026-11-09)
+
+- **A hidden Browser pane throttles the page**: `requestAnimationFrame` ran 0
+  times a second while the pane was hidden and ~1-9 with it shown but the
+  window not in front, so animations stall and screenshots show stale
+  frames. The page exposes `window.__ptt` (state, `setS`, `goTo`,
+  `renderNow()`, which draws without waiting for a frame) for checking states
+  from the console.
+- **The pane may load the page at zero size**: the timeline and the initial
+  fit wait for a real size (ResizeObserver) instead of drawing at 0 px.
+- **`http.server` + the pane's cache**: after editing `app.js` the browser
+  kept running the old copy (heuristic caching; `?v=` on the page URL doesn't
+  reach the script). Re-fetch with `fetch(url, {cache: "reload"})` from the
+  console, or serve with a handler that sends `Cache-Control: no-store`.
 
 ## Inherited Wikipedia gotchas (from living-people-map — they will bite again)
 
