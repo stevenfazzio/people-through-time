@@ -185,11 +185,64 @@ EMBED_INSTRUCTIONS = {
     "field, and the society they lived in",
 }
 # The variant later stages use (decided 2026-11-08): "role" groups people with
-# their peers (Napoleon -> his marshals) where "plain" leans to family and circle;
-# its cost, stronger gender separation, is judged on the rendered map. No erasure.
+# their peers (Napoleon -> his marshals) where "plain" leans to family and circle.
+# Its cost, stronger gender separation, is what stage 07b's erasure takes out.
 EMBED_VARIANT = "role"
 
 
 def embeddings_npz(variant: str = EMBED_VARIANT) -> Path:
     """[qid, vectors] row-aligned with map_people.parquet (rank order)."""
     return DATA_DIR / f"embeddings_{variant}.npz"
+
+
+# --- Stage 07b: gender erasure (decided 2026-11-08, after the AlignedUMAP preview) ---
+# One global centroid projection: the unit (female mean - male mean) direction,
+# fit on the roster's male/female people, projected out of every vector, which is
+# then renormalized. LEACE was indistinguishable and per-window erasers added
+# little in 2-d (scoping/gender_erasure*.py). Linear only: "actress", "queen" and
+# pronouns still carry gender. The direction is saved with the vectors and must
+# also be projected out of anything else embedded into this space (Toponymy's
+# keyphrases and region names).
+ERASE_GENDER = True
+MAP_EMBEDDING = f"{EMBED_VARIANT}_nogender" if ERASE_GENDER else EMBED_VARIANT  # what stage 08 lays out
+
+
+# --- Stage 08: AlignedUMAP layout of every slider window ---
+# Benchmarked 2026-11-08 (scoping/bench_aligned_umap.py, living-people-map's
+# 25k cut into this slider structure): umap-learn 0.5.12's alignment defaults
+# moved a shared person a median 0.049 layout radii between neighbouring
+# windows, ~5x steadier than independent UMAPs + Procrustes. Revisit
+# ALIGNMENT_REGULARISATION only if the frontend shows jumpy motion. min_dist is
+# a clustering parameter here: labels are clustered in the 2-d layout.
+UMAP_KW = {"n_neighbors": 15, "min_dist": 0.05, "metric": "cosine", "random_state": 42}  # family defaults
+ALIGNMENT_REGULARISATION = 1e-2
+ALIGNMENT_WINDOW_SIZE = 3
+N_WINDOWS = N_BINS - WINDOW_BINS + 1  # window w = bins w .. w + WINDOW_BINS - 1
+
+
+def layout_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """[window, qid, x, y]: one row per person per window they belong to."""
+    return DATA_DIR / f"layout_{variant}.parquet"
+
+
+# --- Stage 09: label tracks ---
+# Settled 2026-11-08 (scoping/label_tracks.py; CLAUDE.md "label tracks"): each
+# window's 2-d layout is clustered on its own with Toponymy's primitives
+# (fast_hdbscan leaf clusters), and clusters in neighbouring windows are linked
+# into tracks by shared people. A layer's min cluster size is the same in every
+# window, chosen so a window shows LABEL_TARGETS labels on average (scoping:
+# 39 / 76 / 158 people). Layer 0 is the finest, as in Toponymy.
+LABEL_TARGETS = (40, 20, 10)  # labels per window, finest layer first
+LABEL_MIN_SAMPLES = 5  # Toponymy's default
+TRACK_LINK_MIN = 0.3  # a match needs this share of the smaller cluster's people present in both windows
+TRACK_BRIDGE = True  # also link a track that ended to a cluster starting two windows on (one-window gap)
+
+
+def tracks_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """[window, qid, track_0 .. track_<n-1>]: each person's track per layer in each window; -1 = unlabelled."""
+    return DATA_DIR / f"tracks_{variant}.parquet"
+
+
+def track_tree_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """One row per (layer, track): its majority parent, lifetime and size."""
+    return DATA_DIR / f"track_tree_{variant}.parquet"

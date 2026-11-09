@@ -12,12 +12,14 @@ ruff line-length 120, parquet for tables / npz for vectors, atomic writes,
 `data/` gitignored and expensive.
 
 Status (2026-11-08): roster design settled (views × age, switched from
-log-time stratification the same day). Stages 00–06 run; the bot filter
+log-time stratification the same day). Stages 00–08 run; the bot filter
 (access-ratio clip) is settled and lives in stage 03; birth years (with
 fallbacks and the round-century fix) come from stage 04; stage 05 picks the
 31k roster and its slider bins; stage 06 fetches and translates the leads;
 stage 07 embeds them twice (plain and role-instructed Qwen3); the map uses
-role, with no gender erasure. `scoping/` holds the one-off analysis behind
+role, with gender projected out by stage 07b; stage 08 lays out all 32
+windows with one AlignedUMAP; stage 09 clusters each window into three label
+layers and links the clusters into tracks. `scoping/` holds the one-off analysis behind
 the decisions below; `curated/` holds hand-made inputs (versioned, unlike
 `data/`).
 
@@ -33,9 +35,12 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 02 | Monthly views per (person, language, access method), 12 dumps | `data/pageviews/pageviews_YYYYMM.parquet` |
 | 03 | Per-person monthly totals and median after the bot filter, raw median, access shares, top language | `data/people_views.parquet` |
 | 04 | Wikidata dates (birth, death, baptism, floruit, work start), gender, label, description for people above the floor (WDQS, per-chunk cache in `data/raw/wikidata_facts/`) | `data/people_facts.parquet` |
-| 05 | Fame score, top `MAP_N` roster after `curated/birth_year_overrides.csv`, slider bin, enwiki and top-language titles | `data/map_people.parquet` |
+| 05 | Fame score, top `MAP_N` roster after `curated/birth_year_overrides.csv` (traditional chronologies, Wikidata errors), slider bin, enwiki and top-language titles | `data/map_people.parquet` |
 | 06 | English lead per roster person (enwiki intro, else the top edition's intro translated by Claude), enwiki short description, thumbnail (caches in `data/raw/leads/`, `data/raw/translations/`) | `data/leads.parquet` |
 | 07 | Qwen3-Embedding-8B vectors of the leads via OpenRouter (pinned to Nebius), one file per instruction variant (cache: `data/raw/embedding_cache.sqlite`) | `data/embeddings_<variant>.npz` |
+| 07b | Gender erasure: one global centroid direction projected out of the role vectors (`ERASE_GENDER`) | `data/embeddings_role_nogender.npz` (+ `direction`) |
+| 08 | One AlignedUMAP over the 32 slider windows (`config.MAP_EMBEDDING`) | `data/layout_role_nogender.parquet` (window, qid, x, y) |
+| 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
@@ -44,10 +49,11 @@ raw, 792,471 after the bot filter. Stage 04 fetch (2026-11-08): 793 WDQS
 queries of 1,000 QIDs, ~5 s each, 75 min including a restart (a body cut off
 mid-stream; now retried) and 9 transient 429/502s; a rebuild from the cache
 takes ~4 min. 94.0% have a P569, 1.0% a fallback, 4.9% (38,873) no birth year.
-Stage 05 (12 s, 2026-11-08): bar 1,741,680 views/mo × years; 36 bins from
-10,546 BC–651 BC (803 people) down to 3–4 years wide in 1940–1990, 687–1,016
-per bin; 32 windows of 4,131–4,420, 137,579 AlignedUMAP points; 289 roster
-people (0.9%) have no enwiki article, 188 of them Japanese-led.
+Stage 05 (12 s, 2026-11-08, after the birth-year corrections): bar 1,740,672
+views/mo × years; 36 bins from 10,546 BC–651 BC (803 people) down to 3–4
+years wide in 1940–1990, 736–1,002 per bin; 32 windows of 4,144–4,423,
+137,574 AlignedUMAP points; 288 roster people (0.9%) have no enwiki article,
+most of them Japanese-led.
 
 Stage 06 (2026-11-08): 1,534 enwiki requests of 20 titles in 16 min at
 ~96/min with 2 workers, no 429s or maxlag. An enwiki page is used only if it
@@ -71,7 +77,38 @@ Stage 07 (2026-11-08): ~15 min per variant with 4 workers, 32 transient
 every 5xx was retried); $0.05 (plain) + $0.09 (role, the instruction adds
 tokens). Same text twice on Nebius: cosine 0.9999; Nebius vs DeepInfra 0.997.
 
-Planned next: AlignedUMAP (stage 08) → label tracks → frontend.
+Stage 08 (2026-11-08, first run on the unerased role vectors): 4.8 min,
+2.5 GB peak, 137,579 points. A shared
+person moves a median 0.055 layout radii between neighbouring windows (p90
+0.151, p99 0.425; benchmark 0.049), fastest in windows 9–20 (~1260–1930);
+0.68% of moves exceed 0.5 radii, mostly people between two groups. 15-NN
+fidelity 0.364 (benchmark 0.288). Window centres stay put; spread narrows in
+the middle centuries (x std 5.8 → 3.3 → 3.7). 2-d same-gender neighbour
+share (for the erasure question): 0.96–0.98 in windows 0–10 (women 14–20%,
+chance ~0.74), 0.87–0.93 from window 12 on (women 18–39%, chance 0.52–0.70);
+as a share of the room above chance, ~0.85 in every era — women cluster
+nearly completely throughout. Animated preview:
+`scoping/layout_preview.py` → `data/scoping/layout_<embedding>_by_{role,gender}.html`.
+Stage 07b + 08 rerun on the erased vectors (2026-11-08): held-out gender
+probe AUC 1.000 → 0.722; 2-d same-gender share 0.924 → 0.736 averaged over
+windows (chance 0.663), i.e. the excess over chance 0.78 → 0.22 — most left
+in the earliest windows (0.31–0.37: consorts and queens, whose text is about
+being someone's wife). Motion median 0.055 (p99 0.373), fidelity 0.357:
+unchanged. Logs: `logs/08_aligned_umap.role.log` (before), `.log` (after).
+After the birth-year corrections (current outputs): probe 0.708, 4.7 min,
+motion median 0.058 (p99 0.370), fidelity 0.357.
+
+Stage 09 (2026-11-08): 2 s. Min cluster sizes 39 / 76 / 158 give 39.5 /
+20.2 / 9.7 labels per window; 270 / 110 / 50 tracks; 23–26% of a window
+unlabelled; a labelled person's label switches in 14–18% of window steps
+(42–49% of those are merges, the rest boundary crossings); layers nest
+strictly within every window. Tree: 93% of fine tracks have a mid parent (4%
+skip to coarse, 3% root), 97% of mid tracks a coarse parent; the median
+track sits 100% under its parent. Same numbers as A+ in
+`scoping/results/label_tracks.txt`. Log: `logs/09_label_tracks.log`.
+
+Planned next: merge flicker in stage 09's linking (see "Label tracks,
+what's left"), then naming with Toponymy → frontend.
 
 ## Working rules
 
@@ -262,7 +299,8 @@ Planned next: AlignedUMAP (stage 08) → label tracks → frontend.
   (Ötzi, Cheddar Man, mostly Iron Age bog bodies) stay; the bog bodies span
   several windows and should form their own region.
 
-- **2026-11-08 — embedding variant = role (instructed), no erasure.** Comparison (
+- **2026-11-08 — embedding variant = role (instructed), gender erased (stage
+  07b, see Gender erasure).** Comparison (
   `scoping/embed_variants.py` → `scoping/results/embed_variants.txt`, UMAP
   panels in `data/scoping/embed_variants.html`). Role instruction: "Identify
   what the person described in this Wikipedia article opening is known for:
@@ -278,19 +316,86 @@ Planned next: AlignedUMAP (stage 08) → label tracks → frontend.
   to their peers (Napoleon → his marshals; Leonardo → Raphael, Perugino;
   Genghis Khan → the later khans; Taylor Swift → country singers). Cost of
   role: stronger gender separation (Cleopatra → only Ptolemaic queens) —
-  which erasure would remove (see Gender erasure; not adopted). Chosen for
-  the peer grouping; gender separation is judged on the rendered map. Plain
-  stays embedded for a side-by-side if needed.
+  which stage 07b's erasure removes. Chosen for the peer grouping. Plain stays
+  embedded for a side-by-side if needed.
+
+- **2026-11-08 — junk Wikidata birth years are curated, and stage 06 warns
+  about new ones.** Found in the layout preview: the age weighting turns a bad
+  P569 into a huge score, and 14 roster people, all born in the 20th century,
+  sat in early windows. Kinds: the day of the month entered as the year (Yurie
+  Igoma "24" for February 24, 1999; Minami Hinata, Yu-ri Yoshida, Daniela
+  Zaiushkina — only a birthday known); placeholder year 1 (Omar Metwally,
+  Claudio Tapia, Xaviersobased); truncation (Jason Douglas 173, Amirhossein
+  Mahmoodi 200); typos (Hwang In-yeop 1492, Durai Murugan 1834, Tommy
+  Hilfiger 29, Chris McKenna 20); Hijri (Nawaf bin Saad 1391 AH = 1971).
+  `curated/birth_year_overrides.csv` now takes plain data errors too, with
+  the year from the person's own enwiki article, or an empty year when no
+  source gives it (unscoreable). Rerun: 12 left the roster, 12 came in at the
+  bottom (Niklas Luhmann, Creighton Abrams, Michael Chekhov, ...); Hilfiger
+  (rank 12,220) and Hwang stay at their real ages. Stage 06 logs a warning for
+  birth years the person's own article contradicts; it caught all 14, and the
+  only one left is Veer Teja (folk hero: lead 1074–1103, Wikidata 1255,
+  traditional dates — left alone). Wikidata descriptions are no automatic fix:
+  their "(YYYY–YYYY)" is often a term of office (Obama 2009–2017).
+
+- **2026-11-08 — label tracks: cluster each window on its own and link the
+  clusters across windows; hierarchy by majority parent.** Compared with one
+  3-d clustering of the stacked windows (`scoping/label_tracks.py` →
+  `scoping/results/label_tracks.txt`; previews
+  `data/scoping/label_tracks_{A,B}.html`, `label_tracks_frames.png`). Both
+  with Toponymy's own primitives (leaf clusters, min_samples 5), matched on
+  ~40 / 20 / 10 labels per window. A: per-window 2-d clusters (min size
+  39 / 76 / 158) linked by mutual-best member overlap; A+ also bridges
+  one-window gaps. B: all 137k (window, person) points in (x, y, λ·window),
+  λ 0.02–0.16 (median 5-NN distance in a window ~0.08; a person moves a
+  median 0.30 per step). B is steadier (a labelled person's label switches
+  in 0.4–11% of steps vs 14–18%; label centroids move about half as far)
+  but can't cover the map: 49–61% of each window unlabelled vs 23–26%, at
+  most ~25 / 13 / 6 labels per window at A's size bars, and about half its
+  coarse labels straddle separate pieces (A 18%); in window 16 the whole
+  early-film region has no coarse label. Drift of a track's content from
+  first to last window is similar (A+ 2–13% of tracks, B 3–17%). Half of
+  A's switches are boundary crossings, half merges (two regions join for a
+  window; the smaller track ends and its people take the larger's label).
+  People per track per step as stacked areas: `scoping/track_sizes.py` →
+  `data/scoping/track_sizes.html` (A: 1.6 tracks born and 1.7 ended per
+  step, unlabelled 8–42% by window; B: 0.8 / 0.7, 44–87%; A's film & TV
+  track runs windows 13–31 and peaks at 35% of window 23); size
+  distributions: `scoping/cluster_sizes.py`.
+  **Hierarchy.** Within a window the layers nest strictly (each is the same
+  density tree cut at a larger size): a fine cluster lies wholly inside one
+  mid cluster (84%) or wholly in mid's unlabelled space (16%), never split;
+  mid in coarse 80 / 20. Across windows each layer is linked on its own, so
+  46% of fine tracks change mid parent at least once and 49% of mid tracks
+  change coarse parent — half of those because the parent track ended
+  (merge flicker), half because the child moved. Chosen: each layer linked
+  independently (a coarse flicker doesn't reset fine labels), then each
+  child track's parent = the track at the next coarser layer holding most
+  of its person-windows; a child never under a named parent there goes to
+  the next layer up, else the root (Toponymy's convention). Measured: fine
+  → mid for 93% of fine tracks, skip a layer 4%, root 3%; mid → coarse 97%,
+  root 3%; the median child sits 100% under its chosen parent, 86–87% of
+  person-windows overall, and only 4% of children are under it less than
+  half the time. Rejected: top-down linking (a child continues only under
+  the same parent) — strict tree, but every coarse break would reset all
+  the tracks below it.
 
 ## Proposed, not yet settled
 
-- **Labels across windows**: cluster each window on its own 2-d layout (the
-  datamap rule — cluster in the plot space), link clusters in neighbouring
-  windows by member overlap into *tracks*, and name each track once with
-  Toponymy, handed the tracks as a pre-fitted clusterer. Label position =
-  track centroid per window, interpolated between windows; labels fade in and
-  out as tracks begin and end; on a split, the larger piece keeps the name.
-  Start with one or two label layers.
+- **Label tracks, what's left** (see the 2026-11-08 decision). Merge
+  flicker: keep a track alive through a short merge and give it back its id
+  when it splits off again (half of all label switches; also half of the
+  parent changes). Per-segment names where a track's content drifts (a coarse
+  track went from Mozart, Beethoven and Bach to film actors). (Done in
+  stage 09: fixed min cluster sizes across windows rather than Toponymy's
+  per-run quantile rule, which would give each window different layers; the
+  majority-parent tree.) Toponymy handoff: one row per person under
+  their majority track in each layer, plus our own `cluster_tree_` from the
+  majority parents — Toponymy's `build_cluster_tree` attaches a child to the
+  first parent (by cluster number) holding any of its points, which assumes
+  strict nesting. Label position = the track's centroid per window,
+  interpolated between windows; labels fade in and out as tracks begin and
+  end.
 - **Frontend is custom.** datamapplot can't animate positions: in 0.7.3's
   `datamap.js` the only deck.gl `transitions` are on `getFillColor`
   (colormap switches), and the histogram only highlights a selection. Either
@@ -323,12 +428,13 @@ Planned next: AlignedUMAP (stage 08) → label tracks → frontend.
   but per-window erasers, which kill that (0.50), move the 2-d purity only
   0.752 → 0.735; re-erasing after renormalizing (3 rounds) 0.741. The
   residue is the text itself ("actress", "queen", pronouns) — nonlinear,
-  out of reach of linear erasure. **Decided 2026-11-08: no erasure for
-  now.** Add it only if the rendered map shows gender organizing it in a way
-  worth removing, not preemptively. If it comes back: one global centroid
-  projection (simplest to explain; per-window adds little), applied also to
-  Toponymy's keyphrase and name embeddings so labels share the points' space.
-  The `concept-erasure` dependency stays for the scoping scripts.
+  out of reach of linear erasure. First decided against (2026-11-08: wait for
+  the map); **reversed the same day after the AlignedUMAP preview**, where
+  women clustered almost completely in every window. Now stage 07b: one
+  global centroid projection (simplest to explain; per-window adds little).
+  The direction is saved in `embeddings_role_nogender.npz` and must also be
+  projected out of Toponymy's keyphrase and name embeddings, so labels share
+  the points' space. `concept-erasure` stays only for the scoping scripts.
 - **`MAP_N` and `AGE_OFFSET`**: 31k and 0 are what stage 05 builds with,
   still provisional until the map can be looked at. Real data gives history
   more room than the enwiki proxy did (19 of 36 bins before 1903), so nothing

@@ -1,10 +1,17 @@
 # Hand-curated birth years, applied by stage 05 over stage 04's birth_year_est.
 #
-# Rule (2026-11-08): override only a HISTORICAL person whose Wikidata birth year
-# comes from a traditional or religious chronology and sits centuries away from
-# the scholarly dating. Legendary figures with no scholarly date (Ishmael,
-# Shaodian, Gao Yao, Parashara) stay at their traditional dates. Ranges become
-# their midpoint, as stage 04 does for century-precision dates (7th century -> 650).
+# Two kinds of row (2026-11-08):
+# 1. A HISTORICAL person whose Wikidata birth year comes from a traditional or
+#    religious chronology and sits centuries away from the scholarly dating.
+#    Legendary figures with no scholarly date (Ishmael, Shaodian, Gao Yao,
+#    Parashara) stay at their traditional dates. Ranges become their midpoint,
+#    as stage 04 does for century-precision dates (7th century -> 650).
+# 2. A plain Wikidata error: the day of the month entered as the year, a
+#    placeholder year 1, a truncated or mistyped year, a Hijri year. The year
+#    comes from the person's own English Wikipedia article. Leave birth_year
+#    empty when no source gives the year: the person then has no usable birth
+#    year and can't be scored. Found by comparing with the lead's stated year
+#    (stage 06 now warns about new mismatches) and by modern roles born early.
 #
 # wikidata_year = stage 04's birth_year when the row was written. Stage 05 warns
 # when it changes: Wikidata may have been fixed, and the row may be stale.
@@ -14,3 +21,17 @@ Q4458118,Thirumazhisai Alvar,-4202,650,"Traditionally a contemporary of the firs
 Q3523946,Madhurakavi Alvar,-3101,750,"Disciple and elder contemporary of Nammalvar, whom scholars date to the 8th century CE (enwiki Nammalvar) and Wikidata to 750. -3101 is the traditional start of the Kali Yuga."
 Q4460484,Thondaradippodi Alvar,-2813,750,"enwiki Alvars: the twelve Alvars flourished in the 5th-8th centuries CE. Traditionally later than Nammalvar and Andal, whom Wikidata dates to 750. Wikidata's -2813 is the traditional date."
 Q6363995,Kannappa Nayanar,-3101,650,"One of the 63 Nayanars, who lived in the 6th to 8th centuries CE (enwiki Nayanars), midpoint 650. -3101 is the traditional start of the Kali Yuga."
+Q136687,Tommy Hilfiger,29,1951,"enwiki lead: born March 24, 1951."
+Q553338,Omar Metwally,1,1974,"enwiki short description: American actor (born 1974). Wikidata's 1 is a placeholder."
+Q76823543,Hwang In-yeop,1492,1991,"enwiki lead: born January 19, 1991."
+Q24567408,Claudio Tapia,1,1967,"enwiki lead: born 22 September 1967. Wikidata's 1 is a placeholder."
+Q122731572,Xaviersobased,1,2003,"enwiki lead: born October 23, 2003. Wikidata's 1 is a placeholder."
+Q117354720,Yurie Igoma,24,1999,"enwiki lead: born February 24, 1999. Wikidata has the day as the year."
+Q6162394,Jason Douglas,173,1973,"enwiki lead: born February 14, 1973. Wikidata's 173 is truncated."
+Q110679793,Amirhossein Mahmoodi,200,2006,"enwiki lead: born 12 July 2006 (Wikidata's description says 1998). Wikidata's 200 is truncated."
+Q6885493,Nawaf bin Saad,1391,1971,"enwiki lead: (1971-). Wikidata's 1391 is the Hijri year (1391 AH = 1971 CE)."
+Q5316137,Durai Murugan,1834,1938,"enwiki lead: born 1 July 1938."
+Q5107425,Chris McKenna,20,,"American television writer and producer; no source here gives his birth year. Wikidata's 20 is not a year."
+Q109601031,Minami Hinata,24,,"enwiki lead: born January 24, year not given. Wikidata has the day as the year."
+Q17210548,Yu-ri Yoshida,18,,"enwiki lead: born 18 August, year not given. Wikidata has the day as the year."
+Q113727534,Daniela Zaiushkina,3,,"enwiki lead: born 3 January, year not given. Wikidata has the day as the year."

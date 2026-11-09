@@ -8,9 +8,11 @@ age). Ties break on median views, then QID, so the roster is deterministic.
 
 Birth year = stage 04's birth_year_est, except for the hand-curated rows of
 config.BIRTH_YEAR_OVERRIDES_CSV (birth_source "override"): historical people
-whose Wikidata date comes from a traditional chronology, such as Alvar saints
-at -4202. An override whose wikidata_year no longer matches stage 04 still
-applies, with a warning, because Wikidata may have been corrected since.
+whose Wikidata date comes from a traditional chronology (Alvar saints at
+-4202), and plain Wikidata errors (Tommy Hilfiger "born 29"). An empty year
+there means no usable birth year, so the person can't be scored. An
+override whose wikidata_year no longer matches stage 04 still applies, with a
+warning, because Wikidata may have been corrected since.
 
 Slider: config.bin_edges() over the roster's birth years gives N_BINS
 equal-count bins with whole-year edges, so a person's bin depends only on their
@@ -45,7 +47,8 @@ OUT_COLUMNS = [
 
 
 def load_overrides(path) -> pd.DataFrame:
-    """The curated CSV, validated: QID format, one row per QID, a year no later than the reference year, a source."""
+    """The curated CSV, validated: QID format, one row per QID, a source, and a year no later than the reference
+    year -- or none, meaning no usable birth year (the person can't be scored)."""
     ov = pd.read_csv(path, comment="#", dtype={"qid": str, "label": str, "source": str})
     if list(ov.columns) != OVERRIDE_COLUMNS:
         raise ValueError(f"{path}: columns {list(ov.columns)}, expected {OVERRIDE_COLUMNS}")
@@ -55,11 +58,11 @@ def load_overrides(path) -> pd.DataFrame:
     dup = ov.loc[ov["qid"].duplicated(), "qid"].tolist()
     if dup:
         raise ValueError(f"{path}: QIDs listed twice {dup}")
-    if ov["birth_year"].isna().any() or (ov["birth_year"] > config.FAME_REFERENCE_YEAR).any():
-        raise ValueError(f"{path}: every row needs a birth_year no later than {config.FAME_REFERENCE_YEAR}")
+    if (ov["birth_year"].dropna() > config.FAME_REFERENCE_YEAR).any():
+        raise ValueError(f"{path}: birth_year later than {config.FAME_REFERENCE_YEAR}")
     if ov["source"].fillna("").str.strip().eq("").any():
         raise ValueError(f"{path}: every row needs a source")
-    ov["birth_year"] = ov["birth_year"].astype(int)
+    ov["birth_year"] = ov["birth_year"].astype("Int32")
     ov["wikidata_year"] = ov["wikidata_year"].astype("Int32")
     return ov
 
@@ -79,8 +82,10 @@ def apply_overrides(people: pd.DataFrame, overrides: pd.DataFrame) -> pd.DataFra
         if pd.isna(was) != pd.isna(now) or (not pd.isna(now) and was != now):
             log(f"WARNING: override {row['qid']} ({row['label']}) was written against Wikidata year {was}, "
                 f"stage 04 now has {now}; applying it anyway -- check whether it is stale")  # fmt: skip
-    col_est, col_src = out.columns.get_loc("birth_year_est"), out.columns.get_loc("birth_source")
-    out.iloc[rows, col_est] = ov["birth_year"].to_numpy()
+    col_src = out.columns.get_loc("birth_source")
+    est = out["birth_year_est"].copy()
+    est.iloc[rows] = ov["birth_year"].array  # NA: no usable birth year
+    out["birth_year_est"] = est.astype("Int32")
     out.iloc[rows, col_src] = "override"
     return out
 
@@ -129,8 +134,9 @@ def log_override_effects(before: pd.DataFrame, people: pd.DataFrame, roster: pd.
     for _, row in ov[ov["qid"].isin(p.index)].iterrows():
         views = p.at[row["qid"], "median_views"]
         old = config.fame_score(views, float(row["wikidata_year"])) if pd.notna(row["wikidata_year"]) else np.nan
-        new = config.fame_score(views, float(row["birth_year"]))
-        log(f"  {row['label']}: {row['wikidata_year']} -> {row['birth_year']}, {views:,.0f} views/mo, "
+        new = config.fame_score(views, float(row["birth_year"])) if pd.notna(row["birth_year"]) else np.nan
+        year = row["birth_year"] if pd.notna(row["birth_year"]) else "unknown"
+        log(f"  {row['label']}: {row['wikidata_year']} -> {year}, {views:,.0f} views/mo, "
             f"score {old:,.0f} -> {new:,.0f} (bar {bar:,.0f}); in roster "
             f"{row['qid'] in set(before['qid'])} -> {row['qid'] in set(roster['qid'])}")  # fmt: skip
 

@@ -1,0 +1,113 @@
+137,574 points, 32 windows; targets (labels/window) {'fine': 40, 'mid': 20, 'coarse': 10}; min_samples 5
+A min cluster size per layer: {'fine': 39, 'mid': 76, 'coarse': 158}
+
+== Tracks by approach and layer ==
+(min size: 2-d per window for A, 3-d over the stack for B; a B label is shown where it has >= A's size)
+approach  layer  min size   labels/win  tracks  unlab  life med  blinks  gaps  events/step  switch  toggle  motion med  motion p90  cohesion  split  first-last cos  drifted
+       A   fine        39 39.5 (30-46)     300   0.26         3    0.47  0.00         16.5   0.177   0.234       0.065       0.146     0.954  0.048           0.923     0.01
+      A+   fine        39 39.5 (30-46)     270   0.26         4    0.40  0.11         16.5   0.177   0.234       0.065       0.146     0.954  0.048           0.916     0.02
+  B 0.02   fine       163 22.2 (10-33)     165   0.60         4    0.18  0.15         11.3   0.055   0.223       0.025       0.061     0.896  0.083           0.953     0.10
+  B 0.04   fine       163 24.1 (14-37)     179   0.59         4    0.21  0.12         11.5   0.069   0.222       0.029       0.069     0.904  0.108           0.954     0.09
+  B 0.08   fine       125 24.7 (14-38)     230   0.59         3    0.36  0.09         14.8   0.107   0.236       0.033       0.071     0.915  0.097           0.965     0.03
+  B 0.16   fine        36 34.8 (27-42)    1107   0.41         1    1.00  0.00         68.7   0.995   0.264       0.032       0.054     0.944  0.004           0.981     0.00
+       A    mid        76 20.2 (17-24)     127   0.24         4    0.35  0.00          7.0   0.143   0.212       0.067       0.168     0.975  0.113           0.924     0.01
+      A+    mid        76 20.2 (17-24)     110   0.24         5    0.30  0.13          7.0   0.143   0.212       0.067       0.168     0.975  0.113           0.908     0.05
+  B 0.02    mid       508  10.1 (6-15)      52   0.61         5    0.12  0.21          3.6   0.012   0.171       0.032       0.074     0.912  0.241           0.900     0.15
+  B 0.04    mid       358  12.2 (7-18)      73   0.58         5    0.16  0.14          4.9   0.027   0.205       0.033       0.084     0.917  0.237           0.932     0.13
+  B 0.08    mid       358  13.2 (8-18)      79   0.54         5    0.10  0.11          5.1   0.027   0.195       0.038       0.091     0.937  0.252           0.948     0.06
+  B 0.16    mid        74 14.6 (10-19)     460   0.52         1    1.00  0.00         28.9   0.988   0.240       0.041       0.119     0.960  0.006           0.996     0.00
+       A coarse       158   9.7 (6-12)      60   0.23         4    0.35  0.00          3.3   0.144   0.196       0.086       0.243     0.987  0.178           0.908     0.10
+      A+ coarse       158   9.7 (6-12)      50   0.23         5    0.24  0.14          3.3   0.144   0.196       0.086       0.243     0.987  0.178           0.897     0.13
+  B 0.02 coarse      1451    5.8 (2-8)      19   0.51         8    0.05  0.05          1.2   0.009   0.162       0.037       0.086     0.934  0.500           0.875     0.17
+  B 0.04 coarse      1218    5.7 (1-8)      24   0.58         6    0.08  0.08          1.5   0.007   0.159       0.045       0.088     0.932  0.503           0.887     0.14
+  B 0.08 coarse      1451    6.1 (1-9)      22   0.49         7    0.05  0.14          1.4   0.004   0.156       0.047       0.104     0.948  0.464           0.902     0.10
+  B 0.16 coarse      1116    6.2 (3-9)      36   0.50         5    0.17  0.03          2.0   0.075   0.162       0.057       0.119     0.973  0.364           0.948     0.07
+
+Most labels/window B can show at each layer's size bar: {('B 0.02', 'fine'): 22.2, ('B 0.02', 'mid'): 10.1, ('B 0.02', 'coarse'): 5.8, ('B 0.04', 'fine'): 24.1, ('B 0.04', 'mid'): 12.2, ('B 0.04', 'coarse'): 5.7, ('B 0.08', 'fine'): 24.7, ('B 0.08', 'mid'): 13.2, ('B 0.08', 'coarse'): 6.1, ('B 0.16', 'fine'): 34.8, ('B 0.16', 'mid'): 14.6, ('B 0.16', 'coarse'): 6.2}
+
+== Why A+ labels switch ==
+fine: 11,821 switches: old region continues 57%, old track ended and its people mostly joined one region 42%, ended and scattered 1%
+mid: 9,969 switches: old region continues 57%, old track ended and its people mostly joined one region 42%, ended and scattered 1%
+coarse: 10,178 switches: old region continues 51%, old track ended and its people mostly joined one region 49%, ended and scattered 0%
+
+== Coarse tracks, A+ ==
+ track windows  people        born                                           roles                                                           best known
+     0    0-29    3178   650..1964      politics & law 35%, royalty & nobility 30%                                    The Buddha; Genghis Khan; Saladin
+     1     0-0     430 -2750..-850       royalty & nobility 88%, politics & law 3%                                  Tutankhamun; Ramesses II; Nefertiti
+     2     0-4     571     50..588              religion 84%, thought & science 5%                          Jesus Christ; Paul the Apostle; Saint Peter
+     3     0-1     281  -850..-250   royalty & nobility 65%, thought & science 10%                                      Qin Shi Huang; Confucius; Laozi
+     4     0-5     664  -1750..604            royalty & nobility 53%, religion 18%                       Muhammad; Nebuchadnezzar II; Alī ibn Abī Ṭālib
+     5     0-7    1363  -150..1266      royalty & nobility 51%, politics & law 15%                             Julius Caesar; Augustus; Marcus Aurelius
+     6     0-2     568   -550..171              thought & science 44%, writing 24%                                           Socrates; Aristotle; Plato
+     7     0-2     182   -264..150            royalty & nobility 63%, military 14%                    Emperor Gaozu of Han; Xiang Yu; Emperor Wu of Han
+     8     0-3     664   -230..269            military 35%, royalty & nobility 26%                                 Emperor Gaozu of Han; Cao Cao; Lü Bu
+     9     0-2     265   -286..489             royalty & nobility 88%, military 4%                                      Cleopatra; Zoroaster; Caesarion
+    10     0-1     240  -599..-300            royalty & nobility 70%, military 18%                              Alexander the Great; Xerxes I; Darius I
+    11     1-8     985   250..1357            royalty & nobility 54%, military 13%                     Wu Zetian; Emperor Taizong of Tang; Ādi Shankara
+    12    2-10    1259   605..1589            royalty & nobility 76%, religion 11%          Charlemagne; William the Conqueror; Baldwin IV of Jerusalem
+    13     2-5     341    568..955            royalty & nobility 39%, military 18%                     Alī ibn Abī Ṭālib; Umar ibn Al-Khattāb; Abu Bakr
+    14     3-8     513   564..1392            royalty & nobility 42%, military 29%                        Himiko; Prince Shōtoku; Sugawara no Michizane
+    15     3-7     397   550..1183 royalty & nobility 87%, family of the famous 5%                     Ragnar Lodbrok; Alfred the Great; Cnut the Great
+    16     3-8     594   611..1326             thought & science 35%, religion 21%                 Avicenna; Marco Polo; Muḥammad ibn Musa al-Khwarizmi
+    17    3-12     960   679..1726            royalty & nobility 72%, religion 21%      Joan of Arc; Louis XIV of France; Charles V, Holy Roman Emperor
+    18     4-6     312   486..1270                        religion 70%, writing 9%                Francis of Assisi; Benedict of Nursia; Thomas Aquinas
+    19    5-17    2108  1178..1894              writing 34%, thought & science 22%                     William Shakespeare; Napoleon; Francis of Assisi
+    20    7-12     611  1148..1709       royalty & nobility 63%, politics & law 8%                                Genghis Khan; Kublai Khan; Mansa Musa
+    21    7-12     501  1210..1775             royalty & nobility 57%, writing 17%   Henry VIII of England; William Shakespeare; Elizabeth I of England
+    22    8-14     876  1223..1872            military 59%, royalty & nobility 14%                  Toyotomi Hideyoshi; Oda Nobunaga; Toyotomi Hidenaga
+    23    9-12     641  1253..1800            royalty & nobility 44%, religion 13%                            Mehmed II; Suleiman the Magnificent; Rumi
+    24    9-13     842  1300..1794             royalty & nobility 87%, military 3%         Victoria; Charles V, Holy Roman Emperor; Niccolò Machiavelli
+    25   10-18    1072  1582..1910            royalty & nobility 68%, military 11%                           Napoleon; Catherine II of Russia; Victoria
+    26   10-11     223  1450..1779       thought & science 37%, politics & law 20%              Christopher Columbus; Ferdinand Magellan; Vasco da Gama
+    27   10-31    2957  1784..1983                politics & law 22%, business 19%                     Donald Trump; George Washington; Abraham Lincoln
+    28   11-16     366  1473..1903           visual arts 94%, thought & science 3%                         Leonardo da Vinci; Michelangelo; Ansel Adams
+    29   12-12     321  1627..1856             thought & science 70%, business 20%                          Isaac Newton; Galileo Galilei; Nikola Tesla
+    30   13-31    5075  1909..1983                         film & tv 88%, music 8% Wolfgang Amadeus Mozart; Ludwig van Beethoven; Johann Sebastian Bach
+    31   13-18     902  1841..1921                politics & law 39%, military 38%                          Adolf Hitler; Joseph Stalin; Hermann Göring
+    32   13-14     349  1749..1894             thought & science 55%, business 34%                           Albert Einstein; Marie Curie; Nikola Tesla
+    33   14-19     905  1796..1929             thought & science 49%, military 12%                              Albert Einstein; Karl Marx; Marie Curie
+    34   15-24    1366  1862..1955                 writing 47%, politics & law 13%                           Donald Trump; John F. Kennedy; Jane Austen
+    35   15-15     219  1793..1908              thought & science 94%, business 2%                           Albert Einstein; Marie Curie; Nikola Tesla
+    36   16-16     174  1840..1914                         crime 66%, military 12%                              Ed Gein; Jack the Ripper; Zodiac Killer
+    37   17-20     357  1914..1945                         film & tv 99%, sport 1%                           Dick Van Dyke; Michael Landon; Tom Selleck
+    38   18-31    1228  1926..1987                       film & tv 96%, writing 2%                        Sean Connery; Elizabeth Taylor; Jason Statham
+    39   18-29    1394  1929..1973                         music 93%, film & tv 3%                      Michael Jackson; Freddie Mercury; Elvis Presley
+    40   19-24     708  1926..1962                        film & tv 73%, music 18%                    Steven Spielberg; Stanley Kubrick; Roman Polanski
+    41   19-19     176  1907..1941             thought & science 41%, religion 21%                   Martin Luther King Jr.; John Paul II; Pope Francis
+    42   19-19     161  1909..1942       politics & law 51%, thought & science 41%                John F. Kennedy; J. Robert Oppenheimer; Ronald Reagan
+    43   21-24     307  1941..1960                         music 92%, film & tv 3%                         Freddie Mercury; Paul McCartney; John Lennon
+    44   22-31     804  1947..1995                        film & tv 69%, music 22%                           Jackie Chan; Hayao Miyazaki; Michelle Yeoh
+    45   24-31     755  1956..1997                         sport 96%, film & tv 2%                        Michael Jordan; Dwayne Johnson; O. J. Simpson
+    46   26-29     347  1957..1981                       film & tv 97%, writing 3%                           Jim Carrey; Adam Sandler; Catherine O'Hara
+    47   27-31     673  1966..2000                    sport 99%, politics & law 0%                       Cristiano Ronaldo; Lionel Messi; José Mourinho
+    48   28-31     563  1969..1996                         music 96%, film & tv 3%                         Lisa Marie Presley; Whitney Houston; Shakira
+    49   29-30     203  1967..1988                film & tv 78%, politics & law 8%                     Priyanka Chopra; C. Joseph Vijay; Shah Rukh Khan
+
+== Coarse tracks, B 0.04 ==
+ track windows  people       born                                           roles                                                best known
+     0   27-31     673 1966..2000                    sport 99%, politics & law 0%            Cristiano Ronaldo; Lionel Messi; José Mourinho
+     1   29-30     203 1967..1988                film & tv 78%, politics & law 8%          Priyanka Chopra; C. Joseph Vijay; Shah Rukh Khan
+     2     0-3     615  -250..244            military 37%, royalty & nobility 27%                      Emperor Gaozu of Han; Cao Cao; Lü Bu
+     3     1-7     563  327..1289            royalty & nobility 58%, military 15%        Wu Zetian; Emperor Taizong of Tang; Hongwu Emperor
+     4     3-9     505  562..1429            royalty & nobility 44%, military 30%             Himiko; Prince Shōtoku; Sugawara no Michizane
+     5    8-13     573 1514..1838             military 68%, royalty & nobility 8%       Toyotomi Hideyoshi; Oda Nobunaga; Toyotomi Hidenaga
+     6   23-31     452 1948..1995                        film & tv 67%, music 21%            Hayao Miyazaki; Akira Toriyama; Takeshi Kitano
+     7   25-25     159 1950..1966                        film & tv 66%, music 31%               Monica Bellucci; Andrea Bocelli; Luc Besson
+     8     3-7     365  596..1283 royalty & nobility 85%, family of the famous 5%          Ragnar Lodbrok; Alfred the Great; Cnut the Great
+     9   19-31    1458 1940..1987                         music 95%, film & tv 2%           Michael Jackson; Freddie Mercury; Elvis Presley
+    10   13-30    2185 1879..1969                politics & law 56%, military 16%               Adolf Hitler; Joseph Stalin; Hermann Göring
+    11    7-15     780 1103..1890      royalty & nobility 58%, politics & law 15%              Saladin; Mehmed II; Suleiman the Magnificent
+    12     1-8     972  552..1198             religion 24%, thought & science 23%          Muhammad; Alī ibn Abī Ṭālib; Umar ibn Al-Khattāb
+    13     4-6     273  442..1210            religion 72%, royalty & nobility 26%                   Rodrigo Díaz de Vivar; Gregory I; Leo I
+    14   11-15     471 1644..1897    politics & law 39%, family of the famous 14%     George Washington; Abraham Lincoln; Benjamin Franklin
+    15   10-15     848 1503..1868             royalty & nobility 77%, military 8%                Napoleon; Catherine II of Russia; Victoria
+    16    7-19    1538 1340..1920                       writing 51%, religion 12%    Mary, Queen of Scots; Francis of Assisi; Martin Luther
+    17    7-14     515 1328..1876         visual arts 41%, royalty & nobility 39%                Henry VIII of England; Anne Boleyn; Mary I
+    18   13-30    1420 1836..1974                business 34%, politics & law 21%            Donald Trump; Albert Einstein; Jeffrey Epstein
+    19   11-22     437 1487..1950                thought & science 49%, crime 25% Christopher Columbus; Galileo Galilei; Ferdinand Magellan
+    20     2-9    1199  326..1425            royalty & nobility 78%, religion 15%         Charlemagne; Baldwin IV of Jerusalem; Joan of Arc
+    21   18-31     985 1930..1987                       film & tv 97%, writing 1%                  Sean Connery; Jason Statham; Liam Neeson
+    22   24-31    1113 1954..1986          film & tv 99%, family of the famous 0%                      Tom Cruise; Brad Pitt; Anne Hathaway
+    23   18-23     659 1913..1955                         film & tv 99%, sport 0%          Clint Eastwood; Bruce Willis; Sylvester Stallone
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/label_tracks_A.html (13.9 MB)
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/label_tracks_B.html (13.9 MB)

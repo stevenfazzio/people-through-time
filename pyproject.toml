@@ -16,6 +16,7 @@ dependencies = [
     "anthropic>=2.6.0",
     "plotly>=7.1.0",
     "concept-erasure>=0.2.4",
+    "toponymy>=0.5.4",
 ]
 
 [project.optional-dependencies]

@@ -25,11 +25,17 @@ Output: data/leads.parquet, one row per roster person, rank order:
   translated), n_chars, pageid, enwiki_description (enwiki's short description),
   thumb_url. A page with no extract gets "label: short description" instead
   (lead_source "description"); only a person with neither keeps a null lead.
+
+Also warns about birth years the person's own article contradicts (a year in
+the lead's first parenthesis or "(born YYYY)" in the short description more
+than 100 years off; a birthday with no year, or a modern role, before 1000):
+candidates for curated/birth_year_overrides.csv.
 """
 
 import hashlib
 import json
 import os
+import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -349,6 +355,54 @@ def fill_missing(leads: pd.DataFrame, people: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+# Roles no one born before 1000 can have: a birth year that early is a Wikidata error.
+MODERN_ROLE = re.compile(
+    r"\b(?:television|tv|film|rapper|youtuber|footballer|voice actor|voice actress|streamer|anime|video game"
+    r"|basketball|baseball|record producer|tiktoker|influencer|esports)\b",
+    re.IGNORECASE,
+)
+MONTHS = r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+
+
+def stated_birth_year(lead: str) -> int | None:
+    """The birth year the lead's first parenthesis states ("born ... 1974", or the start of "(1951–2020)"), if it
+    is CE; None when the parenthesis is about a death, a floruit or a reign, or gives no year."""
+    m = re.match(r"^[^(]{0,200}\(([^)]{0,160})\)", lead or "")
+    if not m or re.search(r"\b(?:died|d\.|fl\.|reigned|r\.|BC|BCE)\b", m.group(1)):
+        return None
+    par = m.group(1)
+    born = re.search(r"\bborn\b[^)]{0,40}?\b(\d{4})\b", par)
+    life = re.match(r"^(?:[^0-9;]*?;\s*)?(?:c\. ?|circa )?(?:\d{1,2} \w+ |\w+ \d{1,2}, )?(\d{4})\s*[–-]", par)
+    hit = born or life
+    return int(hit.group(1)) if hit else None
+
+
+def birth_year_mismatches(people: pd.DataFrame, leads: pd.DataFrame, tolerance: int = 100) -> pd.DataFrame:
+    """Roster people whose birth year their own article contradicts -- candidates for curated/birth_year_overrides.
+
+    Found 2026-11-08: Wikidata had the day of the month as the year (Yurie Igoma "24"), placeholder years (1),
+    truncations (173 for 1973) and Hijri years, and the age weighting admitted such people as ancients.
+    """
+    df = people[["qid", "label", "birth_year_est"]].merge(leads[["qid", "lead", "enwiki_description"]], on="qid")
+    year = df["birth_year_est"].astype(float)
+    desc = df["enwiki_description"].fillna("")
+    stated = df["lead"].map(stated_birth_year).astype(float)
+    desc_born = desc.str.extract(r"\(born (\d{4})\)", expand=False).astype(float)
+    par = df["lead"].fillna("").str.extract(r"^[^(]{0,200}\(([^)]{0,160})\)", expand=False).fillna("")
+    birthday_only = par.str.contains(rf"\bborn (?:\d{{1,2}} {MONTHS}|{MONTHS} \d{{1,2}})\b") & ~par.str.contains(
+        r"\d{4}"
+    )
+    reasons = {
+        "the lead states another year": (stated - year).abs() > tolerance,
+        "the short description states another year": (desc_born - year).abs() > tolerance,
+        "a birthday with no year, birth year before 1000": birthday_only & (year < 1000),
+        "a modern role, birth year before 1000": desc.str.contains(MODERN_ROLE) & (year < 1000),
+    }
+    flags = pd.DataFrame(reasons)
+    out = df.assign(stated=stated.fillna(desc_born), reason=flags.apply(lambda r: "; ".join(r.index[r]), axis=1))
+    return out[flags.any(axis=1)][["qid", "label", "birth_year_est", "stated", "reason", "enwiki_description"]]
+
+
 def main() -> None:
     people = pd.read_parquet(
         config.MAP_PEOPLE_PARQUET, columns=["rank", "qid", "label", "description", "birth_year_est", "enwiki_title",
@@ -411,6 +465,15 @@ def main() -> None:
         f"by language {stub['top_lang'].value_counts().head(8).to_dict()}")  # fmt: skip
     if len(stub):
         log(stub.nsmallest(8, "n_chars")[["label", "birth_year_est", "top_lang", "lead"]].to_string(index=False))
+
+    suspects = birth_year_mismatches(people, leads)
+    if len(suspects):
+        log(
+            f"WARNING: {len(suspects)} birth years contradicted by the person's own article (fix in "
+            f"curated/birth_year_overrides.csv, then rerun from stage 05):\n{suspects.to_string(index=False)}"
+        )
+    else:
+        log("Birth years: none contradicted by the person's own article")
 
     write_parquet_atomic(
         leads[

@@ -171,3 +171,43 @@ def test_fill_missing_falls_back_to_a_description():
     assert out["lead"].tolist()[:3] == ["Romuald: Founder of the Camaldolese order", "Hyunri: actress", "Plato was."]
     assert out["lead_source"].tolist() == ["description", "description", "enwiki", "enwiki"]
     assert pd.isna(out["lead"].iloc[3])  # no label: stays null
+
+
+@pytest.mark.parametrize(
+    "lead, year",
+    [
+        ("Claudio Tapia (born 22 September 1967) is an Argentine football executive.", 1967),
+        ("Thomas Jacob Hilfiger ( HIL-fig-ər; born March 24, 1951) is an American designer.", 1951),
+        ("Hwang In-youp (Korean: 황인엽; born January 19, 1991) is a South Korean actor.", 1991),
+        ("Nawaf bin Saad (1971-) is the chairman of Al Hilal.", 1971),
+        ("Molière (15 January 1622 – 17 February 1673) was a French playwright.", 1622),
+        ("Minami Hinata (日向 未南; born January 24) is a Japanese voice actress.", None),
+        ("Ramesses II (c. 1303 BC – 1213 BC) was a pharaoh.", None),
+        ("Fedor Mstislavsky (died 1622) was a Russian noble.", None),
+        ("Omar Metwally is an American actor.", None),
+    ],
+)
+def test_stated_birth_year(lead, year):
+    assert leads.stated_birth_year(lead) == year
+
+
+def test_birth_year_mismatches_flags_each_kind():
+    people = pd.DataFrame(
+        {
+            "qid": ["Q1", "Q2", "Q3", "Q4", "Q5"],
+            "label": ["Tapia", "Hinata", "McKenna", "Molière", "Thespis"],
+            "birth_year_est": [1, 24, 20, 1622, -550],
+        }
+    )
+    lds = pd.DataFrame(
+        {
+            "qid": ["Q1", "Q2", "Q3", "Q4", "Q5"],
+            "lead": ["Tapia (born 22 September 1967) is", "Hinata (born January 24) is", "McKenna is a writer.",
+                     "Molière (15 January 1622 – 1673) was", "Thespis was an actor."],
+            "enwiki_description": ["Argentine football executive", "Japanese voice actress",
+                                   "American television and film writer", "French playwright", "Greek actor"],
+        }
+    )  # fmt: skip
+    out = leads.birth_year_mismatches(people, lds)
+    assert out["qid"].tolist() == ["Q1", "Q2", "Q3"]  # Molière and Thespis are fine
+    assert out["stated"].tolist()[0] == 1967

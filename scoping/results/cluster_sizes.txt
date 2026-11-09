@@ -1,0 +1,20 @@
+Labels per window (mean), as in label_tracks.txt: {('A', 'coarse'): 9.7, ('A', 'fine'): 39.5, ('A', 'mid'): 20.2, ('B', 'coarse'): 5.7, ('B', 'fine'): 24.1, ('B', 'mid'): 12.2}
+
+== People per label (all windows) ==
+approach  layer  labels  size p10  median  p90  max  p90/p10  largest label / window: median  largest label / window: max
+       A   fine    1263        43      67  138  328      3.2                            0.05                         0.08
+       B   fine     770        42      64  114  347      2.7                            0.03                         0.08
+       A    mid     646        85     138  275  727      3.2                            0.09                         0.17
+       B    mid     389        82     118  261  530      3.2                            0.07                         0.12
+       A coarse     309       174     279  574 1490      3.3                            0.16                         0.35
+       B coarse     181       174     279  530  773      3.0                            0.13                         0.18
+
+== Biggest labels per approach and layer ==
+A fine  : w23 A211 film & tv 328 (8%); w31 A167 film & tv 288 (7%); w29 A167 film & tv 286 (6%)
+B fine  : w1 B26 military 347 (8%); w0 B16 royalty & nobility 341 (8%); w2 B26 military 332 (8%)
+A mid   : w30 A104 film & tv 727 (17%); w23 A66 film & tv 662 (15%); w10 A51 military 557 (13%)
+B mid   : w31 B0 sport 530 (12%); w11 B17 military 435 (10%); w10 B17 military 419 (10%)
+A coarse: w23 A30 film & tv 1,490 (35%); w25 A30 film & tv 1,424 (34%); w30 A30 film & tv 1,410 (32%)
+B coarse: w5 B12 religion 773 (18%); w4 B12 religion 756 (18%); w3 B12 religion 666 (15%)
+
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/cluster_sizes.html (0.3 MB)

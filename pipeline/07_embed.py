@@ -4,7 +4,7 @@ Text = stage 06's English lead (the article opening, which already starts with
 the person's name). Variants = config.EMBED_INSTRUCTIONS: "plain" (the text as
 is) and "role" (Qwen3's instruction format, asking what the person is known
 for: role, field and society). scoping/embed_variants.py compares them; later
-stages read config.EMBED_VARIANT.
+stages read config.EMBED_VARIANT (through stage 07b's gender erasure, config.MAP_EMBEDDING).
 
 Vectors come through embedder.py's SQLite cache (data/raw/embedding_cache.sqlite),
 so a rerun pays only for texts never sent, and changing a lead re-embeds just

@@ -27,7 +27,7 @@ def test_curated_overrides_file_loads():
     ov = roster.load_overrides(config.BIRTH_YEAR_OVERRIDES_CSV)
     assert len(ov) >= 1
     assert ov["qid"].is_unique and ov["source"].str.len().gt(20).all()
-    assert ov["birth_year"].between(-3000, config.FAME_REFERENCE_YEAR).all()
+    assert ov["birth_year"].dropna().between(-3000, config.FAME_REFERENCE_YEAR).all()
 
 
 @pytest.mark.parametrize(
@@ -36,13 +36,22 @@ def test_curated_overrides_file_loads():
         ("Q1,A,-4202,650,src\nQ1,A,-4202,650,src\n", "twice"),
         ("3537100,A,-4202,650,src\n", "malformed"),
         ("Q1,A,-4202,650,\n", "source"),
-        ("Q1,A,-4202,,src\n", "birth_year"),
         ("Q1,A,-4202,2100,src\n", "birth_year"),
     ],
 )
 def test_load_overrides_rejects_bad_rows(tmp_path, body, match):
     with pytest.raises(ValueError, match=match):
         roster.load_overrides(write_csv(tmp_path, body))
+
+
+def test_an_empty_override_year_makes_the_person_unscoreable(tmp_path):
+    people = people_frame([("Q1", 5000.0, 20, 20, "P569"), ("Q2", 900.0, 1950, 1950, "P569")])
+    ov = roster.load_overrides(write_csv(tmp_path, "Q1,McKenna,20,,no source gives the year\n"))
+    assert ov["birth_year"].isna().tolist() == [True]
+    out = roster.apply_overrides(people, ov)
+    assert out["birth_year_est"].isna().tolist() == [True, False]
+    assert out["birth_source"].tolist() == ["override", "P569"]
+    assert roster.select_roster(out, 5)["qid"].tolist() == ["Q2"]
 
 
 def test_apply_overrides(tmp_path, capsys):
