@@ -1,0 +1,84 @@
+window 16: 4,212 people born 1831 to 1924
+  layer 0 (fine): 41 clusters, 23% unlabelled
+  layer 1 (mid): 21 clusters, 24% unlabelled
+  layer 2 (coarse): 9 clusters, 19% unlabelled
+== Layer 0 (fine): 41 names ==
+  f158   176  French Impressionist, Post-Impressionist and Modernist Painters  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  f123   171  European Royal Princesses, Queens and Consorts (Victorian–Edwardian Era)  |  Empress Elisabeth of Austria; Wilhelm II; Francesc Ferran of Austria; Maximilian I of Mexico
+  f114   149  20th-Century Physicists, Quantum Theory and Manhattan Project  |  Albert Einstein; Marie Curie; Nikola Tesla; J. Robert Oppenheimer
+  f153   135  Soviet Bolshevik Leaders and Eastern Bloc Communist Politicians  |  Joseph Stalin; Vladimir Lenin; Leon Trotsky; Nikita Khrushchev
+  f152   126  Japanese Prime Ministers, Samurai, and Meiji–Shōwa Statesmen  |  Hirohito; Emperor Meiji; Hideki Tojo; Emperor Taishō
+  f117   120  British Novelists, Poets and Dramatists of the 19th–20th Centuries  |  J. R. R. Tolkien; Oscar Wilde; Agatha Christie; George Orwell
+  f151   110  Oscar-Winning Hollywood Leading Men and Character Actors  |  Marlon Brando; John Wayne; Katharine Hepburn; Kirk Douglas
+  f134   103  US Presidents, Vice Presidents, First Ladies, and Nominees  |  John F. Kennedy; Franklin Delano Roosevelt; Theodore Roosevelt; Ronald Reagan
+  f99    102  Continental Philosophers: Phenomenology, Hermeneutics, and Critical Theory  |  Friedrich Nietzsche; Albert Camus; Aleister Crowley; Hannah Arendt
+  f161    98  Nazi SS Officials, Hitler's Inner Circle, Holocaust Perpetrators  |  Adolf Hitler; Hermann Göring; Heinrich Himmler; Joseph Goebbels
+  f177    94  Italian and Israeli Political and Military Leaders  |  Benito Mussolini; Mata Hari; Oswald Mosley; T. E. Lawrence
+  f169    93  Romanov and British Royal Family Members, Victorian–Edwardian Era  |  Edward VII; George V; George VI; Edward VIII
+  f101    88  Middle Eastern Royalty: Saudi, Hashemite, Qajar, Gulf Monarchs  |  Mohammad Reza I of Iran; Ibn Saud; Ruhollah Khomeini; Reza Shah
+  f167    86  Mid-20th-Century English Stage and Film Actors  |  Christopher Lee; Vivien Leigh; Laurence Olivier; Richard Attenborough
+  f2      85  Indian Independence Leaders and Post-Independence South Asian Politicians  |  Mahatma Gandhi; Nelson Mandela; Indira Gandhi; Jawaharlal Nehru
+  f91     84  Chinese Political Leaders from Late Qing to PRC  |  Mao Zedong; Chiang Kai-shek; Deng Xiaoping; Puyi
+  f168    83  Early American Pro Sports Legends: Baseball, Boxing, Football  |  Babe Ruth; Jackie Robinson; Joe DiMaggio; Jesse Owens
+  f141    72  Late Romantic and Early Modern Classical Composers  |  Pyotr Ilyich Tchaikovsky; Sergei Rachmaninoff; Johannes Brahms; Gustav Mahler
+  f173    71  European and Japanese Film Directors and Actors  |  Édith Piaf; Akira Kurosawa; Louis de Funès; Charles Aznavour
+  f166    69  American Mafia Bosses of New York and Chicago  |  Al Capone; Lucky Luciane; J. Edgar Hoover; Jimmy Hoffa
+  f148    67  Pioneering Psychologists, Psychoanalysts, and Medical Physiology Researchers  |  Sigmund Freud; Carl Jung; Alfred Nobel; Ludwig Wittgenstein
+  f160    67  Nazi Germany Wehrmacht Field Marshals and Senior Generals  |  Erwin Rommel; Karl Dönitz; Wilhelm Keitel; Claus Schenk Graf von Stauffenberg
+  f130    65  Latin American and Iberian Dictators, Revolutionaries, and Presidents  |  Francisco Franco; Augusto Pinochet; Eva Perón; Juan Perón
+  f144    63  French Third Republic, Vichy and Gaullist Politicians  |  Charles de Gaulle; Philippe Pétain; Joachim von Ribbentrop; Franz von Papen
+  f175    61  American Jazz, Blues, Swing and Early Popular Musicians  |  Frank Sinatra; Dean Martin; Louis Armstrong; Woody Guthrie
+  f178    61  American and Japanese World War II Military Commanders and Heroes  |  George S. Patton; Douglas MacArthur; Isoroku Yamamoto; Desmond Doss
+  f145    60  Modern Catholic Saints, Mystics, and Religious Leaders  |  Mother Teresa; Padre Pio; Thérèse of Lisieux; Bernadette Soubirous
+  f45     59  20th-Century Continental European Novelists (German, Central European, Italian)  |  Franz Kafka; Thomas Mann; Hermann Hesse; Stefan Zweig
+  f157    59  Studio-Era Hollywood Directors, Émigré Auteurs and Producers  |  Alfred Hitchcock; Howard Hughes; Orson Welles; Leni Riefenstahl
+  f181    59  American Novelists and Short-Story Writers, Literary and Genre  |  Ernest Hemingway; H. P. Lovecraft; F. Scott Fitzgerald; Jack London
+  f143    58  American Old West Outlaws, Gunfighters and Lawmen  |  Billy the Kid; John Wilkes Booth; Wyatt Earp; Jesse James
+  f182    58  American Classic Television Sitcom and Character Actors  |  Bea Arthur; Estelle Getty; Telly Savalas; Don Knotts
+  f176    49  American Vaudeville, Radio and Television Comedians and Entertainers  |  Betty White; Lucille Ball; Groucho Marx; Desi Arnaz
+  f174    48  Record-Holders, Supercentenarians, Sideshow Performers, Martial Artists, and Journalists  |  Jeanne Calment; Robert Wadlow; Joseph Merrick; Ip Man
+  f146    46  Russian, Soviet and Eastern European Poets and Writers  |  Anton Chekhov; Vladimir Nabokov; Mikhail Bulgakov; Maxim Gorky
+  f180    46  World War Spies, SOE Agents, and Fighter Aces  |  Simo Häyhä; Bernard Montgomery; Manfred von Richthofen; Paddy Mayne
+  f138    45  American Tycoons, Financiers, and Wealthy Business Dynasty Philanthropists  |  John D. Rockefeller; J. P. Morgan; Harland Sanders; Ray Kroc
+  f170    45  Notorious Serial Killers and Jack the Ripper Suspects  |  Ed Gein; Jack the Ripper; Zodiac Killer; Lizzie Borden
+  f163    44  British and Commonwealth Prime Ministers and Parliamentary Leaders  |  Winston Churchill; Neville Chamberlain; Anthony Eden; Harold Wilson
+  f183    42  Founders of Major Industrial and Consumer Brand Companies  |  Henry Ford; Madam C. J. Walker; Ferruccio Lamborghini; Carroll Shelby
+  f179    41  Soviet Marshals and Russian Civil War Commanders  |  Georgy Zhukov; Stepan Bandera; Alexander Kolchak; Konstantin Rokossovsky
+== Layer 1 (mid): 21 names ==
+  m66    436  American Film and Television Actors  |  Charlie Chaplin; Marlon Brando; Judy Garland; John Wayne
+  m58    246  Nazi Germany and Vichy-Era France Leaders  |  Adolf Hitler; Hermann Göring; Heinrich Himmler; Joseph Goebbels
+  m59    222  British and American Novelists  |  J. R. R. Tolkien; Oscar Wilde; Agatha Christie; Ernest Hemingway
+  m48    176  French Impressionist, Post-Impressionist and Modernist Painters  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  m73    174  Outlaws, Gangsters and Serial Killers  |  Ed Gein; Jack the Ripper; Zodiac Killer; Al Capone
+  m65    171  European Royal Princesses, Queens and Consorts (Victorian–Edwardian Era)  |  Empress Elisabeth of Austria; Wilhelm II; Francesc Ferran of Austria; Maximilian I of Mexico
+  m60    163  Industrialists, Tycoons and Brand Founders  |  John D. Rockefeller; Fred Trump; Coco Chanel; J. P. Morgan
+  m63    150  Continental European & Latin American Writers  |  Franz Kafka; Anton Chekhov; Thomas Mann; Hermann Hesse
+  m55    149  20th-Century Physicists, Quantum Theory and Manhattan Project  |  Albert Einstein; Marie Curie; Nikola Tesla; J. Robert Oppenheimer
+  m77    141  British, Italian and Israeli Statesmen  |  Winston Churchill; Benito Mussolini; Mata Hari; Oswald Mosley
+  m68    135  Soviet Bolshevik Leaders and Eastern Bloc Communist Politicians  |  Joseph Stalin; Vladimir Lenin; Leon Trotsky; Nikita Khrushchev
+  m74    133  Athletes, Record-Holders and Supercentenarians  |  Jeanne Calment; Babe Ruth; Harry Houdini; Robert Wadlow
+  m72    129  Psychologists, Saints, and Mystics  |  Sigmund Freud; Carl Jung; Mother Teresa; Alfred Nobel
+  m64    126  Japanese Prime Ministers, Samurai, and Meiji–Shōwa Statesmen  |  Hirohito; Emperor Meiji; Hideki Tojo; Emperor Taishō
+  m54    103  US Presidents, Vice Presidents, First Ladies, and Nominees  |  John F. Kennedy; Franklin Delano Roosevelt; Theodore Roosevelt; Ronald Reagan
+  m62    102  Continental Philosophers: Phenomenology, Hermeneutics, and Critical Theory  |  Friedrich Nietzsche; Albert Camus; Aleister Crowley; Hannah Arendt
+  m75     93  Romanov and British Royal Family Members, Victorian–Edwardian Era  |  Edward VII; George V; George VI; Edward VIII
+  m49     88  Middle Eastern Royalty: Saudi, Hashemite, Qajar, Gulf Monarchs  |  Mohammad Reza I of Iran; Ibn Saud; Ruhollah Khomeini; Reza Shah
+  m76     86  Mid-20th-Century English Stage and Film Actors  |  Christopher Lee; Vivien Leigh; Laurence Olivier; Richard Attenborough
+  m67     85  Indian Independence Leaders and Post-Independence South Asian Politicians  |  Mahatma Gandhi; Nelson Mandela; Indira Gandhi; Jawaharlal Nehru
+  m18     84  Chinese Political Leaders from Late Qing to PRC  |  Mao Zedong; Chiang Kai-shek; Deng Xiaoping; Puyi
+== Layer 2 (coarse): 9 names ==
+  c30    871  Film, Stage and Music Performers  |  Charlie Chaplin; Marlon Brando; Frank Sinatra; Pyotr Ilyich Tchaikovsky
+  c31    464  WWII-Era Political and Military Figures  |  Adolf Hitler; Joseph Stalin; Hermann Göring; Vladimir Lenin
+  c19    438  Novelists and Poets  |  J. R. R. Tolkien; Franz Kafka; Oscar Wilde; Agatha Christie
+  c27    435  American Tycoons, Physicists, Presidents  |  Albert Einstein; Marie Curie; John F. Kennedy; Franklin Delano Roosevelt
+  c0     306  Middle Eastern and South Asian Leaders  |  Mahatma Gandhi; Mustafa Kemal Atatürk; Nelson Mandela; Francisco Franco
+  c33    279  Psychology, Philosophy, and Spirituality  |  Friedrich Nietzsche; Sigmund Freud; Helen Keller; Carl Jung
+  c25    277  European Royal Princesses and Consorts  |  Empress Elisabeth of Austria; Edward VII; George V; George VI
+  c28    176  French Impressionist, Post-Impressionist and Modernist Painters  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  c36    174  Outlaws, Gangsters and Serial Killers  |  Ed Gein; Jack the Ripper; Zodiac Killer; Al Capone
+Naming: 58 Claude calls (0 more from cache), 286,968 input / 2,637 output tokens = $1.20 (claude-opus-5-5, effort medium); 0 empty names
+  per call: 4,948 input, 45 output tokens
+Embedding (keyphrases, names): 226,319 tokens, $0.0023
+Wall clock: 26.7 min
+All 32 windows at this rate: ~$38; every second window: ~$19 (before the per-track consolidation step)
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/name_window_16.json

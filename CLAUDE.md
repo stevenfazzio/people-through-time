@@ -19,7 +19,8 @@ fallbacks and the round-century fix) come from stage 04; stage 05 picks the
 stage 07 embeds them twice (plain and role-instructed Qwen3); the map uses
 role, with gender projected out by stage 07b; stage 08 lays out all 32
 windows with one AlignedUMAP; stage 09 clusters each window into three label
-layers and links the clusters into tracks. `scoping/` holds the one-off analysis behind
+layers and links the clusters into tracks; stage 10 names every window's
+clusters with Toponymy and Claude Sonnet 5.5. `scoping/` holds the one-off analysis behind
 the decisions below; `curated/` holds hand-made inputs (versioned, unlike
 `data/`).
 
@@ -41,6 +42,7 @@ Run in order with `uv run python pipeline/NN_*.py`; tests with `uv run pytest`.
 | 07b | Gender erasure: one global centroid direction projected out of the role vectors (`ERASE_GENDER`) | `data/embeddings_role_nogender.npz` (+ `direction`) |
 | 08 | One AlignedUMAP over the 32 slider windows (`config.MAP_EMBEDDING`) | `data/layout_role_nogender.parquet` (window, qid, x, y) |
 | 09 | Label tracks: each window's layout clustered at three fixed sizes (`config.LABEL_TARGETS`), clusters linked across windows, majority-parent tree | `data/tracks_role_nogender.parquet` (window, qid, track_0..2; 0 finest, -1 unlabelled), `data/track_tree_role_nogender.parquet` |
+| 10 | Per-window names: Toponymy over stage 09's clusters as a pre-fitted clusterer, Claude via `pipeline/namer.py` (cache `data/raw/llm_cache.sqlite`; one JSON per window in `data/raw/window_names/`, so reruns resume) | `data/window_names_role_nogender.parquet` (window, layer, track, size, name) |
 
 Stage 02 run 2026-11-08: 160 min for 12 dumps with 2 workers; 4.60–4.82M
 people with views per month; desktop share 23–26% every month. Stage 03
@@ -107,8 +109,30 @@ skip to coarse, 3% root), 97% of mid tracks a coarse parent; the median
 track sits 100% under its parent. Same numbers as A+ in
 `scoping/results/label_tracks.txt`. Log: `logs/09_label_tracks.log`.
 
-Planned next: merge flicker in stage 09's linking (see "Label tracks,
-what's left"), then naming with Toponymy → frontend.
+Stage 10 (2026-11-09): 50.5 min, $17.33 (Sonnet 5.5, effort medium; 1,771
+Claude calls, 8.2M input / 90k output tokens; 69 more from the cache of a
+first attempt that crashed writing window 0's JSON). 2,218 names (1,263 /
+646 / 309 fine / mid / coarse), none empty; median 7 / 6 / 5 words.
+Keyphrase embedding: 1.0M tokens, $0.01, base64 responses in batches of 256
+(`EMBED_SHORT_BATCH_ITEMS`); 75 transient Nebius 429s, all retried;
+windows after the first reuse most phrases from the cache, so a window took
+44–138 s. The appended instructions (`NAME_INSTRUCTIONS`) kept every name in
+Title Case, but 8 names still misgender their cluster, nearly all through
+the idiom "Leading Men" over clusters 36–46% women (Meryl Streep, Demi
+Moore, Julia Roberts; tracks f186, f211, m66 in windows 18–28), plus "Male
+Character Actors" (91% men) and "Notorious Female Criminals"; stage 11 gets
+each track's gender mix to fix them. Paths per track:
+`scoping/track_paths.py` → `data/scoping/track_paths.html` (c30 runs
+"European Classical Composers and Performers" → "Classical Composers and
+Hollywood Stars" → "Golden Age Hollywood Stars" → ... → "American Film and
+TV Actors"; c0 runs from "Ancient Indian Rulers and Buddhists" through
+"Islamic Caliphs and Sultans" and "Mughal Era South Asian Rulers" to "Heads
+of State and Government"). Log: `logs/10_name_windows.log`.
+
+Planned next: stage 11 — one name per track from its path of per-window
+names (LLM), then a check that tracks sharing a window get distinct names →
+frontend. Merge flicker looked acceptable in the preview (see "Label
+tracks, what's left").
 
 ## Working rules
 
@@ -380,20 +404,70 @@ what's left"), then naming with Toponymy → frontend.
   the same parent) — strict tree, but every coarse break would reset all
   the tracks below it.
 
+- **2026-11-08 — naming: Toponymy per window, then one name per track from
+  its path.** Geometry decides the map's structure (stage 09's tracks: which
+  regions exist and where a track starts and ends); the LLM only describes
+  it. Toponymy names each window on its own, where the layers nest strictly
+  and its tree, exemplars and disambiguation work as designed — and
+  disambiguation runs among exactly the labels on screen together. A second
+  LLM step turns each track's path of per-window names into one name for the
+  whole path, generalizing where the content changes ("composers" → "film
+  and TV" becomes something like "entertainment industry"), then checks that
+  tracks sharing a window get distinct names. The LLM never cuts a track.
+  Supersedes naming whole tracks with people filed under their most common
+  track plus a hand-built tree. Drift cuts stay off: the prototype
+  (`scoping/track_segments.py` → `scoping/results/track_segments.txt`,
+  `data/scoping/track_segments.html`) cut 10 of 430 tracks on embedding
+  drift, but whether that's needed shows only in the consolidated names; a
+  path that only fits a very vague name is a signal to fix the geometry
+  (linking or a geometric cut), not to let the LLM split it.
+  **One-window test** (window 16, born 1831–1924; `scoping/name_window.py`
+  → `scoping/results/name_window_opus.txt`, `data/scoping/name_window_16_opus.json`;
+  2026-11-09): stage 09's clusters handed to Toponymy 0.5.4 as a pre-fitted
+  clusterer (41 / 21 / 9 clusters), Opus 5.5 at medium effort, detail levels
+  0.4–0.8. 58 Claude calls, 287k input / 2.6k output tokens (~4,950 in and
+  45 out per call: eight full article openings per prompt dominate) = $1.20;
+  0 empty names. 26.7 min, ~22 of them embedding Toponymy's keyphrase
+  vocabulary (its default cap, 50,000 phrases per window, in batches of 32;
+  43 transient Nebius 429s, all retried; $0.002). Names are specific and
+  read well ("Late Romantic and Early Modern Classical Composers", "Soviet
+  Bolshevik Leaders and Eastern Bloc Communist Politicians"); median 8 / 6 /
+  5 words fine / mid / coarse. A cluster unchanged from the layer below keeps
+  its name (12 of 21 mid, 2 of 9 coarse), so some coarse labels are long
+  ("French Impressionist, Post-Impressionist and Modernist Painters"). Mixed
+  clusters get list names ("Record-Holders, Supercentenarians, Sideshow
+  Performers, Martial Artists, and Journalists"; c27 "American Tycoons,
+  Physicists, Presidents"). c30 here is "Film, Stage and Music Performers"
+  (Chaplin, Brando, Sinatra, Tchaikovsky). At this rate all 32 windows cost
+  ~$38 (every second window ~$19), plus the per-track step.
+  **Sonnet 5.5 on the same window** (2026-11-09, switched for cost;
+  `scoping/results/name_window_sonnet.txt`; side by side in
+  `scoping/compare_namers.py` → `data/scoping/namer_comparison.html`):
+  same 58 calls and prompts, $0.60, 0 empty names; all 32 windows ~$19.
+  Similar length (median 7 vs 8 words fine). Less faithful in places: a
+  gender the cluster doesn't have ("Classic Hollywood American Male Actors"
+  over Judy Garland and Katharine Hepburn, on a gender-erased map), a
+  narrower name than the members ("Classic Hollywood Actors" for c30, which
+  holds Sinatra and Tchaikovsky; "American Sports Hall of Famers" for record
+  holders and supercentenarians), embellishments ("... in Paris",
+  "Nobel-era"), and mixed title/sentence case. **Kept Sonnet 5.5**
+  (2026-11-09) for the cost, knowing these gaps; normalize the case when
+  names are written. The namer now opens a client
+  per request: one kept across Toponymy's event loops threw harmless "Event
+  loop is closed" tracebacks.
+
 ## Proposed, not yet settled
 
 - **Label tracks, what's left** (see the 2026-11-08 decision). Merge
-  flicker: keep a track alive through a short merge and give it back its id
+  flicker: judged acceptable in the animated preview on 2026-11-08
+  (`scoping/track_preview.py` → `data/scoping/track_preview.html`, which
+  lists each step's appearing and disappearing coarse labels), so no
+  hysteresis for now; revisit if the real frontend shows it. The idea, if
+  needed: keep a track alive through a short merge and give it back its id
   when it splits off again (half of all label switches; also half of the
-  parent changes). Per-segment names where a track's content drifts (a coarse
-  track went from Mozart, Beethoven and Bach to film actors). (Done in
-  stage 09: fixed min cluster sizes across windows rather than Toponymy's
-  per-run quantile rule, which would give each window different layers; the
-  majority-parent tree.) Toponymy handoff: one row per person under
-  their majority track in each layer, plus our own `cluster_tree_` from the
-  majority parents — Toponymy's `build_cluster_tree` attaches a child to the
-  first parent (by cluster number) holding any of its points, which assumes
-  strict nesting. Label position = the track's centroid per window,
+  parent changes). Naming is settled (2026-11-08 decision: per window,
+  then per track); stage 09's majority-parent tree stays for the frontend's
+  label hierarchy, but Toponymy no longer needs it. Label position = the track's centroid per window,
   interpolated between windows; labels fade in and out as tracks begin and
   end.
 - **Frontend is custom.** datamapplot can't animate positions: in 0.7.3's

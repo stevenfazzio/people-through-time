@@ -12,6 +12,7 @@ found the same text embedded by two OpenRouter providers at cosine 0.996, not
 embeddings must come from the provider that embedded the documents.
 """
 
+import base64
 import hashlib
 import os
 import random
@@ -28,14 +29,42 @@ from util import log
 RETRY_STATUS = {408, 429}  # plus every 5xx: Nebius answers 529 "worker overloaded" under load (2026-11-08)
 
 
+def decode_embedding(e) -> np.ndarray:
+    """An embedding as returned with encoding_format "base64" (little-endian float32), or a plain list."""
+    if isinstance(e, str):
+        return np.frombuffer(base64.b64decode(e), dtype="<f4")
+    return np.asarray(e, dtype=np.float32)
+
+
 def with_instruction(instruction: str | None, text: str) -> str:
     """The query format from the Qwen3-Embedding model card."""
     return f"Instruct: {instruction}\nQuery:{text}" if instruction else text
 
 
+class DirectionRemovedEmbedder:
+    """Wraps an embedder and projects one unit direction out of every vector, then renormalizes.
+
+    For Toponymy's keyphrases and candidate names: stage 07b removed the gender direction from the people's
+    vectors, and anything compared with them must live in the same space. Same operation as stage 07b.
+    """
+
+    def __init__(self, inner, direction: np.ndarray):
+        d = np.asarray(direction, dtype=np.float64)
+        self.inner = inner
+        self.direction = d / np.linalg.norm(d)
+
+    def encode(self, texts, show_progress_bar=None, verbose=None, **kwargs) -> np.ndarray:
+        v = np.asarray(self.inner.encode(texts, show_progress_bar=show_progress_bar, verbose=verbose, **kwargs),
+                       dtype=np.float64)  # fmt: skip
+        v = v - np.outer(v @ self.direction, self.direction)
+        return (v / np.linalg.norm(v, axis=1, keepdims=True)).astype(np.float32)
+
+
 class OpenRouterEmbedder:
-    def __init__(self, instruction: str | None = None, provider: str = None, cache_path=None, session=None):
+    def __init__(self, instruction: str | None = None, provider: str = None, cache_path=None, session=None,
+                 batch_items: int | None = None):  # fmt: skip
         self.instruction = instruction
+        self.batch_items = batch_items  # None: config.EMBED_BATCH_ITEMS
         self.provider = provider or config.EMBED_PROVIDER
         self.tokens = 0
         self.cost_usd = 0.0
@@ -51,11 +80,13 @@ class OpenRouterEmbedder:
         return hashlib.sha256(f"{config.EMBED_MODEL}\x00{self.provider}\x00{sent}".encode()).hexdigest()
 
     @staticmethod
-    def batches(texts: list[str]):
-        """Batches closing at config.EMBED_BATCH_ITEMS texts or EMBED_BATCH_CHARS characters, whichever comes first."""
+    def batches(texts: list[str], max_items: int | None = None):
+        """Batches closing at max_items texts (default config.EMBED_BATCH_ITEMS) or config.EMBED_BATCH_CHARS
+        characters, whichever comes first."""
+        max_items = max_items or config.EMBED_BATCH_ITEMS
         batch, chars = [], 0
         for t in texts:
-            if batch and (len(batch) == config.EMBED_BATCH_ITEMS or chars + len(t) > config.EMBED_BATCH_CHARS):
+            if batch and (len(batch) == max_items or chars + len(t) > config.EMBED_BATCH_CHARS):
                 yield batch
                 batch, chars = [], 0
             batch.append(t)
@@ -67,7 +98,9 @@ class OpenRouterEmbedder:
         payload = {
             "model": config.EMBED_MODEL,
             "input": texts,
-            "encoding_format": "float",
+            # base64: a quarter of the bytes of float JSON, which bounded throughput on short texts
+            # (2026-11-09: 256 keyphrases 5.6 MB in 3.7 s vs 22.6 MB in 6.1 s; same vectors, cosine >= 0.9997)
+            "encoding_format": "base64",
             "provider": {"order": [self.provider], "allow_fallbacks": False},
         }
         for attempt in range(max_retries):
@@ -99,7 +132,7 @@ class OpenRouterEmbedder:
             data = sorted(body["data"], key=lambda d: d["index"])
             if len(data) != len(texts):
                 raise RuntimeError(f"{len(data)} vectors for {len(texts)} texts")
-            return np.asarray([d["embedding"] for d in data], dtype=np.float32), body.get("usage", {})
+            return np.stack([decode_embedding(d["embedding"]) for d in data]), body.get("usage", {})
         raise RuntimeError("exhausted retries")
 
     def encode(self, texts, show_progress_bar=None, verbose=None, **kwargs) -> np.ndarray:
@@ -115,7 +148,7 @@ class OpenRouterEmbedder:
 
         todo = list(dict.fromkeys(s for s, k in zip(sent, keys) if k not in cached))  # each string once
         if todo:
-            batches = list(self.batches(todo))
+            batches = list(self.batches(todo, self.batch_items))
             loud = bool(show_progress_bar or verbose)
             if loud:
                 log(f"  embedding {len(todo):,} new texts in {len(batches):,} batches via {self.provider}")

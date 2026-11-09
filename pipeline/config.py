@@ -246,3 +246,38 @@ def tracks_parquet(variant: str = MAP_EMBEDDING) -> Path:
 def track_tree_parquet(variant: str = MAP_EMBEDDING) -> Path:
     """One row per (layer, track): its majority parent, lifetime and size."""
     return DATA_DIR / f"track_tree_{variant}.parquet"
+
+
+# --- Stage 10: naming (Toponymy per window, then one name per track) ---
+# Settled 2026-11-08 (CLAUDE.md "naming"). Toponymy names each window's layers with
+# Claude (namer.py); a second step names each track from its path of per-window
+# names. Keyphrases and candidate names are embedded with stage 07's embedder
+# *without* the role instruction -- Qwen3's query/document pairing: the people were
+# embedded as instructed queries, keyphrases are plain documents -- and with stage
+# 07b's gender direction removed, so they share the people's space.
+# Sonnet 5.5 chosen 2026-11-09 for cost (half Opus 5.5's price); window 16 with
+# Opus 5.5 cost $1.20 (scoping/results/name_window_opus.txt).
+NAME_MODEL = "claude-sonnet-5-5"  # $2 / $10 per MTok in / out (claude-api skill, 2026-10-06)
+NAME_EFFORT = "medium"
+NAME_WORKERS = 8  # concurrent Claude requests
+NAME_DETAIL_LEVELS = (0.4, 0.8)  # Toponymy lowest/highest detail level: 4-8 words finest, 1-4 coarsest
+NAME_CACHE = DATA_DIR / "raw" / "llm_cache.sqlite"  # every response, keyed by model, effort and prompt
+# Appended to every naming prompt (2026-11-09), for two slips Sonnet 5.5 made on window 16: names in
+# sentence case, and a gender the cluster doesn't have ("... American Male Actors" over Judy Garland).
+NAME_INSTRUCTIONS = (
+    "\n\nAdditional rules for every name you give: write it in Title Case, and do not describe a group by "
+    "gender (male, female, men, women) unless every person in it shares that gender. Keep your response in the "
+    "JSON format requested above."
+)
+NAME_OBJECT_DESCRIPTION = "Wikipedia biographies (the opening of each person's article)"
+NAME_CORPUS_DESCRIPTION = (  # {lo}, {hi}: the window's earliest and latest birth year
+    "the most famous people born between {lo} and {hi}, from all Wikipedias -- one era of a map of the most "
+    "famous people of every era"
+)
+EMBED_SHORT_BATCH_ITEMS = 256  # keyphrases and names: 256 base64 vectors = ~5.6 MB per response
+WINDOW_NAMES_DIR = DATA_DIR / "raw" / "window_names"  # one JSON per named window, so a rerun resumes
+
+
+def window_names_parquet(variant: str = MAP_EMBEDDING) -> Path:
+    """[window, layer, track, size, name]: Toponymy's name for each track in each window."""
+    return DATA_DIR / f"window_names_{variant}.parquet"

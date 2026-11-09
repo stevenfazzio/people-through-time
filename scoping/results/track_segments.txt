@@ -1,0 +1,42 @@
+
+== Layer 2 (coarse): 6 of 50 tracks cut into 12 segments (bar: cosine 0.732) ==
+c30 whole: {'windows': '13–31', 'people': 5075, 'born': '1909 to 1983', 'roles': 'film & tv 88%, music 8%, writing 1%', 'best known': 'Wolfgang Amadeus Mozart; Ludwig van Beethoven; Johann Sebastian Bach; Clint Eastwood; Charlie Chaplin'}
+   segment 1: {'windows': '13–16', 'people': 994, 'born': '1839 to 1922', 'roles': 'film & tv 70%, music 24%, writing 1%', 'best known': 'Wolfgang Amadeus Mozart; Ludwig van Beethoven; Johann Sebastian Bach; Charlie Chaplin; Antonio Vivaldi'}
+   segment 2: {'windows': '17–31', 'people': 4297, 'born': '1932 to 1985', 'roles': 'film & tv 92%, music 5%, writing 1%', 'best known': 'Clint Eastwood; Bruce Lee; Marilyn Monroe; Bruce Willis; Sylvester Stallone'}
+c0 whole: {'windows': '0–29', 'people': 3178, 'born': '650 to 1964', 'roles': 'politics & law 35%, royalty & nobility 30%, military 7%', 'best known': 'The Buddha; Genghis Khan; Saladin; Ashoka; Mehmed II'}
+   segment 1: {'windows': '0–15', 'people': 1610, 'born': '450 to 1869', 'roles': 'royalty & nobility 50%, politics & law 12%, religion 10%', 'best known': 'The Buddha; Genghis Khan; Saladin; Ashoka; Mehmed II'}
+   segment 2: {'windows': '16–29', 'people': 1756, 'born': '1894 to 1970', 'roles': 'politics & law 56%, royalty & nobility 11%, military 7%', 'best known': 'Winston Churchill; Charles III; Vladimir Putin; Mahatma Gandhi; Leo XIV'}
+c27 whole: {'windows': '10–31', 'people': 2957, 'born': '1784 to 1983', 'roles': 'politics & law 22%, business 19%, film & tv 13%', 'best known': 'Donald Trump; George Washington; Abraham Lincoln; Albert Einstein; Jeffrey Epstein'}
+   segment 1: {'windows': '10–18', 'people': 1314, 'born': '1718 to 1931', 'roles': 'politics & law 22%, business 19%, thought & science 15%', 'best known': 'George Washington; Abraham Lincoln; Albert Einstein; Benjamin Franklin; Marie Curie'}
+   segment 2: {'windows': '19–31', 'people': 1790, 'born': '1942 to 1986', 'roles': 'business 22%, film & tv 21%, politics & law 21%', 'best known': 'Donald Trump; Jeffrey Epstein; Jeff Bezos; Elon Musk; Barack Obama'}
+c19 whole: {'windows': '5–17', 'people': 2108, 'born': '1178 to 1894', 'roles': 'writing 34%, thought & science 22%, royalty & nobility 14%', 'best known': 'William Shakespeare; Napoleon; Francis of Assisi; Martin Luther; Dante Alighieri'}
+   segment 1: {'windows': '5–9', 'people': 728, 'born': '985 to 1628', 'roles': 'royalty & nobility 34%, religion 25%, thought & science 15%', 'best known': 'Francis of Assisi; Martin Luther; Dante Alighieri; Isaac Newton; Thomas Aquinas'}
+   segment 2: {'windows': '10–17', 'people': 1647, 'born': '1544 to 1900', 'roles': 'writing 42%, thought & science 27%, politics & law 8%', 'best known': 'William Shakespeare; Napoleon; Martin Luther; Isaac Newton; Galileo Galilei'}
+c17 whole: {'windows': '3–12', 'people': 960, 'born': '679 to 1726', 'roles': 'royalty & nobility 72%, religion 21%, family of the famous 3%', 'best known': "Joan of Arc; Louis XIV of France; Charles V, Holy Roman Emperor; Catherine de' Medici; Frederick Barbarossa"}
+   segment 1: {'windows': '3–4', 'people': 264, 'born': '245 to 1065', 'roles': 'religion 69%, royalty & nobility 29%, military 1%', 'best known': 'Rodrigo Díaz de Vivar; Gregory I; Linus; Leo I; Pelagius'}
+   segment 2: {'windows': '6–12', 'people': 758, 'born': '994 to 1743', 'roles': 'royalty & nobility 90%, family of the famous 3%, military 2%', 'best known': "Joan of Arc; Louis XIV of France; Charles V, Holy Roman Emperor; Catherine de' Medici; Frederick Barbarossa"}
+c4 whole: {'windows': '0–5', 'people': 664, 'born': '-1750 to 604', 'roles': 'royalty & nobility 53%, religion 18%, family of the famous 10%', 'best known': 'Muhammad; Nebuchadnezzar II; Alī ibn Abī Ṭālib; Sargon of Akkad; Hammurabi'}
+   segment 1: {'windows': '0–1', 'people': 646, 'born': '-1770 to 600', 'roles': 'royalty & nobility 55%, religion 18%, family of the famous 9%', 'best known': 'Muhammad; Nebuchadnezzar II; Alī ibn Abī Ṭālib; Sargon of Akkad; Hammurabi'}
+   segment 2: {'windows': '2–5', 'people': 219, 'born': '520 to 615', 'roles': 'religion 46%, family of the famous 33%, politics & law 6%', 'best known': 'Muhammad; Aisha; Fatima; Khadija bint Khuwaylid; Abu Sufyan ibn Harb'}
+
+== Layer 1 (mid): 2 of 110 tracks cut into 4 segments (bar: cosine 0.692) ==
+m57 whole: {'windows': '11–30', 'people': 1284, 'born': '1867 to 1972', 'roles': 'music 92%, film & tv 4%, business 1%', 'best known': 'Wolfgang Amadeus Mozart; Michael Jackson; Ludwig van Beethoven; Johann Sebastian Bach; Elvis Presley'}
+   segment 1: {'windows': '11–18', 'people': 438, 'born': '1710 to 1936', 'roles': 'music 83%, film & tv 9%, family of the famous 2%', 'best known': 'Wolfgang Amadeus Mozart; Ludwig van Beethoven; Johann Sebastian Bach; Elvis Presley; Antonio Vivaldi'}
+   segment 2: {'windows': '19–30', 'people': 967, 'born': '1937 to 1975', 'roles': 'music 95%, visual arts 1%, business 1%', 'best known': 'Michael Jackson; Elvis Presley; Madonna; Paul McCartney; Bob Dylan'}
+m54 whole: {'windows': '9–30', 'people': 1233, 'born': '1704 to 1976', 'roles': 'politics & law 40%, business 12%, military 10%', 'best known': 'Donald Trump; George Washington; Abraham Lincoln; Benjamin Franklin; John F. Kennedy'}
+   segment 1: {'windows': '9–15', 'people': 613, 'born': '1624 to 1867', 'roles': 'politics & law 32%, military 18%, family of the famous 12%', 'best known': 'George Washington; Abraham Lincoln; Benjamin Franklin; Franklin Delano Roosevelt; Thomas Jefferson'}
+   segment 2: {'windows': '16–30', 'people': 685, 'born': '1904 to 1982', 'roles': 'politics & law 51%, business 17%, thought & science 13%', 'best known': 'Donald Trump; John F. Kennedy; Franklin Delano Roosevelt; Elon Musk; Theodore Roosevelt'}
+
+== Layer 0 (fine): 2 of 270 tracks cut into 4 segments (bar: cosine 0.647) ==
+f180 whole: {'windows': '16–31', 'people': 698, 'born': '1913 to 1978', 'roles': 'politics & law 65%, military 14%, thought & science 8%', 'best known': 'Vladimir Putin; Leo XIV; Margaret Thatcher; Mikhail Gorbachev; Keir Starmer'}
+   segment 1: {'windows': '16–23', 'people': 424, 'born': '1907 to 1954', 'roles': 'politics & law 48%, military 22%, thought & science 12%', 'best known': 'Vladimir Putin; Leo XIV; Margaret Thatcher; Mikhail Gorbachev; Amelia Earhart'}
+   segment 2: {'windows': '24–31', 'people': 326, 'born': '1954 to 1983', 'roles': 'politics & law 88%, military 3%, family of the famous 2%', 'best known': 'Keir Starmer; Giorgia Meloni; Emmanuel Macron; Brigitte Macron; Friedrich Merz'}
+f45 whole: {'windows': '1–19', 'people': 665, 'born': '518 to 1907', 'roles': 'writing 52%, religion 22%, royalty & nobility 12%', 'best known': 'Dante Alighieri; Benedict of Nursia; Hildegard of Bingen; Saint Patrick; Miguel de Cervantes'}
+   segment 1: {'windows': '1–8', 'people': 325, 'born': '450 to 1468', 'roles': 'religion 45%, royalty & nobility 23%, writing 15%', 'best known': 'Benedict of Nursia; Hildegard of Bingen; Saint Patrick; Thomas Becket; Bede'}
+   segment 2: {'windows': '9–19', 'people': 376, 'born': '1527 to 1920', 'roles': 'writing 85%, thought & science 3%, politics & law 3%', 'best known': 'Dante Alighieri; Miguel de Cervantes; Johann Wolfgang von Goethe; Alexandre Dumas; Franz Kafka'}
+
+     layer  tracks  bar (cosine)  tracks cut  segments from them  names needed
+2 (coarse)      50         0.732           6                  12            56
+   1 (mid)     110         0.692           2                   4           112
+  0 (fine)     270         0.647           2                   4           272
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/track_segments.html

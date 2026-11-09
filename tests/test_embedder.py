@@ -1,3 +1,4 @@
+import base64
 import json
 
 import numpy as np
@@ -74,3 +75,27 @@ def test_batches_close_on_items_or_chars(monkeypatch):
     batches = list(emb.OpenRouterEmbedder.batches(["a"] * 4 + ["x" * 9, "y" * 20]))
     assert [len(b) for b in batches] == [3, 2, 1]  # "a" + 9 x fills 10 chars exactly
     assert np.all([sum(map(len, b)) <= 10 or len(b) == 1 for b in batches])
+
+
+def test_direction_removed_embedder_projects_out_and_renormalizes():
+    class Inner:
+        def encode(self, texts, show_progress_bar=None, verbose=None, **kwargs):
+            return np.array([[3.0, 4.0, 0.0], [0.0, 1.0, 1.0]][: len(texts)])
+
+    wrapped = emb.DirectionRemovedEmbedder(Inner(), np.array([2.0, 0.0, 0.0]))  # direction need not be unit
+    v = wrapped.encode(["a", "b"])
+    assert np.allclose(v[:, 0], 0)  # nothing left along the direction
+    assert np.allclose(np.linalg.norm(v, axis=1), 1)
+    assert np.allclose(v[0], [0, 1, 0]) and np.allclose(v[1], [0, 2**-0.5, 2**-0.5])
+
+
+def test_decode_embedding_base64_and_list():
+    v = np.array([0.5, -1.25, 3.0], dtype="<f4")
+    assert np.array_equal(emb.decode_embedding(base64.b64encode(v.tobytes()).decode()), v)
+    assert np.array_equal(emb.decode_embedding([0.5, -1.25, 3.0]), v)
+
+
+def test_batches_take_a_per_call_item_cap(monkeypatch):
+    monkeypatch.setattr(config, "EMBED_BATCH_ITEMS", 2)
+    assert [len(b) for b in emb.OpenRouterEmbedder.batches(["a"] * 5)] == [2, 2, 1]
+    assert [len(b) for b in emb.OpenRouterEmbedder.batches(["a"] * 5, max_items=4)] == [4, 1]

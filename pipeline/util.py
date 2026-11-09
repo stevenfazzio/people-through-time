@@ -197,6 +197,20 @@ def write_parquet_atomic(df: pd.DataFrame, path: Path) -> None:
         raise
 
 
+def write_json_atomic(obj, path: Path) -> None:
+    """Write JSON to a temp file in the same directory, then rename over the destination."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".json.tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=1)
+        json.loads(Path(tmp).read_text(encoding="utf-8"))  # verify it reads back
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
+
+
 def save_npz_atomic(path: Path, **arrays) -> None:
     """np.savez_compressed to a temp file in the same directory, verify, atomic rename.
 

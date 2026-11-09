@@ -1,0 +1,255 @@
+window 16: 4,212 people born 1831 to 1924
+  layer 0 (fine): 41 clusters, 23% unlabelled
+  layer 1 (mid): 21 clusters, 24% unlabelled
+  layer 2 (coarse): 9 clusters, 19% unlabelled
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+future: <Task finished name='Task-59' coro=<AsyncClient.aclose() done, defined at /Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpx2/_client.py:2197> exception=RuntimeError('Event loop is closed')>
+Traceback (most recent call last):
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/toponymy/cluster_layer.py", line 51, in run_async
+    loop = asyncio.get_running_loop()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpx2/_client.py", line 2204, in aclose
+    await self._transport.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpx2/_transports/default.py", line 400, in aclose
+    await self._pool.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpcore2/_async/connection_pool.py", line 382, in aclose
+    await self._close_connections(closing_connections)
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpcore2/_async/connection_pool.py", line 374, in _close_connections
+    await connection.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpcore2/_async/connection.py", line 157, in aclose
+    await self._connection.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpcore2/_async/http11.py", line 236, in aclose
+    await self._network_stream.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/httpcore2/_backends/anyio.py", line 56, in aclose
+    await self._stream.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/anyio/streams/tls.py", line 262, in aclose
+    await self.transport_stream.aclose()
+  File "/Users/stevenfazzio/repos/people-through-time-map/.venv/lib/python3.11/site-packages/anyio/_backends/_asyncio.py", line 1499, in aclose
+    self._transport.abort()
+  File "/Users/stevenfazzio/.uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/selector_events.py", line 825, in abort
+    self._force_close(None)
+  File "/Users/stevenfazzio/.uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/selector_events.py", line 895, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/Users/stevenfazzio/.uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/base_events.py", line 762, in call_soon
+    self._check_closed()
+  File "/Users/stevenfazzio/.uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/base_events.py", line 520, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+== Layer 0 (fine): 41 names ==
+  f158   176  French Impressionist, Post-Impressionist and Modernist Painters in Paris  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  f123   171  Princesses and Queens Consort of European Royal Houses  |  Empress Elisabeth of Austria; Wilhelm II; Francesc Ferran of Austria; Maximilian I of Mexico
+  f114   149  Nobel-winning theoretical physicists and Manhattan Project scientists  |  Albert Einstein; Marie Curie; Nikola Tesla; J. Robert Oppenheimer
+  f153   135  Soviet and Eastern Bloc communist party leaders  |  Joseph Stalin; Vladimir Lenin; Leon Trotsky; Nikita Khrushchev
+  f152   126  Meiji-era Japanese statesmen, generals, and prime ministers  |  Hirohito; Emperor Meiji; Hideki Tojo; Emperor Taishō
+  f117   120  20th-century British novelists and Nobel-era literary authors  |  J. R. R. Tolkien; Oscar Wilde; Agatha Christie; George Orwell
+  f151   110  Classic Hollywood American male film actors, Oscar-winning  |  Marlon Brando; John Wayne; Katharine Hepburn; Kirk Douglas
+  f134   103  American Presidents, Vice Presidents, and National Political Figures  |  John F. Kennedy; Franklin Delano Roosevelt; Theodore Roosevelt; Ronald Reagan
+  f99    102  Continental European phenomenology, hermeneutics and critical theory philosophers  |  Friedrich Nietzsche; Albert Camus; Aleister Crowley; Hannah Arendt
+  f161    98  Nazi SS leaders and Holocaust perpetrators  |  Adolf Hitler; Hermann Göring; Heinrich Himmler; Joseph Goebbels
+  f177    94  Italian Fascist-era figures and Israeli statesmen  |  Benito Mussolini; Mata Hari; Oswald Mosley; T. E. Lawrence
+  f169    93  Romanov and British Royal Family Members  |  Edward VII; George V; George VI; Edward VIII
+  f101    88  Arabian Peninsula, Hashemite, and Iranian Royal Dynasties  |  Mohammad Reza I of Iran; Ibn Saud; Ruhollah Khomeini; Reza Shah
+  f167    86  Mid-20th-century English stage and film actors  |  Christopher Lee; Vivien Leigh; Laurence Olivier; Richard Attenborough
+  f2      85  Indian National Congress leaders and independence movement statesmen  |  Mahatma Gandhi; Nelson Mandela; Indira Gandhi; Jawaharlal Nehru
+  f91     84  Chinese Communist, Qing, and Republican-era political leaders  |  Mao Zedong; Chiang Kai-shek; Deng Xiaoping; Puyi
+  f168    83  American Baseball, Football, and Boxing Hall of Famers  |  Babe Ruth; Jackie Robinson; Joe DiMaggio; Jesse Owens
+  f141    72  Late Romantic and early 20th-century European classical composers  |  Pyotr Ilyich Tchaikovsky; Sergei Rachmaninoff; Johannes Brahms; Gustav Mahler
+  f173    71  Mid-century Italian, French, and Japanese film actors and directors  |  Édith Piaf; Akira Kurosawa; Louis de Funès; Charles Aznavour
+  f166    69  Italian-American Mafia bosses and Chicago gangsters  |  Al Capone; Lucky Luciane; J. Edgar Hoover; Jimmy Hoffa
+  f148    67  Founders of Psychoanalysis and Modern Psychology  |  Sigmund Freud; Carl Jung; Alfred Nobel; Ludwig Wittgenstein
+  f160    67  Wehrmacht Field Marshals, Army Group Commanders and 20 July Plotters  |  Erwin Rommel; Karl Dönitz; Wilhelm Keitel; Claus Schenk Graf von Stauffenberg
+  f130    65  Latin American and Iberian military dictators and presidents  |  Francisco Franco; Augusto Pinochet; Eva Perón; Juan Perón
+  f144    63  French Third Republic and Vichy-era political leaders  |  Charles de Gaulle; Philippe Pétain; Joachim von Ribbentrop; Franz von Papen
+  f175    61  American jazz, blues, and swing musicians and vocalists  |  Frank Sinatra; Dean Martin; Louis Armstrong; Woody Guthrie
+  f178    61  American Army, Marine, and Navy Commanders in World War II Pacific and Europe  |  George S. Patton; Douglas MacArthur; Isoroku Yamamoto; Desmond Doss
+  f145    60  Modern Catholic saints, mystics, and religious founders  |  Mother Teresa; Padre Pio; Thérèse of Lisieux; Bernadette Soubirous
+  f45     59  Central and Southern European Modernist Novelists, Nobel-Era Writers  |  Franz Kafka; Thomas Mann; Hermann Hesse; Stefan Zweig
+  f157    59  Classic Hollywood Studio-Era Film Directors and Producers  |  Alfred Hitchcock; Howard Hughes; Orson Welles; Leni Riefenstahl
+  f181    59  American novelists and short-story writers, 20th century  |  Ernest Hemingway; H. P. Lovecraft; F. Scott Fitzgerald; Jack London
+  f143    58  American Old West outlaws, gunfighters, and lawmen  |  Billy the Kid; John Wilkes Booth; Wyatt Earp; Jesse James
+  f182    58  American Classic Television Sitcom and Drama Actors  |  Bea Arthur; Estelle Getty; Telly Savalas; Don Knotts
+  f176    49  American Vaudeville, Radio, and Television Comedians  |  Betty White; Lucille Ball; Groucho Marx; Desi Arnaz
+  f174    48  World record holders, supercentenarians, and unusual-fame curiosities  |  Jeanne Calment; Robert Wadlow; Joseph Merrick; Ip Man
+  f146    46  Russian and Soviet Writers and Poets  |  Anton Chekhov; Vladimir Nabokov; Mikhail Bulgakov; Maxim Gorky
+  f180    46  World War II spies, SOE agents, and special forces  |  Simo Häyhä; Bernard Montgomery; Manfred von Richthofen; Paddy Mayne
+  f138    45  American Gilded Age tycoons and billionaire industrialist dynasties  |  John D. Rockefeller; J. P. Morgan; Harland Sanders; Ray Kroc
+  f170    45  Notorious Serial Killers and Murderers, Jack the Ripper  |  Ed Gein; Jack the Ripper; Zodiac Killer; Lizzie Borden
+  f163    44  British and Commonwealth Prime Ministers, Westminster-system Politicians  |  Winston Churchill; Neville Chamberlain; Anthony Eden; Harold Wilson
+  f183    42  Founders of major automotive and industrial conglomerates  |  Henry Ford; Madam C. J. Walker; Ferruccio Lamborghini; Carroll Shelby
+  f179    41  Marshals of the Soviet Union and Civil War Red Army Commanders  |  Georgy Zhukov; Stepan Bandera; Alexander Kolchak; Konstantin Rokossovsky
+
+== Layer 1 (mid): 21 names ==
+  m66    436  Classic Hollywood American Male Actors  |  Charlie Chaplin; Marlon Brando; Judy Garland; John Wayne
+  m58    246  Nazi Germany Leaders and Vichy France  |  Adolf Hitler; Hermann Göring; Heinrich Himmler; Joseph Goebbels
+  m59    222  Anglo-American Novelists and Fiction Writers  |  J. R. R. Tolkien; Oscar Wilde; Agatha Christie; Ernest Hemingway
+  m48    176  French Impressionist, Post-Impressionist and Modernist Painters in Paris  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  m73    174  American Gangsters, Outlaws, and Murderers  |  Ed Gein; Jack the Ripper; Zodiac Killer; Al Capone
+  m65    171  Princesses and Queens Consort of European Royal Houses  |  Empress Elisabeth of Austria; Wilhelm II; Francesc Ferran of Austria; Maximilian I of Mexico
+  m60    163  Business Tycoons and Industrial Dynasties  |  John D. Rockefeller; Fred Trump; Coco Chanel; J. P. Morgan
+  m63    150  European Nobel-Era Novelists and Poets  |  Franz Kafka; Anton Chekhov; Thomas Mann; Hermann Hesse
+  m55    149  Nobel-winning theoretical physicists and Manhattan Project scientists  |  Albert Einstein; Marie Curie; Nikola Tesla; J. Robert Oppenheimer
+  m77    141  British, Italian, and Israeli Prime Ministers  |  Winston Churchill; Benito Mussolini; Mata Hari; Oswald Mosley
+  m68    135  Soviet and Eastern Bloc communist party leaders  |  Joseph Stalin; Vladimir Lenin; Leon Trotsky; Nikita Khrushchev
+  m74    133  American Sports Hall of Famers and Record-Holders  |  Jeanne Calment; Babe Ruth; Harry Houdini; Robert Wadlow
+  m72    129  Psychologists and Catholic Saints  |  Sigmund Freud; Carl Jung; Mother Teresa; Alfred Nobel
+  m64    126  Meiji-era Japanese statesmen, generals, and prime ministers  |  Hirohito; Emperor Meiji; Hideki Tojo; Emperor Taishō
+  m54    103  American Presidents, Vice Presidents, and National Political Figures  |  John F. Kennedy; Franklin Delano Roosevelt; Theodore Roosevelt; Ronald Reagan
+  m62    102  Continental European phenomenology, hermeneutics and critical theory philosophers  |  Friedrich Nietzsche; Albert Camus; Aleister Crowley; Hannah Arendt
+  m75     93  Romanov and British Royal Family Members  |  Edward VII; George V; George VI; Edward VIII
+  m49     88  Arabian Peninsula, Hashemite, and Iranian Royal Dynasties  |  Mohammad Reza I of Iran; Ibn Saud; Ruhollah Khomeini; Reza Shah
+  m76     86  Mid-20th-century English stage and film actors  |  Christopher Lee; Vivien Leigh; Laurence Olivier; Richard Attenborough
+  m67     85  Indian National Congress leaders and independence movement statesmen  |  Mahatma Gandhi; Nelson Mandela; Indira Gandhi; Jawaharlal Nehru
+  m18     84  Chinese Communist, Qing, and Republican-era political leaders  |  Mao Zedong; Chiang Kai-shek; Deng Xiaoping; Puyi
+
+== Layer 2 (coarse): 9 names ==
+  c30    871  Classic Hollywood Actors  |  Charlie Chaplin; Marlon Brando; Frank Sinatra; Pyotr Ilyich Tchaikovsky
+  c31    464  Nazi Germany and WWII Leaders  |  Adolf Hitler; Joseph Stalin; Hermann Göring; Vladimir Lenin
+  c19    438  Modern Novelists and Fiction Writers  |  J. R. R. Tolkien; Franz Kafka; Oscar Wilde; Agatha Christie
+  c27    435  American Tycoons and Physicists  |  Albert Einstein; Marie Curie; John F. Kennedy; Franklin Delano Roosevelt
+  c0     306  Muslim World and South Asian Leaders  |  Mahatma Gandhi; Mustafa Kemal Atatürk; Nelson Mandela; Francisco Franco
+  c33    279  Psychology, Philosophy and Spirituality Thinkers  |  Friedrich Nietzsche; Sigmund Freud; Helen Keller; Carl Jung
+  c25    277  European Royal Princesses and Consorts  |  Empress Elisabeth of Austria; Edward VII; George V; George VI
+  c28    176  French Impressionist, Post-Impressionist and Modernist Painters in Paris  |  Ansel Adams; Vincent van Gogh; Pablo Picasso; Frida Kahlo
+  c36    174  American Gangsters, Outlaws, and Murderers  |  Ed Gein; Jack the Ripper; Zodiac Killer; Al Capone
+
+Naming: 58 Claude calls (0 more from cache), 286,183 input / 2,500 output tokens = $0.60 (claude-sonnet-5-5, effort medium); 0 empty names
+  per call: 4,934 input, 43 output tokens
+Embedding (keyphrases, names): 622 tokens, $0.0000
+Wall clock: 1.1 min
+All 32 windows at this rate: ~$19; every second window: ~$10 (before the per-track consolidation step)
+Wrote /Users/stevenfazzio/repos/people-through-time-map/data/scoping/name_window_16_sonnet.json
