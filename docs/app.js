@@ -559,10 +559,7 @@
         e.preventDefault();
         togglePlay();
       } else if (e.key === "Escape") {
-        clearSearch();
-        S.pinned = -1;
-        showCard();
-        queueRender();
+        clearSearch(); // also unpins
       }
     });
     $("play").addEventListener("click", togglePlay);
@@ -576,10 +573,13 @@
 
   // ------------------------------------------------------------------------------------------------------
   // Hovercard
-  function cardHtml(p) {
-    const P = core.people;
+  function cardTrack(p) {
     const at = personAt(p, S.s);
-    const tr = at ? at.track : 255;
+    return at ? at.track : 255;
+  }
+
+  function cardHtml(p, tr) {
+    const P = core.people;
     let pill = "";
     if (tr !== 255) {
       const g = coarseOf[tr];
@@ -604,15 +604,18 @@
       `<div class="pc-lead">${d ? esc(d.excerpt[p]) : ""}</div><div class="pc-foot">${foot}</div>`;
   }
 
-  let cardFor = -2, cardLoaded = null;
+  // The card is rebuilt when its person, their region (the pill follows the slider) or the details change.
+  let cardFor = -2, cardLoaded = null, cardTr = -1;
   function showCard() {
     const card = $("card");
     const p = S.hover >= 0 ? S.hover : S.pinned;
     if (p < 0) { card.hidden = true; cardFor = -2; return; }
-    if (p !== cardFor || cardLoaded !== !!D) {
-      card.innerHTML = cardHtml(p);
+    const tr = cardTrack(p);
+    if (p !== cardFor || cardLoaded !== !!D || tr !== cardTr) {
+      card.innerHTML = cardHtml(p, tr);
       cardFor = p;
       cardLoaded = !!D;
+      cardTr = tr;
     }
     card.classList.toggle("pinned", S.hover < 0);
     card.hidden = false;
@@ -1068,11 +1071,17 @@
   }
 
   function clearSearch(clearInput = true) {
-    if (clearInput) $("search").value = "";
+    const input = $("search");
+    if (clearInput) input.value = "";
     results = [];
     S.mask = null;
     $("search-status").textContent = "";
     $("results").hidden = true;
+    // Pins come only from search picks, so an empty box (its x, Escape, or deleting the query) drops the pin too.
+    if (!input.value && S.pinned >= 0) {
+      S.pinned = -1;
+      showCard();
+    }
     queueRender();
   }
 
