@@ -42,7 +42,9 @@
       all Wikipedias) × years since birth. Each slider position shows the ~4,300 people born in five consecutive
       birth-year bins; each person's place comes from the opening of their Wikipedia article (Qwen3 embeddings,
       laid out with AlignedUMAP so people glide between windows). Regions were found in each window, followed
-      across windows and named by Claude. Click a person to open their article.</p>
+      across windows and named by Claude. In the chart below the map, each ribbon is a large region's share of
+      the window's people in large regions; the 8–42% of each window in no large region (the grey points) is
+      left out. Click a person to open their article.</p>
     <p>Text and images: <a href="https://www.wikipedia.org/" target="_blank" rel="noopener">Wikipedia</a> (CC BY-SA)
       and Wikidata; leads with no English article were translated by Claude.</p>
   </details>
@@ -53,8 +55,8 @@
 <section id="timeline" aria-label="Birth-year slider">
   <div id="tl-head">
     <button id="play" type="button" aria-label="Play">&#9654;</button>
-    <span class="hint">The band picks a range of birth years: drag it or press ← →. Each ribbon is a region of the map,
-      as thick as its number of people.</span>
+    <span class="hint">The band picks a range of birth years: drag it or press ← →. Each ribbon is a region's share of
+      the window; people in no large region (grey on the map) are left out.</span>
   </div>
   <svg id="tl-svg" role="slider" aria-label="Birth-year window" tabindex="0"></svg>
   <div id="tl-tip" class="tip" hidden></div>

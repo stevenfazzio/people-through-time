@@ -32,6 +32,8 @@
   const TICK_SIZE = 11; // px, year ticks on the timeline's axis (as in style.css)
   const EDGE_SIZE = 13; // px, the band's edge years (as in style.css)
   const EDGE_GAP = 8; // px kept clear between an edge year and a tick or the other edge year
+  const EDGE_INSET = 8; // px kept between an edge year and the chart's sides (2 px clipped "2013" in one browser)
+  const HANDLE_W = 46, HANDLE_H = 12; // px, the tab on top of the band; it grabs across the band's whole width
   const LABEL_PAD = [10, 6]; // px added around each label's box (x, y) when testing overlaps
   const LABEL_FADE_MS = 180;
   // Props handed to every label layer on every frame: created once, so deck.gl sees them unchanged.
@@ -96,6 +98,7 @@
     hoverXY: null,
     pinned: -1,
     hlTrack: -1, // coarse track id highlighted from the chart
+    hoverHold: null, // [x, y] where the last drag was released: ribbon hovers wait until the pointer moves
     mask: null, // Uint8Array of search matches, or null
     zoom: 0,
     zoom0: 0,
@@ -638,7 +641,8 @@
     if (parent) parent.appendChild(e);
     return e;
   };
-  const TL = { w: 0, h: 0, padL: 14, padR: 14, top: 4, axis: 18, step: 2, g: {}, ribbons: {} };
+  // top: the strip above the ribbons holds the band's handle (HANDLE_H tall), so grabbing it touches no ribbon.
+  const TL = { w: 0, h: 0, padL: 14, padR: 14, top: HANDLE_H + 4, axis: 18, step: 2, g: {}, ribbons: {} };
 
   function binToX(b) { return TL.padL + (b / core.n_bins) * (TL.w - TL.padL - TL.padR); }
   function xToBin(x) { return ((x - TL.padL) / (TL.w - TL.padL - TL.padR)) * core.n_bins; }
@@ -701,23 +705,18 @@
       vals[t][k] = m;
       vals[s][k] = m;
     });
+    // Each knot's ribbons fill the chart's height: a ribbon is its region's share of the window's people in a
+    // coarse region. Windows hold ~equal numbers of people by design, so a raw total would only show coarse
+    // coverage (58-92% by window), a clustering artifact that reads as "fewer famous people born then".
     const K = 2 * core.n_bins + 1;
-    let maxSum = 0, maxAlive = 0;
-    for (let k = 0; k < K; k++) {
-      let s = 0, a = 0;
-      for (const t of order) if (vals[t][k] > 0) { s += vals[t][k]; a++; }
-      maxSum = Math.max(maxSum, s);
-      maxAlive = Math.max(maxAlive, a);
-    }
     const H = TL.h - TL.top - TL.axis;
-    const scale = (H - maxAlive * GAP) / maxSum;
-    // Control points (y down): centred stack, ribbons in order from the top.
     const top = {}, bot = {};
     order.forEach((t) => { top[t] = new Float64Array(K); bot[t] = new Float64Array(K); });
     for (let k = 0; k < K; k++) {
-      let total = 0;
-      for (const t of order) if (vals[t][k] > 0) total += vals[t][k] * scale + GAP;
-      let y = TL.top + (H - total) / 2;
+      let sum = 0, alive = 0;
+      for (const t of order) if (vals[t][k] > 0) { sum += vals[t][k]; alive++; }
+      const scale = sum > 0 ? (H - alive * GAP) / sum : 0;
+      let y = TL.top;
       for (const t of order) {
         const v = vals[t][k];
         if (v > 0) {
@@ -808,8 +807,12 @@
       for (let i = i1; i >= i0; i--) d += "L" + xs[i].toFixed(1) + "," + r.bot[i].toFixed(2);
       const g = coarseOf[t];
       const path = el("path", { d: d + "Z", class: "ribbon", fill: `rgb(${coarseRgb[t].join(",")})` }, gR);
-      path.addEventListener("pointerenter", (e) => { if (!S.dragging) hoverRibbon(t, e); });
-      path.addEventListener("pointermove", (e) => { if (!S.dragging) moveTip(e); });
+      path.addEventListener("pointerenter", (e) => { if (!S.dragging && !S.hoverHold) hoverRibbon(t, e); });
+      path.addEventListener("pointermove", (e) => {
+        if (S.dragging || S.hoverHold) return;
+        if (S.hlTrack !== t) hoverRibbon(t, e); // first move after a drag ended over this ribbon
+        else moveTip(e);
+      });
       path.addEventListener("pointerleave", () => { if (!S.dragging) hoverRibbon(-1); });
       TL.ribbons[t] = path;
       // Label: full name if it fits somewhere at 13..9 px, else the short name, else none.
@@ -848,13 +851,21 @@
     // first and last birth years (the ticks under those labels hide).
     TL.shadeL = el("rect", { class: "shade", y: 0, height: yAxis }, gB);
     TL.shadeR = el("rect", { class: "shade", y: 0, height: yAxis }, gB);
-    TL.band = el("rect", { class: "band", y: 1, height: yAxis - 2, rx: 3 }, gB);
-    TL.grip = el("rect", { class: "grip", y: 0, height: 3, rx: 1.5 }, gB);
+    const bandY = TL.top - 3;
+    TL.band = el("rect", { class: "band", y: bandY, height: yAxis - 1 - bandY, rx: 3 }, gB);
     TL.edges = [0, 1].map(() => ({
       line: el("line", { class: "edge-tick", y1: yAxis - 1, y2: yAxis + 4 }, gB),
       text: el("text", { class: "edge", y: yAxis + 14 }, gB),
       label: null,
     }));
+    // Handle: a tab on the band's top edge (drawn round x = 0, moved by drawBand), with a hit area across the
+    // band's width above the ribbons. Pressing it starts the same drag as pressing the band.
+    TL.handle = el("g", { class: "handle" }, gB);
+    el("rect", { class: "tab", x: -HANDLE_W / 2, y: 1, width: HANDLE_W, height: bandY + 2, rx: 3 }, TL.handle);
+    for (const dx of [-4, 0, 4]) {
+      el("line", { class: "grip-line", x1: dx, x2: dx, y1: 4, y2: bandY - 2 }, TL.handle);
+    }
+    TL.handleHit = el("rect", { class: "hit", y: 0, height: TL.top }, TL.handle);
     drawBand();
     return true;
   }
@@ -869,9 +880,10 @@
     TL.shadeR.setAttribute("width", Math.max(0, TL.w - x1));
     TL.band.setAttribute("x", x0);
     TL.band.setAttribute("width", Math.max(0, x1 - x0));
-    TL.band.setAttribute("height", yAxis - 2);
-    TL.grip.setAttribute("x", (x0 + x1) / 2 - 14);
-    TL.grip.setAttribute("width", 28);
+    const cx = (x0 + x1) / 2, hitW = Math.max(HANDLE_W + 20, x1 - x0);
+    TL.handle.setAttribute("transform", `translate(${cx.toFixed(1)},0)`);
+    TL.handleHit.setAttribute("x", -hitW / 2);
+    TL.handleHit.setAttribute("width", hitW);
     // Edge labels: the years of the window the map shows (the nearest one while dragging, as the readout),
     // centred under the band's edges, kept inside the chart and apart from each other.
     const w = Math.round(S.s), W = core.windows;
@@ -880,7 +892,7 @@
     let c0 = x0, c1 = x1;
     const short = c0 + half[0] + EDGE_GAP - (c1 - half[1]);
     if (short > 0) { c0 -= short / 2; c1 += short / 2; }
-    const inL = Math.max(0, 2 - (c0 - half[0])), inR = Math.max(0, c1 + half[1] - (TL.w - 2));
+    const inL = Math.max(0, EDGE_INSET - (c0 - half[0])), inR = Math.max(0, c1 + half[1] - (TL.w - EDGE_INSET));
     c0 += inL - inR;
     c1 += inL - inR;
     [x0, x1].forEach((x, i) => {
@@ -938,7 +950,10 @@
       stopAnim();
       offset = b >= S.s && b <= S.s + core.window_bins ? b - S.s : core.window_bins / 2;
       S.dragging = true;
-      $("tl-tip").hidden = true;
+      svg.classList.add("dragging");
+      // Grabbing the band means pressing on a ribbon, which hover has just highlighted: drop that highlight
+      // for the drag (ribbon hovers are ignored while dragging, and resume when the pointer next moves).
+      hoverRibbon(-1);
       svg.setPointerCapture(e.pointerId);
       setS(b - offset);
     });
@@ -946,9 +961,18 @@
       if (!S.dragging) return;
       setS(xToBin(e.clientX - svg.getBoundingClientRect().left) - offset);
     });
-    const release = () => {
+    // Releasing the capture makes the browser enter the ribbon under a still pointer; hold hovers off until
+    // the pointer really moves (a capture listener, so the ribbon's own handler sees the hold cleared).
+    svg.addEventListener("pointermove", (e) => {
+      const h = S.hoverHold;
+      if (h && Math.abs(e.clientX - h[0]) + Math.abs(e.clientY - h[1]) > 3) S.hoverHold = null;
+    }, true);
+    svg.addEventListener("pointerleave", () => { S.hoverHold = null; });
+    const release = (e) => {
       if (!S.dragging) return;
       S.dragging = false;
+      S.hoverHold = [e.clientX, e.clientY];
+      svg.classList.remove("dragging");
       animateTo(Math.round(S.s), SETTLE_MS);
     };
     svg.addEventListener("pointerup", release);

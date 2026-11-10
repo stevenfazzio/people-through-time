@@ -545,22 +545,54 @@ Planned next: see "Frontend, what's left".
   - **Timeline / slider**: SVG under the map (27vh, 190-270 px). x = the 36
     equal-count bins with year ticks at their true positions -- uneven in
     years, as Histomap's axis is -- and the window on the map is a 5-bin band
-    with the rest shaded; drag it or click anywhere. One ribbon per coarse
+    with the rest shaded; drag it (by its handle or anywhere on it) or click
+    anywhere. One ribbon per coarse
     track, as thick as its people in each window (window w's count at its
     centre bin w + 2.5; the half-window midpoint is 0 where a track starts or
     ends, so ribbons taper; first and last windows extend to the edges), drawn
     as a uniform cubic B-spline of stacked control points (smooth, never below
-    zero, stacked boundaries coincide). Centred like ThemeRiver, 2 px gaps,
-    scaled to the largest labelled total; people outside every coarse track
-    are left out, so the river narrows where few people fall into big clusters
-    (coarse coverage 58-92% by window). Ribbon order: one fixed order (no
+    zero, stacked boundaries coincide). 2 px gaps; people outside every coarse
+    track are left out. Ribbon order: one fixed order (no
     crossings), from the tracks' mean height on the map, then single-track
     moves while they lower the people × tracks stacked between the two ends of
     each coarse-track flow between windows (merges, splits). Ribbon label:
     the full name where it fits horizontally inside the ribbon at 13-9 px,
-    else stage 11b's short name, else none (tooltip on hover); 21 of 50 at
-    1440 px wide. Hovering a ribbon highlights its people on the map (others
-    at 10% alpha); hovering a person highlights their ribbon.
+    else stage 11b's short name, else none (tooltip on hover). Hovering a
+    ribbon highlights its people on the map (others at 10% alpha); hovering a
+    person highlights their ribbon.
+  - **The river fills the chart** (2026-11-10, Steven asked whether the
+    total said anything). It was centred like ThemeRiver and scaled to the
+    largest labelled total, so its height was coarse coverage: windows hold
+    ~equal people by design, so it could never show how many famous people
+    were born then (the uneven axis does), only the share in a coarse region,
+    58-92% by window -- a clustering artifact that read as "fewer famous
+    people born 1866-1952" (the river's narrowest, 62% of full height), and
+    jumped with size-threshold crossings (81% → 60% from window 17 to 18).
+    Now each knot's ribbons fill the height: a ribbon is its region's share
+    of the window's people in coarse regions. Measured on a scratch copy
+    (ribbon labels, today / grey remainder / filled): 19 / 19 / 28 at
+    1440×900, 10 / 7 / 17 at 1024×768. Cost: a ribbon swells when a
+    neighbour leaves the coarse layer, but coverage alone changes a ribbon by
+    a median 7% per window step (p90 23%, max 34% at 17→18) against a median
+    28% (p75 59%) real change in a track's people; 23 of 241 track steps
+    change direction, all near-flat (worst: European Royalty 372 → 313 drawn
+    flat at 11%). Comparing one region across distant windows is off by up to
+    1.6× (coverage 58% vs 92%). Rejected: the window's whole 100% with the
+    uncovered share as a grey band (exact ribbons, but fewer labels and a big
+    grey wedge under 1866-1952). Kept honest by words: the hint says "share
+    of the window; people in no large region (grey on the map) are left out",
+    the About text gives the 8-42%, and the ribbon tooltip keeps counts.
+  - **Band handle** (2026-11-10, Steven: dragging the band also highlighted a
+    region). Grabbing the band means pressing on a ribbon that hover has just
+    highlighted, and ribbon hovers were ignored during the drag, so that
+    region stayed highlighted (the map dimmed) for the whole drag. Now a tab
+    on the band's top edge (46 × 12 px, grip lines, grab cursor) in a strip
+    above the ribbons, its hit area the band's width; the cursor reaches it
+    from the map without crossing a ribbon. Pressing the band clears the
+    highlight, and after release hovers wait until the pointer moves 3 px:
+    releasing pointer capture makes the browser enter the ribbon under a
+    still pointer, which lit a region at the moment of letting go. The strip
+    costs 2 ribbon labels at 1440×900 (26).
   - **Birth-year readout** (2026-11-10, Steven: the range was a small line
     under the map, and a reader could take the slider for the years people
     were famous -- someone on 1925-1952 asking where the WWII leaders are,

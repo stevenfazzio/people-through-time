@@ -235,13 +235,16 @@ html, body {
   font-weight: 700;
   font-family: var(--sans);
   text-anchor: middle;
-  font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
 #tl-svg .edge-tick { stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; pointer-events: none; }
 #tl-svg .shade { fill: rgba(11, 14, 18, 0.62); pointer-events: none; }
 #tl-svg .band { fill: none; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; pointer-events: none; }
-#tl-svg .grip { fill: rgba(255, 255, 255, 0.85); pointer-events: none; }
+#tl-svg .handle .tab { fill: rgba(255, 255, 255, 0.85); pointer-events: none; transition: fill 120ms; }
+#tl-svg .handle .grip-line { stroke: #0b0e12; stroke-width: 1.2; pointer-events: none; }
+#tl-svg .handle .hit { fill: transparent; pointer-events: all; cursor: grab; }
+#tl-svg .handle:hover .tab { fill: #fff; }
+#tl-svg.dragging, #tl-svg.dragging .handle .hit { cursor: grabbing; }
 
 .tip {
   position: absolute;
