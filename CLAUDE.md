@@ -561,6 +561,28 @@ Planned next: see "Frontend, what's left".
     else stage 11b's short name, else none (tooltip on hover); 21 of 50 at
     1440 px wide. Hovering a ribbon highlights its people on the map (others
     at 10% alpha); hovering a person highlights their ribbon.
+  - **Birth-year readout** (2026-11-10, Steven: the range was a small line
+    under the map, and a reader could take the slider for the years people
+    were famous -- someone on 1925-1952 asking where the WWII leaders are,
+    who are in windows 14-19, born 1874-1891). The range is big
+    on the map, "Born 1925 – 1952" in the title serif at 30% white behind the
+    points (Gapminder's year; deck.gl's canvas is transparent), lower left,
+    with the count and "aged 40 in 1965 – 1992" under it. The aged-40 line
+    turns birth years into roughly the years these people were active, and
+    shows only for windows of at most 150 years (`AGED_SPAN_MAX`, 1773-1914
+    on): over centuries-wide windows 40 years is noise. It says "aged" so the
+    tense still works once the years run past 2026. The band's edges carry
+    the window's first and last years on the axis (bold, white; the ticks
+    under them hide), and the subtitle says the slider is birth years, not
+    fame years, with the example put as where to look ("you'll find World
+    War II's leaders around 1880, not 1940"; stated as a birth-decade fact
+    it read as a non-sequitur). The small header
+    readout and its "window N of 32" are gone. Considered and dropped: three
+    famous names per window (the top three by score repeat across windows
+    and are awkward picks: Hitler tops windows 16-19, Ansel Adams -- the
+    crawler suspect -- is second in 17-19, Epstein third in 1945-1964); a
+    lifespan shadow on the timeline (the 1925-1952 people were alive in
+    WWII, as children).
   - **Colour**: points by coarse track (grey `#5b6472` outside every coarse
     track; blended while a person changes track). Interval colouring with a
     1-window buffer, so no two coarse tracks alive within a window of each

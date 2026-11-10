@@ -19,12 +19,18 @@
 <script src="https://unpkg.com/deck.gl@9.1.15/dist.min.js"></script>
 </head>
 <body>
+<!-- The birth-year range, large and behind the points (deck.gl's canvas is transparent). -->
+<div id="era" aria-hidden="true">
+  <div class="range"><span class="born">Born</span> <span id="era-years"></span></div>
+  <div id="era-sub" class="sub"></div>
+</div>
 <div id="map"></div>
 
 <header id="title" class="panel">
   <h1>People Through Time</h1>
   <p class="sub">The most famous people of every era, from all Wikipedias, placed by what they are known for.
-    Move the slider below to travel through birth years.</p>
+    Move the slider below through the years people were <strong>born</strong>, not the years they were famous:
+    you'll find World War II's leaders around 1880, not 1940.</p>
   <div class="search">
     <input id="search" type="search" placeholder="Search 31,000 people…" autocomplete="off" spellcheck="false" aria-label="Search people">
     <div id="search-status" class="status"></div>
@@ -47,8 +53,8 @@
 <section id="timeline" aria-label="Birth-year slider">
   <div id="tl-head">
     <button id="play" type="button" aria-label="Play">&#9654;</button>
-    <span id="readout"></span>
-    <span class="hint">Drag the band or press ← →. Each ribbon is a region of the map, as thick as its number of people.</span>
+    <span class="hint">The band picks a range of birth years: drag it or press ← →. Each ribbon is a region of the map,
+      as thick as its number of people.</span>
   </div>
   <svg id="tl-svg" role="slider" aria-label="Birth-year window" tabindex="0"></svg>
   <div id="tl-tip" class="tip" hidden></div>

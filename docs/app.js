@@ -17,6 +17,7 @@
   const STEP_MS = 560;
   const PLAY_WINDOWS_PER_S = 0.75;
   const DIM = 0.1; // alpha factor for points outside a highlight
+  const AGED_SPAN_MAX = 150; // years: the readout's "aged 40 in" line shows for windows no wider (1773-1914 on)
   const FONT = '"Source Sans 3", "Source Sans Pro", system-ui, sans-serif';
   // Label layers, finest first (stage 09's layer 0 is the finest). As in datamapplot 0.7.3, labels have fixed
   // pixel sizes, coarse labels win collisions and finer ones appear as zooming spreads them apart -- but the
@@ -28,6 +29,9 @@
     { size: 17, weight: 700, wrap: 22, base: 600, color: null },
   ];
   const GAP = 2; // px between ribbons
+  const TICK_SIZE = 11; // px, year ticks on the timeline's axis (as in style.css)
+  const EDGE_SIZE = 13; // px, the band's edge years (as in style.css)
+  const EDGE_GAP = 8; // px kept clear between an edge year and a tick or the other edge year
   const LABEL_PAD = [10, 6]; // px added around each label's box (x, y) when testing overlaps
   const LABEL_FADE_MS = 180;
   // Props handed to every label layer on every frame: created once, so deck.gl sees them unchanged.
@@ -521,12 +525,21 @@
     S.anim = requestAnimationFrame(tick);
   }
 
+  // The range on the map. "Aged 40 in" moves the reader from birth years to the years these people were
+  // active (the slider is about birth, not events); only where 40 years is a real shift against the window's
+  // span -- in the earliest windows, spanning centuries, it would be noise.
   function updateReadout() {
     const w = Math.round(S.s);
+    if (w === S.readoutWindow) return;
+    S.readoutWindow = w;
     const W = core.windows;
-    $("readout").innerHTML = `Born ${esc(fmtYear(W.lo[w]))} – ${esc(fmtYear(W.hi[w]))}` +
-      `<span class="n">${W.n[w].toLocaleString("en-US")} people · window ${w + 1} of ${NW}</span>`;
+    const range = `${fmtYear(W.lo[w])} – ${fmtYear(W.hi[w])}`;
+    $("era-years").textContent = range;
+    let sub = `${W.n[w].toLocaleString("en-US")} people`;
+    if (W.hi[w] - W.lo[w] <= AGED_SPAN_MAX) sub += ` · aged 40 in ${fmtYear(W.lo[w] + 40)} – ${fmtYear(W.hi[w] + 40)}`;
+    $("era-sub").textContent = sub;
     $("tl-svg").setAttribute("aria-valuenow", String(w));
+    $("tl-svg").setAttribute("aria-valuetext", "Born " + range);
     if (S.mask && w !== S.statusWindow) { S.statusWindow = w; searchStatus(); }
   }
 
@@ -818,6 +831,7 @@
     // Year axis: ticks at their true positions along the equal-people bins.
     let lastX = -1e9;
     const yAxis = TL.h - TL.axis;
+    TL.ticks = [];
     for (const yr of TICK_YEARS) {
       const b = yearToBin(yr);
       if (b === null) continue;
@@ -826,13 +840,21 @@
       lastX = x;
       const g = el("g", { class: "tick" }, gA);
       el("line", { x1: x, x2: x, y1: yAxis, y2: yAxis + 4 }, g);
-      el("text", { x, y: yAxis + 14 }, g).textContent = fmtYear(yr);
+      const text = fmtYear(yr);
+      el("text", { x, y: yAxis + 14 }, g).textContent = text;
+      TL.ticks.push({ g, x, half: textWidth(text, TICK_SIZE, 400) / 2 });
     }
-    // Lens: shade outside the 5 bins on the map, outline the band.
+    // Lens: shade outside the 5 bins on the map, outline the band, and label its edges with the window's
+    // first and last birth years (the ticks under those labels hide).
     TL.shadeL = el("rect", { class: "shade", y: 0, height: yAxis }, gB);
     TL.shadeR = el("rect", { class: "shade", y: 0, height: yAxis }, gB);
     TL.band = el("rect", { class: "band", y: 1, height: yAxis - 2, rx: 3 }, gB);
     TL.grip = el("rect", { class: "grip", y: 0, height: 3, rx: 1.5 }, gB);
+    TL.edges = [0, 1].map(() => ({
+      line: el("line", { class: "edge-tick", y1: yAxis - 1, y2: yAxis + 4 }, gB),
+      text: el("text", { class: "edge", y: yAxis + 14 }, gB),
+      label: null,
+    }));
     drawBand();
     return true;
   }
@@ -850,6 +872,29 @@
     TL.band.setAttribute("height", yAxis - 2);
     TL.grip.setAttribute("x", (x0 + x1) / 2 - 14);
     TL.grip.setAttribute("width", 28);
+    // Edge labels: the years of the window the map shows (the nearest one while dragging, as the readout),
+    // centred under the band's edges, kept inside the chart and apart from each other.
+    const w = Math.round(S.s), W = core.windows;
+    const texts = [fmtYear(W.lo[w]), fmtYear(W.hi[w])];
+    const half = texts.map((t) => textWidth(t, EDGE_SIZE, 700) / 2);
+    let c0 = x0, c1 = x1;
+    const short = c0 + half[0] + EDGE_GAP - (c1 - half[1]);
+    if (short > 0) { c0 -= short / 2; c1 += short / 2; }
+    const inL = Math.max(0, 2 - (c0 - half[0])), inR = Math.max(0, c1 + half[1] - (TL.w - 2));
+    c0 += inL - inR;
+    c1 += inL - inR;
+    [x0, x1].forEach((x, i) => {
+      const e = TL.edges[i], c = i ? c1 : c0;
+      e.line.setAttribute("x1", x);
+      e.line.setAttribute("x2", x);
+      e.text.setAttribute("x", c.toFixed(1));
+      if (e.label !== texts[i]) { e.label = texts[i]; e.text.textContent = texts[i]; }
+    });
+    const spans = [[c0 - half[0], c0 + half[0]], [c1 - half[1], c1 + half[1]]];
+    for (const t of TL.ticks) {
+      const hide = spans.some(([a, b]) => t.x + t.half + EDGE_GAP > a && t.x - t.half - EDGE_GAP < b);
+      if (t.hidden !== hide) { t.hidden = hide; t.g.style.display = hide ? "none" : ""; }
+    }
   }
 
   function hoverRibbon(t, e) {

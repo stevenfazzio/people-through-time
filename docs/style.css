@@ -28,6 +28,31 @@ html, body {
   inset: 0 0 var(--tl-h) 0;
 }
 
+/* The birth-year range, behind the points (Gapminder's year). */
+#era {
+  position: absolute;
+  left: 22px;
+  bottom: calc(var(--tl-h) + 14px);
+  pointer-events: none;
+  white-space: nowrap;
+}
+#era .range {
+  font-family: var(--serif);
+  font-weight: 560;
+  font-size: clamp(27px, 4.6vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.005em;
+  color: rgba(231, 234, 238, 0.3);
+  font-variant-numeric: lining-nums;
+}
+#era .born { font-size: 0.62em; color: rgba(231, 234, 238, 0.42); }
+#era .sub {
+  margin-top: 8px;
+  font-size: 15px;
+  color: rgba(154, 164, 178, 0.75);
+  font-variant-numeric: tabular-nums;
+}
+
 .panel {
   position: absolute;
   background: var(--panel);
@@ -57,6 +82,7 @@ html, body {
   line-height: 1.4;
   color: var(--dim);
 }
+#title .sub strong { color: var(--text); font-weight: 600; }
 
 .search { position: relative; }
 #search {
@@ -188,9 +214,7 @@ html, body {
   cursor: pointer;
 }
 #play:hover { border-color: var(--accent); }
-#readout { color: var(--text); font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-#readout .n { color: var(--dim); font-weight: 400; font-size: 13px; margin-left: 8px; }
-#tl-head .hint { margin-left: auto; font-size: 12px; color: var(--faint); text-align: right; }
+#tl-head .hint { font-size: 12.5px; color: var(--faint); }
 #tl-svg { flex: 1; width: 100%; display: block; cursor: pointer; touch-action: none; outline: none; }
 #tl-svg .ribbon { opacity: 0.86; transition: opacity 120ms; }
 #tl-svg.has-hl .ribbon { opacity: 0.35; }
@@ -203,8 +227,18 @@ html, body {
   dominant-baseline: central;
   text-anchor: middle;
 }
-#tl-svg .tick text { fill: var(--faint); font-size: 11px; font-family: var(--sans); text-anchor: middle; }
-#tl-svg .tick line { stroke: rgba(255, 255, 255, 0.12); }
+#tl-svg .tick text { fill: #8a94a3; font-size: 11px; font-family: var(--sans); text-anchor: middle; }
+#tl-svg .tick line { stroke: rgba(255, 255, 255, 0.2); }
+#tl-svg .edge {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--sans);
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+#tl-svg .edge-tick { stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; pointer-events: none; }
 #tl-svg .shade { fill: rgba(11, 14, 18, 0.62); pointer-events: none; }
 #tl-svg .band { fill: none; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.5; pointer-events: none; }
 #tl-svg .grip { fill: rgba(255, 255, 255, 0.85); pointer-events: none; }
