@@ -41,7 +41,14 @@
   const TICK_YEARS = [-2999, -999, -499, 1, 500, 1000, 1200, 1400, 1500, 1600, 1700, 1800, 1850, 1900, 1925,
     1950, 1970, 1990, 2005];
 
+  // Phone-sized screens dock the card (as in style.css): along the bottom in portrait, at the right when short.
+  const DOCKED = window.matchMedia("(max-width: 640px), (max-height: 500px)");
+  const NO_HOVER = window.matchMedia("(hover: none)");
+
   const $ = (id) => document.getElementById(id);
+  // Touch and pen have no hover: a tap pins the card instead of opening the article. Per event, not per
+  // device, so a touchscreen laptop's mouse still opens articles on click.
+  const isTouch = (ev) => !!ev && (ev.pointerType === "touch" || ev.pointerType === "pen");
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -102,6 +109,7 @@
     mask: null, // Uint8Array of search matches, or null
     zoom: 0,
     zoom0: 0,
+    userMoved: false, // the reader panned, zoomed or flew somewhere: a resize no longer refits the view
     renderQueued: false,
   };
   let core, D = null; // D = details, once loaded
@@ -124,6 +132,7 @@
     initTimeline();
     initSearch();
     initKeys();
+    initCard();
     setS(16); // opens on people born 1831-1924: busy, and full of familiar names
     $("loading").hidden = true;
     // For debugging from the console; renderNow() draws without waiting for an animation frame.
@@ -192,14 +201,21 @@
     return [el.clientWidth, el.clientHeight];
   }
 
+  let qs = null;
   function fitZoom() {
     // Fit the central 99.6% of all points (normalized windows share one frame).
-    const xs = Array.from(X).sort((a, b) => a - b), ys = Array.from(Y).sort((a, b) => a - b);
-    const qa = (a, f) => a[Math.floor(f * (a.length - 1))];
-    const x0 = qa(xs, 0.002), x1 = qa(xs, 0.998), y0 = qa(ys, 0.002), y1 = qa(ys, 0.998);
+    if (!qs) {
+      const xs = Array.from(X).sort((a, b) => a - b), ys = Array.from(Y).sort((a, b) => a - b);
+      const qa = (a, f) => a[Math.floor(f * (a.length - 1))];
+      qs = [qa(xs, 0.002), qa(xs, 0.998), qa(ys, 0.002), qa(ys, 0.998)];
+    }
+    const [x0, x1, y0, y1] = qs;
     const [w, h] = mapSize();
-    const zoom = Math.log2(Math.min(w / (x1 - x0), h / (y1 - y0)) * 0.9);
-    return { target: [(x0 + x1) / 2, (y0 + y1) / 2, 0], zoom };
+    // On a phone the title panel spans the map's width: fit the points into the space below it instead.
+    const panel = $("title").getBoundingClientRect();
+    const top = panel.width > 0.6 * w && panel.bottom < 0.5 * h ? panel.bottom : 0;
+    const zoom = Math.log2(Math.min(w / (x1 - x0), (h - top) / (y1 - y0)) * 0.9);
+    return { target: [(x0 + x1) / 2, (y0 + y1) / 2 - top / 2 / Math.pow(2, zoom), 0], zoom };
   }
 
   // Fit the view once the map has a size; until then deck.gl has a zero-size canvas.
@@ -211,6 +227,67 @@
     S.fitTarget = fit.target;
     S.fitted = true;
     deckgl.setProps({ initialViewState: { target: fit.target, zoom: fit.zoom, minZoom: fit.zoom - 1.5, maxZoom: fit.zoom + 7 } });
+  }
+
+  // Move the view (zoom unchanged unless given) so world point [x, y] lands on screen point [fx, fy].
+  function panTo(x, y, [fx, fy], zoom = S.zoom, ms = 450) {
+    const [mw, mh] = mapSize();
+    const k = Math.pow(2, zoom);
+    S.userMoved = true;
+    deckgl.setProps({
+      initialViewState: {
+        target: [x + (mw / 2 - fx) / k, y + (mh / 2 - fy) / k, 0],
+        zoom,
+        minZoom: S.zoom0 - 1.5,
+        maxZoom: S.zoom0 + 7,
+        transitionDuration: ms,
+        transitionInterpolator: new deck.LinearInterpolator({ transitionProps: ["target", "zoom"] }),
+      },
+    });
+  }
+
+  // Where a focused person should sit on screen: the middle of the map's part not under the title panel or
+  // a docked card (the map's centre when the card floats beside its person).
+  function focusPoint() {
+    const [mw, mh] = mapSize();
+    let x0 = 0, x1 = mw, y0 = 0, y1 = mh;
+    const card = $("card");
+    if (DOCKED.matches && !card.hidden) {
+      const r = card.getBoundingClientRect();
+      if (r.left > 0.3 * mw) x1 = r.left; // docked at the right
+      else y1 = r.top; // docked along the bottom
+    }
+    const panel = $("title").getBoundingClientRect();
+    if (panel.width > 0.6 * (x1 - x0) && y1 - panel.bottom > 80) y0 = panel.bottom;
+    return [(x0 + x1) / 2, (y0 + y1) / 2];
+  }
+
+  // A tapped person under the title panel or the docked card moves into the free part of the map.
+  function revealPinned() {
+    const at = personAt(S.pinned, S.s);
+    const vp = deckgl.getViewports()[0];
+    if (!at || !vp) return;
+    const [sx, sy] = vp.project([at.x, at.y]);
+    const M = 16;
+    const covered = ["title", "card"].some((id) => {
+      const el = $(id);
+      if (el.hidden) return false;
+      const r = el.getBoundingClientRect();
+      return sx > r.left - M && sx < r.right + M && sy > r.top - M && sy < r.bottom + M;
+    });
+    if (covered) panTo(at.x, at.y, focusPoint());
+  }
+
+  function pin(p) {
+    S.pinned = p;
+    showCard();
+    queueRender();
+  }
+  function unpin() {
+    if (S.pinned < 0) return;
+    S.pinned = -1;
+    showCard();
+    queueRender();
   }
 
   function initDeck() {
@@ -236,30 +313,32 @@
       initialViewState: { target: fit.target, zoom: fit.zoom, minZoom: fit.zoom - 1.5, maxZoom: fit.zoom + 7 },
       controller: { scrollZoom: { speed: 0.04, smooth: true }, dragRotate: false, keyboard: false, inertia: false },
       getCursor: ({ isDragging, isHovering }) => (isDragging ? "grabbing" : isHovering ? "pointer" : "grab"),
-      onViewStateChange: ({ viewState }) => {
+      onViewStateChange: ({ viewState, interactionState }) => {
         S.zoom = viewState.zoom;
+        if (interactionState && (interactionState.isDragging || interactionState.isPanning ||
+          interactionState.isZooming)) S.userMoved = true;
         queueRender();
       },
-      onHover: (info) => {
+      onHover: (info, ev) => {
+        if (isTouch(ev)) return; // a touch has no hover; its tap pins (onClick)
         const p = info.picked && info.layer && info.layer.id === "points" ? frame.pid[info.index] : -1;
         S.hoverXY = info.picked ? [info.x, info.y] : null;
         if (p !== S.hover) {
           S.hover = p;
-          highlightRibbonOf(p);
           queueRender();
         }
         showCard();
       },
-      onClick: (info) => {
+      onClick: (info, ev) => {
         const p = info.picked && info.layer && info.layer.id === "points" ? frame.pid[info.index] : -1;
-        if (p >= 0) {
+        if (p >= 0 && isTouch(ev)) {
+          // A tap shows the card (pinned, with a link to the article); tapping empty map closes it.
+          pin(p);
+          revealPinned();
+        } else if (p >= 0) {
           const ref = D ? D.ref[p] : null;
           if (ref) window.open(articleUrl(ref), "_blank", "noopener");
-        } else if (S.pinned >= 0) {
-          S.pinned = -1;
-          showCard();
-          queueRender();
-        }
+        } else unpin();
       },
       layers: [],
     });
@@ -374,10 +453,15 @@
     const step = lastPlace ? Math.min(1, (now - lastPlace) / LABEL_FADE_MS) : 1;
     lastPlace = now;
     if (!labelVis) labelVis = new Float32Array(core.tracks.name.length);
-    // The title panel counts as a placed label, so no label hides under it.
+    // The title panel and a docked card count as placed labels, so no label hides under them.
     const [mw, mh] = mapSize();
-    const panel = $("title").getBoundingClientRect();
-    const placed = panel.width ? [[panel.left - 4, panel.right + 4, panel.top - 4, panel.bottom + 4]] : [];
+    const placed = [];
+    for (const id of ["title", "card"]) {
+      const el = $(id);
+      if (el.hidden || (id === "card" && !el.classList.contains("docked"))) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width) placed.push([r.left - 4, r.right + 4, r.top - 4, r.bottom + 4]);
+    }
     const EDGE = 4;
     const target = new Uint8Array(labelVis.length);
     cands.sort((a, b) => b.prio - a.prio);
@@ -470,6 +554,7 @@
     });
     deckgl.setProps({ layers });
     drawBand();
+    markRibbon();
     if (S.pinned >= 0 && S.hover < 0) showCard();
   }
 
@@ -578,7 +663,9 @@
     return at ? at.track : 255;
   }
 
-  function cardHtml(p, tr) {
+  // pinned: the card stays up (a search pick or a tap) and takes clicks, so it gets a close button and a link
+  // to the article in place of the hover card's "click to open".
+  function cardHtml(p, tr, pinned) {
     const P = core.people;
     let pill = "";
     if (tr !== 255) {
@@ -594,30 +681,38 @@
     if (d) rows.push(["Views", fmtViews(d.views[p]) + " a month"]);
     const grid = rows.map(([k, v]) => `<div class="k">${k}</div><div>${esc(v)}</div>`).join("");
     let foot;
+    const link = (text) => `<a class="pc-link" href="${esc(articleUrl(d.ref[p]))}" target="_blank" rel="noopener">${text} →</a>`;
     if (!d) foot = "Loading details…";
-    else if (d.from[p]) foot = `Translated by Claude from the <b>${esc(d.from[p])} Wikipedia</b> · click to open it`;
-    else if (d.ref[p].startsWith("wd:")) foot = "From Wikidata · click to open the item";
-    else foot = "Click to open the Wikipedia article";
-    return `${img}${pill}<div class="pc-title">${esc(P.name[p])}</div>` +
+    else if (d.from[p]) {
+      foot = `Translated by Claude from the <b>${esc(d.from[p])} Wikipedia</b>` +
+        (pinned ? `<br>${link(`Open the ${esc(d.from[p])} article`)}` : " · click to open it");
+    } else if (d.ref[p].startsWith("wd:")) foot = pinned ? `From Wikidata · ${link("Open the item")}` : "From Wikidata · click to open the item";
+    else foot = pinned ? link("Open the Wikipedia article") : "Click to open the Wikipedia article";
+    const close = pinned ? `<button class="pc-close" type="button" aria-label="Close">×</button>` : "";
+    return `${close}${img}${pill}<div class="pc-title">${esc(P.name[p])}</div>` +
       (d && d.desc[p] ? `<div class="pc-desc">${esc(d.desc[p])}</div>` : "") +
       `<div class="pc-grid">${grid}</div>` +
       `<div class="pc-lead">${d ? esc(d.excerpt[p]) : ""}</div><div class="pc-foot">${foot}</div>`;
   }
 
-  // The card is rebuilt when its person, their region (the pill follows the slider) or the details change.
-  let cardFor = -2, cardLoaded = null, cardTr = -1;
+  // The card is rebuilt when its person, their region (the pill follows the slider), the details or its
+  // pinned state change. On a phone-sized screen it docks (style.css places it) instead of following its person.
+  let cardFor = -2, cardLoaded = null, cardTr = -1, cardPinned = null;
   function showCard() {
     const card = $("card");
     const p = S.hover >= 0 ? S.hover : S.pinned;
     if (p < 0) { card.hidden = true; cardFor = -2; return; }
-    const tr = cardTrack(p);
-    if (p !== cardFor || cardLoaded !== !!D || tr !== cardTr) {
-      card.innerHTML = cardHtml(p, tr);
+    const tr = cardTrack(p), pinned = S.hover < 0;
+    if (p !== cardFor || cardLoaded !== !!D || tr !== cardTr || pinned !== cardPinned) {
+      card.innerHTML = cardHtml(p, tr, pinned);
       cardFor = p;
       cardLoaded = !!D;
       cardTr = tr;
+      cardPinned = pinned;
     }
-    card.classList.toggle("pinned", S.hover < 0);
+    card.classList.toggle("pinned", pinned);
+    const docked = DOCKED.matches;
+    card.classList.toggle("docked", docked);
     card.hidden = false;
     let xy = S.hover >= 0 ? S.hoverXY : null;
     if (!xy) {
@@ -625,6 +720,10 @@
       const vp = deckgl.getViewports()[0];
       if (!at || !vp) { card.hidden = true; return; }
       xy = vp.project([at.x, at.y]);
+    }
+    if (docked) {
+      card.style.left = card.style.top = "";
+      return;
     }
     const [mw, mh] = mapSize();
     const cw = card.offsetWidth, ch = card.offsetHeight;
@@ -796,6 +895,7 @@
     if (TL.w < 80 || TL.h < 60) return false; // not laid out yet: the ResizeObserver draws it later
     svg.setAttribute("viewBox", `0 0 ${TL.w} ${TL.h}`);
     svg.innerHTML = "";
+    TL.marked = undefined;
     const gR = el("g", {}, svg), gL = el("g", {}, svg), gA = el("g", {}, svg), gB = el("g", {}, svg);
     TL.g = { gR, gL, gA, gB };
     const { order, xs, rib } = layoutRibbons();
@@ -810,9 +910,10 @@
       for (let i = i1; i >= i0; i--) d += "L" + xs[i].toFixed(1) + "," + r.bot[i].toFixed(2);
       const g = coarseOf[t];
       const path = el("path", { d: d + "Z", class: "ribbon", fill: `rgb(${coarseRgb[t].join(",")})` }, gR);
-      path.addEventListener("pointerenter", (e) => { if (!S.dragging && !S.hoverHold) hoverRibbon(t, e); });
+      // Touch has no hover: a press on the chart only moves the band.
+      path.addEventListener("pointerenter", (e) => { if (!S.dragging && !S.hoverHold && !isTouch(e)) hoverRibbon(t, e); });
       path.addEventListener("pointermove", (e) => {
-        if (S.dragging || S.hoverHold) return;
+        if (S.dragging || S.hoverHold || isTouch(e)) return;
         if (S.hlTrack !== t) hoverRibbon(t, e); // first move after a drag ended over this ribbon
         else moveTip(e);
       });
@@ -914,6 +1015,7 @@
 
   function hoverRibbon(t, e) {
     S.hlTrack = t;
+    TL.marked = undefined; // markRibbon redoes the person's ribbon once the chart hover ends
     $("tl-svg").classList.toggle("has-hl", t >= 0);
     for (const k in TL.ribbons) TL.ribbons[k].classList.toggle("hl", Number(k) === t);
     const tip = $("tl-tip");
@@ -935,13 +1037,17 @@
     tip.style.left = Math.max(4, x) + "px";
     tip.style.top = Math.max(-tip.offsetHeight - 6, y) + "px";
   }
-  function highlightRibbonOf(p) {
+  // The hovered or pinned person's ribbon stands out in the chart (on a phone, where few ribbons have room
+  // for a label, this is how a pinned person's region shows its run through time).
+  function markRibbon() {
     if (S.hlTrack >= 0) return; // a ribbon hovered in the chart wins
-    for (const k in TL.ribbons) TL.ribbons[k].classList.remove("hl");
+    const p = S.hover >= 0 ? S.hover : S.pinned;
     const at = p >= 0 ? personAt(p, S.s) : null;
     const t = at && at.track !== 255 ? at.track : -1;
+    if (t === TL.marked) return;
+    TL.marked = t;
+    for (const k in TL.ribbons) TL.ribbons[k].classList.toggle("hl", Number(k) === t);
     $("tl-svg").classList.toggle("has-hl", t >= 0);
-    if (t >= 0 && TL.ribbons[t]) TL.ribbons[t].classList.add("hl");
   }
 
   function initTimeline() {
@@ -980,8 +1086,10 @@
     };
     svg.addEventListener("pointerup", release);
     svg.addEventListener("pointercancel", release);
-    // Redraw on any size change, including the first real one (a pane can load the page at zero size).
-    let pending = null, lastSize = "";
+    // Redraw on any size change, including the first real one (a pane can load the page at zero size). A new
+    // width (a phone turned sideways) refits the map too, unless the reader has moved it; a new height alone
+    // may be a phone's keyboard, which shouldn't rescale the map.
+    let pending = null, lastSize = "", lastW = 0;
     new ResizeObserver(() => {
       const r = svg.getBoundingClientRect();
       const size = `${Math.round(r.width)}x${Math.round(r.height)}`;
@@ -989,8 +1097,11 @@
       lastSize = size;
       clearTimeout(pending);
       pending = setTimeout(() => {
-        if (!S.fitted) refit();
+        const w = Math.round(svg.getBoundingClientRect().width);
+        if (!S.fitted || (w !== lastW && !S.userMoved)) refit();
+        lastW = w;
         drawTimeline();
+        if (S.hover >= 0 || S.pinned >= 0) showCard(); // docked or not may have changed
         queueRender();
       }, 80);
     }).observe(svg);
@@ -1077,11 +1188,8 @@
     S.mask = null;
     $("search-status").textContent = "";
     $("results").hidden = true;
-    // Pins come only from search picks, so an empty box (its x, Escape, or deleting the query) drops the pin too.
-    if (!input.value && S.pinned >= 0) {
-      S.pinned = -1;
-      showCard();
-    }
+    // An empty box (its x, Escape, or deleting the query) drops the pin too, whether a pick or a tap made it.
+    if (!input.value) unpin();
     queueRender();
   }
 
@@ -1092,22 +1200,22 @@
     S.mask = null; // the pinned card and ring mark the person; the query text stays for another pick
     $("search-status").textContent = "";
     $("results").hidden = true;
+    if (NO_HOVER.matches) $("search").blur(); // put the phone's keyboard away
     const ms = Math.min(1600, 350 + 70 * Math.abs(target - S.s));
     animateTo(target, ms, () => {
       const at = personAt(p, target);
-      deckgl.setProps({
-        initialViewState: {
-          target: [at.x, at.y, 0],
-          zoom: Math.max(S.zoom, S.zoom0 + 2.2),
-          minZoom: S.zoom0 - 1.5,
-          maxZoom: S.zoom0 + 7,
-          transitionDuration: 700,
-          transitionInterpolator: new deck.LinearInterpolator({ transitionProps: ["target", "zoom"] }),
-        },
-      });
+      showCard(); // the person is in this window: a docked card is up, so focusPoint can leave room for it
+      // Centred on the map, or in the part a docked card leaves free.
+      panTo(at.x, at.y, focusPoint(), Math.max(S.zoom, S.zoom0 + 2.2), 700);
       setTimeout(() => { showCard(); queueRender(); }, 720);
     });
     showCard();
+  }
+
+  function initCard() {
+    $("card").addEventListener("click", (e) => {
+      if (e.target.closest(".pc-close")) unpin();
+    });
   }
 
   main().catch((err) => {

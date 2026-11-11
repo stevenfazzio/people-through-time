@@ -22,6 +22,13 @@ html, body {
   font-weight: 400;
   overflow: hidden;
 }
+/* Everything is placed inside body, sized to the visible viewport: on phones, vh is the viewport with the
+   browser's toolbars hidden, which would put the timeline's bottom under them. */
+body { position: relative; }
+@supports (height: 100dvh) {
+  :root { --tl-h: clamp(190px, 27dvh, 270px); }
+  body { height: 100dvh; }
+}
 
 #map {
   position: absolute;
@@ -39,7 +46,7 @@ html, body {
 #era .range {
   font-family: var(--serif);
   font-weight: 560;
-  font-size: clamp(27px, 4.6vw, 66px);
+  font-size: clamp(27px, min(4.6vw, 8vh), 66px);
   line-height: 1;
   letter-spacing: -0.005em;
   color: rgba(231, 234, 238, 0.3);
@@ -64,7 +71,10 @@ html, body {
 #title {
   top: 14px;
   left: 14px;
-  width: min(360px, calc(100vw - 28px));
+  box-sizing: border-box; /* the width includes the padding, or a 375 px phone is 20 px too narrow for it */
+  width: min(394px, calc(100vw - 28px)); /* 394 = the 360 px it had on desktop + padding and border */
+  max-height: calc(100% - var(--tl-h) - 28px); /* "About" opened on a small screen scrolls */
+  overflow-y: auto;
   padding: 14px 16px 12px;
   z-index: 5;
 }
@@ -83,6 +93,7 @@ html, body {
   color: var(--dim);
 }
 #title .sub strong { color: var(--text); font-weight: 600; }
+#title .sub-short { display: none; }
 
 .search { position: relative; }
 #search {
@@ -98,6 +109,8 @@ html, body {
   outline: none;
 }
 #search:focus { border-color: var(--accent); }
+/* iOS zooms the page into any focused input under 16 px. */
+@media (pointer: coarse) { #search { font-size: 16px; } }
 .status { font-size: 12px; color: var(--dim); margin-top: 5px; min-height: 0; }
 .status:empty { display: none; }
 #results {
@@ -135,7 +148,31 @@ html, body {
   pointer-events: none;
   font-weight: 400;
 }
-.card.pinned { border-color: rgba(233, 196, 106, 0.6); }
+.card.pinned { border-color: rgba(233, 196, 106, 0.6); pointer-events: auto; }
+.pc-close {
+  float: right;
+  width: 30px;
+  height: 30px;
+  margin: -8px -10px 2px 6px;
+  padding: 0;
+  font: inherit;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.pc-close:hover { color: var(--text); }
+.pc-link {
+  display: inline-block;
+  padding: 3px 0 1px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.pc-link:hover { text-decoration: underline; }
 .pc-img {
   float: right;
   width: 78px;
@@ -280,7 +317,50 @@ html, body {
 }
 #loading[hidden] { display: none; }
 
-@media (max-width: 760px) {
+/* --- small screens --- */
+@media (max-width: 760px), (max-height: 500px) {
   #tl-head .hint { display: none; }
-  #title .sub { display: none; }
+  #title .sub-long { display: none; }
+}
+@media (max-width: 760px) and (min-height: 501px) {
+  #title .sub-short { display: block; margin: 4px 0 9px; font-size: 13px; line-height: 1.35; }
+}
+
+/* Phone, portrait: the title panel spans the width; the pinned card docks above the timeline. */
+@media (max-width: 640px) {
+  #title { top: 8px; left: 8px; width: calc(100% - 16px); padding: 10px 12px 9px; }
+  #title h1 { font-size: 21px; }
+  #era { left: 14px; }
+}
+@media (max-width: 640px) and (min-height: 501px) {
+  .card.docked {
+    left: 8px;
+    top: auto;
+    bottom: calc(var(--tl-h) + 8px);
+    width: calc(100% - 16px);
+    max-width: none;
+    max-height: calc((100% - var(--tl-h)) * 0.58);
+    overflow-y: auto;
+  }
+}
+
+/* Short screens (a phone held sideways): a lower timeline, a smaller title panel, the card docked at the
+   right above the timeline. */
+@media (max-height: 500px) {
+  :root { --tl-h: clamp(116px, 33vh, 160px); }
+  @supports (height: 100dvh) { :root { --tl-h: clamp(116px, 33dvh, 160px); } }
+  #title { top: 8px; left: 8px; width: min(300px, 42%); padding: 8px 12px 7px; }
+  #title h1 { font-size: 19px; }
+  #title .search { margin-top: 6px; }
+  #about { margin-top: 6px; }
+  #tl-head { padding: 3px 10px 0; min-height: 22px; }
+  #play { height: 20px; }
+  .card.docked {
+    top: 8px;
+    right: 8px;
+    left: auto;
+    width: min(330px, 46%);
+    max-height: calc(100% - var(--tl-h) - 16px);
+    overflow-y: auto;
+  }
 }

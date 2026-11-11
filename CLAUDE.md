@@ -653,6 +653,37 @@ Planned next: see "Frontend, what's left".
     order, palette), details.json fetched after the first paint (the 3.8 MB
     gzipped bulk). Kept external, not inlined: one inline file would make
     every visitor wait for all 13 MB.
+  - **Phones** (2026-11-11, Steven asked for "a bit more mobile-friendly").
+    Measured first in the pane at 375×812 and 812×375 with emulated touch:
+    portrait mostly held up (map, labels, the band drags by touch), but a tap
+    on a person opened Wikipedia at once -- deck.gl sends no hover for a
+    touch, so the card was never seen -- and the title panel (content-box
+    width + padding) made the page 395 px wide. Landscape left a 185 px map
+    under a 211 px title panel. Now: a **touch or pen tap pins the card**
+    (decided per event from deck.gl's `pointerType`, so a touchscreen
+    laptop's mouse still opens on click); a pinned card, from a tap or a
+    search pick, takes clicks and has × and "Open the Wikipedia article →"
+    (the translated lead's edition, or Wikidata); tapping empty map unpins.
+    Not a second tap to open: double-tap zooms the map. Ribbon hovers ignore
+    touch (a press only moves the band). The pinned person's ribbon is marked
+    like a hovered one's, on desktop too -- on a phone, where 1 ribbon of 58
+    gets a label, that is how a region's run shows. **Docked card** at
+    `(max-width: 640px), (max-height: 500px)`: portrait along the bottom
+    above the timeline (≤ 58% of the map's height), short screens at the
+    right above it (scrolls; the link is below the fold at 812×375); it
+    blocks labels like the title panel, and a tapped or searched person under
+    it or the panel pans into the middle of what is left. **Header**:
+    border-box; on phones full width with a two-line note (born, not famous,
+    with the WWII example) in place of the long subtitle; short screens drop
+    the note (the "Born ..." readout carries it) and get a 116-160 px
+    timeline. The fit leaves out the title panel when it spans the width
+    (portrait). A width change refits the map unless the reader moved it (a
+    rotation); a height change alone doesn't (Android's keyboard). Viewport
+    units are `dvh` (Safari's `vh` includes the hidden toolbar); search is
+    16 px on coarse pointers (iOS zooms into smaller inputs). Unverified: a
+    real phone (Safari's toolbars, the keyboard, real touch events -- the
+    pane's taps were synthetic), and the rotation refit (a hidden pane runs
+    no ResizeObserver).
 
 - **2026-11-09 — Publishing.** Public repo `stevenfazzio/people-through-time`,
   GitHub Pages (legacy build) from `docs/` on `main`, served at
@@ -784,8 +815,9 @@ Planned next: see "Frontend, what's left".
   one-coarse-track-per-person split).
 - **Frontend is custom** -- settled 2026-11-09, see the decision "Frontend".
 - **Frontend, what's left** (2026-11-09): a write-up post on stevenfazzio.com
-  and the page's "← read the write-up" link; a phone layout (the
-  timeline needs a different shape at 375 px); whether labels crossfading
+  and the page's "← read the write-up" link; a check of the phone layout on
+  a real phone (2026-11-11, see "Phones"; the timeline kept its shape: as a
+  slider it works at 375 px, only its labels don't fit); whether labels crossfading
   during a drag read as flicker; the palette's tone (bright on dark -- review
   by eye); search over more than names and short descriptions.
 
@@ -895,7 +927,15 @@ Planned next: see "Frontend, what's left".
   window not in front, so animations stall and screenshots show stale
   frames. The page exposes `window.__ptt` (state, `setS`, `goTo`,
   `renderNow()`, which draws without waiting for a frame) for checking states
-  from the console.
+  from the console. Hidden, it also runs no ResizeObserver (a viewport
+  resize redraws nothing) and deck.gl's `pickObject` finds nothing; reload
+  after resizing.
+- **Touch in the pane** (2026-11-11): the mobile preset reports touch, but
+  clicks arrive as mouse events. Synthetic `PointerEvent`s with
+  `pointerType: "touch"` on deck.gl's canvas reach `onClick` with
+  `ev.pointerType === "touch"`; on the timeline they throw at
+  `setPointerCapture` (an id no real pointer has), so a touch drag can't be
+  faked there.
 - **The pane may load the page at zero size**: the timeline and the initial
   fit wait for a real size (ResizeObserver) instead of drawing at 0 px.
 - **`http.server` + the pane's cache**: after editing `app.js` the browser
