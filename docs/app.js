@@ -110,6 +110,7 @@
     zoom: 0,
     zoom0: 0,
     userMoved: false, // the reader panned, zoomed or flew somewhere: a resize no longer refits the view
+    lastTouch: -1e9, // performance.now() of the last touch on the map
     renderQueued: false,
   };
   let core, D = null; // D = details, once loaded
@@ -320,7 +321,10 @@
         queueRender();
       },
       onHover: (info, ev) => {
-        if (isTouch(ev)) return; // a touch has no hover; its tap pins (onClick)
+        // A touch has no hover; its tap pins (onClick). deck.gl's hover comes from mouse events, labelled
+        // "mouse" whatever made them, so a tap's compatibility mouse events (if touchend's cancel below
+        // didn't stop them) are told apart by time.
+        if (isTouch(ev) || performance.now() - S.lastTouch < 1000) return;
         const p = info.picked && info.layer && info.layer.id === "points" ? frame.pid[info.index] : -1;
         S.hoverXY = info.picked ? [info.x, info.y] : null;
         if (p !== S.hover) {
@@ -330,6 +334,8 @@
         showCard();
       },
       onClick: (info, ev) => {
+        // deck.gl also calls onClick for a double click, right after its first click (a second article tab).
+        if (ev && ev.type === "dblclick") return;
         const p = info.picked && info.layer && info.layer.id === "points" ? frame.pid[info.index] : -1;
         if (p >= 0 && isTouch(ev)) {
           // A tap shows the card (pinned, with a link to the article); tapping empty map closes it.
@@ -342,6 +348,19 @@
       },
       layers: [],
     });
+    // deck.gl fires onClick on a tap's pointerup (in 9.1.15 its click recognizer never waits for a double
+    // tap: it passes requestFailure where mjolnir reads requireFailure), so the pinned card is up before the
+    // browser's own click for the tap -- which then lands on whatever is now under the finger: the card, or
+    // its link to Wikipedia. Cancelling touchend stops that click and the tap's compatibility mouse events
+    // (which deck.gl would take for a mouse hover); deck.gl reads pointer events, so taps, pans and pinches
+    // still work.
+    const mapEl = $("map");
+    mapEl.addEventListener("pointerdown", (e) => { if (isTouch(e)) S.lastTouch = performance.now(); }, true);
+    mapEl.addEventListener("touchend", (e) => {
+      S.lastTouch = performance.now();
+      if (e.cancelable) e.preventDefault();
+      if (document.activeElement === $("search")) $("search").blur(); // a cancelled tap moves no focus
+    }, { passive: false });
   }
 
   function split(s) {

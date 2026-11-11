@@ -684,6 +684,25 @@ Planned next: see "Frontend, what's left".
     real phone (Safari's toolbars, the keyboard, real touch events -- the
     pane's taps were synthetic), and the rotation refit (a hidden pane runs
     no ResizeObserver).
+    **First live test failed** (Steven's phone, same evening: a tap still
+    opened Wikipedia; the pane's synthetic taps, which send no compatibility
+    mouse events, had passed). Read in deck.gl 9.1.15's bundle
+    (`dist/dist.dev.js`): (1) its hover comes from mjolnir's MoveInput,
+    which listens to *mouse* events and labels every one `pointerType:
+    "mouse"`, so the `onHover` touch guard never fired and a tap's
+    compatibility mousemove turned the pinned card into a hover card; (2)
+    Deck builds its recognizers with `requestFailure` where mjolnir reads
+    `requireFailure`, so `click` never waits for `dblclick`: `onClick` runs
+    synchronously on the tap's pointerup, the docked card is up before the
+    browser's own click for that tap, and that click lands on whatever is now
+    under the finger -- the card, its link. Which of these opened Wikipedia
+    on the phone isn't proven (a stale cached `app.js` wasn't ruled out
+    either). Fix: `touchend` on the map is cancelled (`passive: false`),
+    which stops the tap's compatibility mouse events and click (deck.gl
+    reads pointer events, so taps, pans and pinches still work), plus hover
+    ignored for 1 s after a touch as a backstop. Same root: a mouse double
+    click reached `onClick` as `click` + `dblclick` and opened two tabs; the
+    `dblclick` is now ignored. Assets carry `?v=` (see gotchas).
 
 - **2026-11-09 — Publishing.** Public repo `stevenfazzio/people-through-time`,
   GitHub Pages (legacy build) from `docs/` on `main`, served at
@@ -935,7 +954,13 @@ Planned next: see "Frontend, what's left".
   `pointerType: "touch"` on deck.gl's canvas reach `onClick` with
   `ev.pointerType === "touch"`; on the timeline they throw at
   `setPointerCapture` (an id no real pointer has), so a touch drag can't be
-  faked there.
+  faked there. A synthetic tap sends no compatibility mouse events or
+  click, so it can't show what a real phone does after the tap (see
+  "Phones"); fire them by hand (`d.props.onHover(info, {pointerType:
+  "mouse"})`, a cancelable `TouchEvent("touchend")`) to test that path.
+- **Bump `?v=` in `docs/index.html`** whenever `app.js` or `style.css`
+  changes: Pages serves everything with `max-age=600`, so a returning phone
+  can otherwise pair a new page with its cached old script.
 - **The pane may load the page at zero size**: the timeline and the initial
   fit wait for a real size (ResizeObserver) instead of drawing at 0 px.
 - **`http.server` + the pane's cache**: after editing `app.js` the browser
