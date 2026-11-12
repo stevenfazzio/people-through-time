@@ -194,6 +194,8 @@ from a title. Files: core.json 1.41 MB (0.48 MB gzipped), points.bin 0.69 MB
 (0.60), details.json 11.29 MB (3.79), page 0.05 MB: **13.44 MB raw, 4.89 MB
 gzipped**, plus deck.gl 9.1.15 from unpkg (1.60 MB, 0.44 MB gzipped), the
 Google fonts and thumbnails fetched on hover. Log: `logs/12_export_frontend.log`.
+Rerun 2026-11-11 with the wiggle term (5 s): only `coarse.order` changed
+(flow cost 3,403 → 3,855, wiggle 0.115 → 0.077; 7 drift-cut hand-overs).
 Serve `docs/` (it fetches its data files, so no `file://`):
 `python3 -m http.server 8771 --bind 127.0.0.1 --directory docs`.
 
@@ -555,9 +557,11 @@ Planned next: see "Frontend, what's left".
     track are left out. Ribbon order: one fixed order (no
     crossings), from the tracks' mean height on the map, then single-track
     moves while they lower the people × tracks stacked between the two ends of
-    each coarse-track flow between windows (merges, splits). Ribbon label:
+    each coarse-track flow between windows (merges, splits), plus a wiggle
+    term since 2026-11-11 (see "Ribbon labels"). Ribbon label:
     the full name where it fits horizontally inside the ribbon at 13-9 px,
-    else stage 11b's short name, else none (tooltip on hover). Hovering a
+    else stage 11b's short name, else either along the ribbon's centre line,
+    else none (tooltip on hover). Hovering a
     ribbon highlights its people on the map (others at 10% alpha); hovering a
     person highlights their ribbon.
   - **The river fills the chart** (2026-11-10, Steven asked whether the
@@ -593,6 +597,36 @@ Planned next: see "Frontend, what's left".
     releasing pointer capture makes the browser enter the ribbon under a
     still pointer, which lit a region at the moment of letting go. The strip
     costs 2 ribbon labels at 1440×900 (26).
+  - **Ribbon labels** (2026-11-11, Steven: "Musicians & Actors", running
+    flat, has a label, the diagonal "American History Figures" none). Two
+    changes, measured in headless Chrome (labels at 1024 / 1280 / 1440 / 1920
+    px: 14 / – / 26 / – before either). (1) **Curved labels**: where no
+    horizontal box fits, the full or short name follows the ribbon's centre
+    line (SVG `textPath`), on the stretch where a text-high strip along the
+    normal stays inside the ribbon, the line within ±35° and its curvature
+    radius at least 2.5 text heights (`fitCurved`): 15 / 25 / 32 / 42.
+    (2) **Wiggle in the order** (stage 12, `RIBBON_WIGGLE_WEIGHT = 1`): the
+    order search adds λ × Byron & Wattenberg's weighted wiggle (each
+    ribbon's share × its centre line's squared steps), on the page's own
+    knots -- in a filled river a ribbon's thickness is its share whatever the
+    order, so only slope can be bought. λ is scaled so 1 weighs wiggle and
+    flow alike at the flow-only order: 17 / 27 / 34 / 44 for flow cost 3,403
+    → 3,855 (wiggle 0.115 → 0.077); the order follows map height less
+    (rank correlation 0.84 → ~0.6) and Dictators now sits above European
+    Royals. Weights 2-16 gave 0-2 more labels at 1.3-2.8× flow; weighting
+    thickness² instead, no better. Ceilings, if every ribbon could lie flat
+    at once (they can't: in a filled stack flattening one tilts its
+    neighbours): 25-29 / 33-35 / 36-37 / 44-47, so 1024 stays far below.
+    Stage 12's `ribbon_shares` copies app.js's `knotValues` and drift-cut
+    hand-over: change them together. Phones keep 1 label (375 px). Considered
+    and dropped: one labelled horizontal line per region, packed in rows
+    (Priestley's form; scratch mockup). Up to 12 regions are alive at once,
+    so 12 rows even unlabelled, and 13-15 with every label (most short names
+    fit inside their line): all 58 labels at 9 px at 1440 and 11 px at 1920,
+    but 1024-1280 need ~50 px more height and a phone 22+ rows against 11;
+    it loses each region's size, the window's make-up inside the band and a
+    meaningful vertical order. Steven kept the river. Unverified: `textPath`
+    on Safari and phones.
   - **Birth-year readout** (2026-11-10, Steven: the range was a small line
     under the map, and a reader could take the slider for the years people
     were famous -- someone on 1925-1952 asking where the WWII leaders are,
@@ -702,7 +736,9 @@ Planned next: see "Frontend, what's left".
     reads pointer events, so taps, pans and pinches still work), plus hover
     ignored for 1 s after a touch as a backstop. Same root: a mouse double
     click reached `onClick` as `click` + `dblclick` and opened two tabs; the
-    `dblclick` is now ignored. Assets carry `?v=` (see gotchas).
+    `dblclick` is now ignored. Assets carry `?v=` (see gotchas). **Second
+    live test passed** (Steven's phone, 491a182 live): a tap shows the card.
+    Still unchecked on a phone: the card's link and ×, rotation, the keyboard.
 
 - **2026-11-09 — Publishing.** Public repo `stevenfazzio/people-through-time`,
   GitHub Pages (legacy build) from `docs/` on `main`, served at
@@ -834,9 +870,9 @@ Planned next: see "Frontend, what's left".
   one-coarse-track-per-person split).
 - **Frontend is custom** -- settled 2026-11-09, see the decision "Frontend".
 - **Frontend, what's left** (2026-11-09): a write-up post on stevenfazzio.com
-  and the page's "← read the write-up" link; a check of the phone layout on
-  a real phone (2026-11-11, see "Phones"; the timeline kept its shape: as a
-  slider it works at 375 px, only its labels don't fit); whether labels crossfading
+  and the page's "← read the write-up" link; the rest of the phone check
+  (2026-11-11, see "Phones": tap-to-card works on a real phone; the timeline
+  kept its shape: as a slider it works at 375 px, only its labels don't fit); whether labels crossfading
   during a drag read as flicker; the palette's tone (bright on dark -- review
   by eye); search over more than names and short descriptions.
 

@@ -347,6 +347,12 @@ MARKER_RADIUS_PX = (1.4, 5.5)  # by log(score), smallest to largest
 COLOR_BUFFER_WINDOWS = 1
 COLOR_LIGHTNESS = (55, 85)  # glasbey lightness bounds: points sit on a dark background
 UNLABELLED_COLOR = "#5b6472"  # points outside every coarse track
+# The timeline's ribbon order (2026-11-11): stage 12's local search lowers the people x tracks stacked between
+# each coarse merge or split's two ends, plus this weight x the river's wiggle (each ribbon's thickness x its
+# centre line's squared steps; scaled so that 1 weighs both alike at the flow-only order). Flatter ribbons fit
+# more labels: 1 gives ~2 more per width (17 / 27 / 34 / 44 at 1024 / 1280 / 1440 / 1920 px, was 15 / 25 / 32 /
+# 42) for 13% more flow cost; 2-16 add 0-2 more at 1.3-2.8x. 0 is the flow-only order.
+RIBBON_WIGGLE_WEIGHT = 1.0
 
 SITE_URL = f"https://stevenfazzio.com/{PROJECT_NAME}/"  # GitHub Pages from docs/ on main
 

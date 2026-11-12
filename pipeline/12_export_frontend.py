@@ -245,18 +245,61 @@ def order_cost(pos: np.ndarray, fa: np.ndarray, fb: np.ndarray, fw: np.ndarray, 
     return float((between.sum(1) * fw).sum())
 
 
-def ribbon_order(start: list[int], flows: pd.DataFrame, alive_steps: np.ndarray) -> list[int]:
+def ribbon_shares(cnt: np.ndarray, handovers: list[tuple[int, int, int]], n_bins: int, window_bins: int) -> np.ndarray:
+    """The page's ribbon knots (app.js knotValues and the drift-cut hand-over in layoutRibbons) as each track's
+    share of its knot, [track, knot]. Knots every half bin from 0 to n_bins: window w's count at its centre bin
+    w + window_bins / 2, the midpoint between two windows their mean (0 if the track is absent from either), the
+    first and last windows flat to the chart's edges. A drift cut handing a region from track t (last window d)
+    to s (first window d + 1) gives both a quarter of the two counts at the midpoint. Each knot's ribbons fill
+    the chart's height, so a share is the ribbon's thickness whatever the order. cnt[track, window] = people;
+    handovers: (t, s, d)."""
+    n_tracks, n_windows = cnt.shape
+    k_n, half = 2 * n_bins + 1, window_bins / 2
+    v = np.zeros((n_tracks, k_n))
+    for k in range(k_n):
+        x = k / 2
+        if x <= half:
+            v[:, k] = cnt[:, 0]
+        elif x >= n_bins - half:
+            v[:, k] = cnt[:, n_windows - 1]
+        elif (x - half).is_integer():
+            v[:, k] = cnt[:, int(x - half)]
+        else:
+            a, b = cnt[:, int(x - half)], cnt[:, int(x - half) + 1]
+            v[:, k] = np.where((a > 0) & (b > 0), (a + b) / 2, 0)
+    for t, s, d in handovers:
+        k = int(2 * (d + half) + 1)
+        v[t, k] = v[s, k] = (cnt[t, d] + cnt[s, d + 1]) / 4
+    tot = v.sum(0)
+    return np.divide(v, tot, out=np.zeros_like(v), where=tot > 0)
+
+
+def ribbon_wiggle(order: list[int], shares: np.ndarray) -> float:
+    """Byron & Wattenberg's weighted wiggle of the filled river stacked in `order` (top to bottom): over every
+    ribbon and step between knots where it is drawn, its mean share x (step of its centre line)^2, in units of
+    the chart's height. Flat ribbons leave room for horizontal labels; slanted ones don't."""
+    s = shares[order]
+    mid = np.cumsum(s, 0) - s / 2
+    weight = np.where((s[:, :-1] > 0) & (s[:, 1:] > 0), (s[:, :-1] + s[:, 1:]) / 2, 0.0)
+    return float((weight * np.diff(mid, axis=1) ** 2).sum())
+
+
+def ribbon_order(
+    start: list[int], flows: pd.DataFrame, alive_steps: np.ndarray, shares: np.ndarray | None = None, lam: float = 0.0
+) -> list[int]:
     """Local search from `start` (track ids 0..T-1): move single tracks to whichever position lowers
-    order_cost, until no move does. flows: [a, b, step, people] (step w = windows w -> w + 1);
-    alive_steps[step, track] = the track is alive at w or w + 1."""
+    order_cost + lam * ribbon_wiggle, until no move does. flows: [a, b, step, people] (step w = windows
+    w -> w + 1); alive_steps[step, track] = the track is alive at w or w + 1; shares: ribbon_shares."""
     order = list(start)
-    if flows.empty:
+    use_wiggle = shares is not None and lam > 0
+    if flows.empty and not use_wiggle:
         return order
     fa, fb = flows["a"].to_numpy(), flows["b"].to_numpy()
     fw, alive = flows["people"].to_numpy(float), alive_steps[flows["step"].to_numpy()]
 
     def cost(o):
-        return order_cost(positions(o, alive_steps.shape[1]), fa, fb, fw, alive)
+        c = order_cost(positions(o, alive_steps.shape[1]), fa, fb, fw, alive)
+        return c + lam * ribbon_wiggle(o, shares) if use_wiggle else c
 
     best = cost(order)
     improved = True
@@ -373,13 +416,31 @@ def main() -> None:
     alive_w[cl["window"].to_numpy(), cl["t"].to_numpy()] = True
     alive_steps = alive_w[:-1] | alive_w[1:]
     flows = coarse_flows(lay)
-    order = ribbon_order(start, flows, alive_steps)
     fa, fb, fw = flows["a"].to_numpy(), flows["b"].to_numpy(), flows["people"].to_numpy(float)
     al = alive_steps[flows["step"].to_numpy()]
-    c0 = order_cost(positions(start, n_coarse), fa, fb, fw, al)
-    c1 = order_cost(positions(order, n_coarse), fa, fb, fw, al)
+
+    def flow_cost(o):
+        return order_cost(positions(o, n_coarse), fa, fb, fw, al)
+
+    flow_order = ribbon_order(start, flows, alive_steps)
     log(f"ribbon order: {len(flows)} coarse flows ({int(fw.sum()):,} person-steps); people x tracks stacked "
-        f"between flow ends {c0:,.0f} by map height -> {c1:,.0f} after local search")  # fmt: skip
+        f"between flow ends {flow_cost(start):,.0f} by map height -> {flow_cost(flow_order):,.0f} after local "
+        "search")  # fmt: skip
+    cnt = np.zeros((n_coarse, config.N_WINDOWS))
+    cnt[cl["t"].to_numpy(), cl["window"].to_numpy()] = cl["n"].to_numpy()
+    last_of = coarse.set_index("track")["last_window"]
+    handovers = [
+        (int(r.cut_from), int(r.track), int(last_of[r.cut_from]))
+        for r in coarse.itertuples()
+        if r.cut_from >= 0 and r.first_window == last_of[r.cut_from] + 1
+    ]
+    shares = ribbon_shares(cnt, handovers, config.N_BINS, config.WINDOW_BINS)
+    flow0, wiggle0 = flow_cost(flow_order), ribbon_wiggle(flow_order, shares)
+    lam = config.RIBBON_WIGGLE_WEIGHT * flow0 / wiggle0 if wiggle0 > 0 else 0.0
+    order = ribbon_order(start, flows, alive_steps, shares, lam) if lam > 0 else flow_order
+    log(f"ribbon order with wiggle weight {config.RIBBON_WIGGLE_WEIGHT:g} ({len(handovers)} drift-cut hand-overs): "
+        f"flow cost {flow0:,.0f} -> {flow_cost(order):,.0f} ({flow_cost(order) / flow0:.2f}x), wiggle "
+        f"{wiggle0:.5f} -> {ribbon_wiggle(order, shares):.5f}")  # fmt: skip
 
     # --- per person -----------------------------------------------------------------------------------------
     score = np.log10(people["score"].to_numpy(float))

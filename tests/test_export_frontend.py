@@ -140,6 +140,29 @@ def test_ribbon_order_brings_flow_partners_together():
                          alive[flows["step"].to_numpy()]) == 0  # fmt: skip
 
 
+def test_ribbon_shares_fill_each_knot_taper_and_hand_over():
+    # 6 bins, windows of 2 -> 5 windows, knots every half bin (13); window w's value at knot 2w + 2.
+    cnt = np.array([[8, 8, 0, 0, 0], [0, 0, 4, 4, 4], [2, 2, 2, 2, 2]], float)
+    sh = ex.ribbon_shares(cnt, [], 6, 2)
+    assert np.allclose(sh.sum(0), 1)
+    assert sh[0, 5] == 0 and sh[1, 5] == 0  # the midpoint between windows 1 and 2: both absent from one side
+    sh = ex.ribbon_shares(cnt, [(0, 1, 1)], 6, 2)  # a drift cut hands track 0 on to track 1 after window 1
+    assert sh[0, 5] == sh[1, 5] == 3 / 8  # each a quarter of 8 + 4, beside track 2's 2
+
+
+def test_ribbon_order_wiggle_puts_a_new_ribbon_in_the_middle():
+    # Two steady tracks and one that starts halfway: no flows, so only the wiggle decides. Between the other two,
+    # the newcomer pushes them apart symmetrically; on an edge it shifts the far ribbon by its whole thickness.
+    cnt = np.array([[10, 10, 10, 10, 10], [10, 10, 10, 10, 10], [0, 0, 10, 10, 10]], float)
+    sh = ex.ribbon_shares(cnt, [], 6, 2)
+    flows = pd.DataFrame({c: pd.Series([], dtype=int) for c in ["a", "b", "step", "people"]})
+    alive = np.ones((4, 3), bool)
+    assert ex.ribbon_order([0, 1, 2], flows, alive) == [0, 1, 2]
+    order = ex.ribbon_order([0, 1, 2], flows, alive, sh, 1.0)
+    assert order.index(2) == 1
+    assert ex.ribbon_wiggle(order, sh) < ex.ribbon_wiggle([0, 1, 2], sh)
+
+
 def test_coarse_flows_counts_moves_between_tracks():
     tracks = pd.DataFrame({
         "window": [0, 1, 0, 1, 0, 1],

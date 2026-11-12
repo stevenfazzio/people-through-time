@@ -906,6 +906,68 @@
     return { x: TL.padL + (bi + m / 2) * TL.step, y: (maxTop[bi] + minBot[bi]) / 2, size };
   }
 
+  // Where no horizontal box fits -- mostly a ribbon running diagonally, whose vertical thickness a flat box
+  // can't use -- the label follows the ribbon's centre line instead, as a map labels a river (fitCurved). The
+  // text is a strip h tall centred on that line: at every sample of the stretch both edges of the strip, taken
+  // along the line's normal, must lie inside the ribbon, the line within CURVE_MAX_ANGLE of horizontal and
+  // bending no tighter than CURVE_MIN_RADIUS text heights (tighter, the letters on the inside of the bend
+  // crowd). Of the stretches that fit, the one leaving the most room at its tightest sample wins.
+  const CURVE_MAX_ANGLE = (35 * Math.PI) / 180;
+  const CURVE_MIN_RADIUS = 2.5;
+
+  function centreLine(r) {
+    const n = r.top.length, st = TL.step;
+    const c = new Float64Array(n), ang = new Float64Array(n), radius = new Float64Array(n), S = new Float64Array(n);
+    for (let i = 0; i < n; i++) c[i] = (r.top[i] + r.bot[i]) / 2;
+    for (let i = 0; i < n; i++) {
+      const a = c[Math.max(0, i - 1)], b = c[Math.min(n - 1, i + 1)];
+      const s = (b - a) / (st * (Math.min(n - 1, i + 1) - Math.max(0, i - 1)));
+      const s2 = i > 0 && i < n - 1 ? (c[i + 1] - 2 * c[i] + c[i - 1]) / (st * st) : 0;
+      ang[i] = Math.atan(s);
+      radius[i] = s2 === 0 ? Infinity : Math.pow(1 + s * s, 1.5) / Math.abs(s2);
+      if (i > 0) S[i] = S[i - 1] + Math.hypot(st, c[i] - c[i - 1]);
+    }
+    return { c, ang, radius, S };
+  }
+
+  function fitCurved(r, text, size) {
+    const w = textWidth(text, size) + 8, h = size * 1.02 + 2;
+    const n = r.top.length, st = TL.step;
+    const L = r.line || (r.line = centreLine(r));
+    const at = (arr, x) => {
+      const u = clamp((x - TL.padL) / st, 0, n - 1), i = Math.min(Math.floor(u), n - 2), f = u - i;
+      return arr[i] * (1 - f) + arr[i + 1] * f;
+    };
+    // Room at each sample: vertical px between each strip edge and the ribbon's boundary beyond it (< 0 outside).
+    const room = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      if (Math.abs(L.ang[i]) > CURVE_MAX_ANGLE || L.radius[i] < CURVE_MIN_RADIUS * h) { room[i] = -Infinity; continue; }
+      const x = TL.padL + i * st, sn = Math.sin(L.ang[i]) * h / 2, cs = Math.cos(L.ang[i]) * h / 2;
+      const up = L.c[i] - cs - at(r.top, x + sn); // upper edge of the strip: (x + sin, c - cos) * h / 2
+      const down = at(r.bot, x - sn) - (L.c[i] + cs); // lower edge: (x - sin, c + cos) * h / 2
+      room[i] = Math.min(up, down);
+    }
+    // Every stretch i..j whose arc length first reaches w, with the least room in it (monotonic deque).
+    let best = -1, bi = -1, bj = -1, jn = 0;
+    const dq = [];
+    for (let i = 0; i < n; i++) {
+      while (jn < n && (jn <= i || L.S[jn - 1] - L.S[i] < w)) {
+        while (dq.length && room[dq[dq.length - 1]] >= room[jn]) dq.pop();
+        dq.push(jn++);
+      }
+      while (dq.length && dq[0] < i) dq.shift();
+      if (L.S[jn - 1] - L.S[i] < w) break;
+      const m = room[dq[0]];
+      if (m >= 0 && m > best) { best = m; bi = i; bj = jn - 1; }
+    }
+    if (bi < 0) return null;
+    let d = "";
+    for (let i = bi; i <= bj; i++) {
+      d += (i === bi ? "M" : "L") + (TL.padL + i * st).toFixed(1) + "," + L.c[i].toFixed(2);
+    }
+    return { d, size };
+  }
+
   function drawTimeline() {
     const svg = $("tl-svg");
     const rect = svg.getBoundingClientRect();
@@ -915,6 +977,7 @@
     svg.setAttribute("viewBox", `0 0 ${TL.w} ${TL.h}`);
     svg.innerHTML = "";
     TL.marked = undefined;
+    const defs = el("defs", {}, svg);
     const gR = el("g", {}, svg), gL = el("g", {}, svg), gA = el("g", {}, svg), gB = el("g", {}, svg);
     TL.g = { gR, gL, gA, gB };
     const { order, xs, rib } = layoutRibbons();
@@ -938,18 +1001,27 @@
       });
       path.addEventListener("pointerleave", () => { if (!S.dragging) hoverRibbon(-1); });
       TL.ribbons[t] = path;
-      // Label: full name if it fits somewhere at 13..9 px, else the short name, else none.
+      // Label: full name if a horizontal box fits somewhere at 13..9 px, else the short name; where neither
+      // fits flat, the same along the ribbon's centre line; else none.
       const T = core.tracks;
       let spot = null, text = null;
-      for (const cand of [T.name[g], T.short[g]]) {
-        if (!cand) continue;
-        for (const size of [13, 12, 11, 10, 9]) {
-          spot = fitLabel(r, cand, size);
-          if (spot) { text = cand; break; }
+      for (const fit of [fitLabel, fitCurved]) {
+        for (const cand of [T.name[g], T.short[g]]) {
+          if (!cand) continue;
+          for (const size of [13, 12, 11, 10, 9]) {
+            spot = fit(r, cand, size);
+            if (spot) { text = cand; break; }
+          }
+          if (spot) break;
         }
         if (spot) break;
       }
-      if (spot) {
+      if (spot && spot.d) {
+        const id = `tl-rl-${t}`;
+        el("path", { id, d: spot.d }, defs);
+        const tx = el("text", { class: "rlabel", "font-size": spot.size }, gL);
+        el("textPath", { href: `#${id}`, startOffset: "50%" }, tx).textContent = text;
+      } else if (spot) {
         const tx = el("text", { x: spot.x.toFixed(1), y: spot.y.toFixed(1), class: "rlabel", "font-size": spot.size }, gL);
         tx.textContent = text;
       }
