@@ -1,0 +1,316 @@
+GLOBAL: each person's nearest other person among all 31,000
+cosine distance: p1 0.114  p10 0.178  median 0.255  p90 0.336  p99 0.407  p99.9 0.450  max 0.493
+spearman with lead length: -0.026
+median by lead source: description 0.301 (n=3), enwiki 0.255 (n=30701), translated 0.239 (n=296)
+
+by era: people, median distance, share in the global top 1%, loneliest
+         BCE   2,598  0.233   0.1%  Aglaonike (0.433)
+       1-999   4,340  0.226   0.1%  Yuz Asaf (0.442)
+   1000-1499   3,384  0.228   0.2%  Onfim (0.441)
+   1500-1799   2,927  0.250   0.9%  Samuel Wilson (0.461)
+   1800-1899   2,868  0.282   1.8%  Harry R. Truman (0.491)
+   1900-1949   5,613  0.272   1.8%  Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr. (0.493)
+       1950+   9,270  0.265   1.3%  Jesús Maria Tarriba (0.493)
+
+top 25
+0.493  #28493  Jesús Maria Tarriba  (born 1962) -- First Gentleman of Mexico since 2024
+        nearest: Claudia Sheinbaum -- President of Mexico since 2024
+        lead [enwiki, 564 ch]: Jesús María Tarriba Unger (born 1 September 1962) is a Mexican physicist and financial risk management expert who is the First Gentleman of Mexico. He is married to the President of Mexico, Claudia Sheinbaum. As the firs...
+0.493  #20705  Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr.  (born 1904) -- American typesetter with longest name ever (1914–1997)
+        nearest: Fyodor Vasilyev -- Russian father of 87 children (c. 1707–1782)
+        lead [enwiki, 2641 ch]: Hubert Blaine Wolfe­schlegel­stein­hausen­berger­dorff Sr. (4 August 1914 – 24 October 1997; surname also given as Wolfstern, Wolfe + 666, Wolfe+585, Wolfe+590, and others) was a German-born American typesetter who held ...
+0.491  #30308  Frane Selak  (born 1929) -- Croatian man known for near-death stories (1929–2016)
+        nearest: Franciszek Gajowniczek -- Polish Army officer (1901-1995)
+        lead [enwiki, 159 ch]: Frano Selak or Frane Selak (14 June 1929 – 2016) was a Yugoslav music teacher, who was best known for his unverified stories about frequent brushes with death.
+0.491  #23100  Harry R. Truman  (born 1896) -- American businessman and airman (1896–1980)
+        nearest: Frederick Trump -- German and American businessman (1869–1918)
+        lead [enwiki, 786 ch]: Harry R. Truman (October 30, 1896 – May 18, 1980) was an American businessman, bootlegger, and prospector. He lived near Mount St. Helens, a volcano in the Cascade Range in the state of Washington, and was the owner and ...
+0.484  #21506  Yael Cohen Braun  (born 1986) -- Canadian activist (born 1986)
+        nearest: Bernard Kouchner -- French politician and doctor (born 1939)
+        lead [enwiki, 214 ch]: Yael Cohen (formerly Cohen Braun; born 4 November 1986) is a South African–born Canadian health activist. The former wife of Scooter Braun, she is the founder of the organization "Fuck Cancer", a nonprofit charity.
+0.482  #24212  Lola Van Wagenen  (born 1938) -- American historian (born 1938)
+        nearest: Howard Zinn -- American historian and socialist philosopher (1922–2010)
+        lead [enwiki, 413 ch]: Lola Van Wagenen (born December 19, 1938) is an American historian and activist. In 1970, she co-founded Consumer Action Now (CAN), a non-profit educational organization. In 1995 she co-founded Clio Visualizing History, ...
+0.477  #25666  Susan Oliver  (born 1932) -- American actress, author and aviator (1932–1990)
+        nearest: Suzy Amis Cameron -- American environmental advocate, actress, and model
+        lead [enwiki, 137 ch]: Susan Oliver (born Charlotte Gercke; February 13, 1932 – May 10, 1990) was an American actress, television director, aviator, and author.
+0.475  #26928  Vitaly Kaloyev  (born 1956) -- Russian architect (born 1956)
+        nearest: Mohamed Atta -- Egyptian terrorist and 9/11 hijacker (1968–2001)
+        lead [enwiki, 1321 ch]: Vitaly Konstantinovich Kaloyev (Russian: Виталий Константинович Калоев, IPA: [vʲɪˈtalʲɪj kənstɐnʲˈtʲinəvʲɪtɕ kɐˈlojɪf]; Iron Ossetic: Калоты Къостайы фырт Витали, romanized: Kaloty Qostaiy fyrt Vitali, IPA: [kɑloˈtə qost...
+0.473  #22635  Roy Sullivan  (born 1912) -- Man struck by lightning 7 times (1912–1983)
+        nearest: Randy Gardner -- American sleeplessness world record holder
+        lead [enwiki, 433 ch]: Roy Cleveland Sullivan (February 7, 1912 – September 28, 1983) was an American park ranger in Shenandoah National Park in Virginia. Between 1942 and 1977, Sullivan was claimed to have survived being struck by lightning s...
+0.471  #27460  Lionel Dahmer  (born 1936) -- American chemist and author (1936–2023)
+        nearest: Jeffrey Dahmer -- American serial killer (1960–1994)
+        lead [enwiki, 453 ch]: Lionel Herbert Dahmer (; July 29, 1936 – December 5, 2023) was an American chemist and author. He is the father of the serial killer Jeffrey Dahmer. In 1994, he wrote A Father's Story, a non-fiction account of his son's ...
+0.471  #7589   Jennifer Syme  (born 1972) -- American actress, assistant (1972–2001)
+        nearest: Dana Reeve -- American actress and singer (1961–2006)
+        lead [enwiki, 543 ch]: Jennifer Maria Syme (December 7, 1972 – April 2, 2001) was an American actress, personal assistant, and record company executive. She appeared in the films Lost Highway (1997) and Ellie Parker (2005). The film Mulholland...
+0.467  #29238  Margret Wittmer  (born 1904) -- Floreana Island settler
+        nearest: Hrafna-Flóki Vilgerðarson -- Viking explorer
+        lead [enwiki, 430 ch]: Margret Wittmer (née Walbroel; 12 July 1904 – 21 March 2000) was a German woman who was an early colonist of Floreana Island. Her experiences living on the island were documented in her 1959 biography Postlagernd Florean...
+0.467  #20411  Jack Hemingway  (born 1923) -- American writer, son of Ernest Hemingway
+        nearest: Ernest Hemingway -- American author and journalist (1899–1961)
+        lead [enwiki, 197 ch]: John Hadley Nicanor Hemingway (October 10, 1923 – December 1, 2000) was the Canadian-American son of American novelist Ernest Hemingway. He was a conservationist and wrote two books on fly fishing.
+0.461  #3620   Phineas Gage  (born 1823) -- American brain injury survivor (1823–1860)
+        nearest: Walter Jackson Freeman II -- American physician (1895–1972)
+        lead [enwiki, 2293 ch]: Phineas P. Gage (1823–1860) was an American railroad construction foreman remembered for his improbable[B1] survival of an accident in which a large iron rod was driven completely through his head, destroying much of his...
+0.461  #23849  Dashrath Manjhi  (born 1934) -- Indian laborer (1934–2007)
+        nearest: Chandra Bahadur Dangi -- World's shortest person (1939–2015)
+        lead [enwiki, 783 ch]: Dashrath Manjhi (14 January 1934 – 17 August 2007), also known as the Mountain Man, was an Indian laborer from Gehlaur village, near Gaya in the eastern state of Bihar. He is best known for carving a 110-metre-long (360 ...
+0.461  #16401  Arne Næss, Jr.  (born 1937) -- Norwegian businessman and mountaineer (1937–2004)
+        nearest: Tina Ambani -- Indian actress (born 1957)
+        lead [enwiki, 202 ch]: Arne Næss Jr. (Urban East Norwegian: [ˈɑ̂ːɳə ˈnɛsː]; born Arne Rudolf Ludvig Raab; 8 December 1937 – 13 January 2004) was a Norwegian businessman and the second husband of actress and singer Diana Ross.
+0.461  #29793  Samuel Wilson  (born 1766) -- Purported source of Uncle Sam (1766–1854)
+        nearest: Jimmy Dean -- American singer, television host and actor (1928–2010)
+        lead [enwiki, 210 ch]: Samuel Wilson (September 13, 1766 – July 31, 1854) was an American meat packer who lived in Troy, New York, whose name is purportedly the source of the personification of the United States known as "Uncle Sam".
+0.461  #10998  Juliane Koepcke  (born 1954) -- German mammalogist, sole survivor of LANSA Flight 508
+        nearest: Vesna Vulović -- Serbian flight attendant (1950–2016)
+        lead [enwiki, 559 ch]: Juliane Margaret Beate Koepcke (born 10 October 1954) is a German-Peruvian mammalogist who specialises in bats. She is the daughter of German zoologists Maria and Hans-Wilhelm Koepcke. Koepcke is known for being the sole...
+0.460  #21256  Rachel Reid  (born 1980) -- Canadian author
+        nearest: Lucy Maud Montgomery -- Canadian novelist (1874–1942)
+        lead [enwiki, 327 ch]: Rachelle Goguen (born September 2, 1980), known by her pen name Rachel Reid, is a Canadian author from Nova Scotia. She is known for writing the Game Changers book series and other hockey-themed gay romance novels. A 202...
+0.459  #20849  Katsuya Takasu  (born 1945) -- Japanese plastic surgeon (born 1945)
+        nearest: Hanaoka Seishū -- Japanese surgeon
+        lead [enwiki, 599 ch]: Katsuya Takasu (高須 克弥, Takasu Katsuya; January 22, 1945 in Isshiki, Aichi, Japan) is a plastic surgeon based in Tokyo. He has attracted controversies regarding his stances of Holocaust denial and Nanjing Massacre denial....
+0.458  #24108  Dawn Brancheau  (born 1969) -- American SeaWorld trainer (1969–2010)
+        nearest: Terri Irwin -- American and Australian conservationist (born 1964)
+        lead [enwiki, 373 ch]: Dawn Therese Brancheau (née LoVerde; April 16, 1969 – February 24, 2010) was an American animal trainer at SeaWorld. She worked with orcas at SeaWorld Orlando for fifteen years, including a leading role in revamping the ...
+0.456  #8063   Marvin Heemeyer  (born 1951) -- American known for bulldozer rampage (1951–2004)
+        nearest: Timothy McVeigh -- American domestic terrorist (1968–2001)
+        lead [enwiki, 1131 ch]: Marvin John Heemeyer (October 28, 1951 – June 4, 2004) was an American welder and automobile repair shop owner who, in an act of revenge, demolished numerous buildings with a modified bulldozer in Granby, Colorado, in Ju...
+0.456  #15858  Barbara O'Neill  (born 1953) -- Banned Australian alternative medicine promoter
+        nearest: Alfredo Bowman -- Honduran herbalist (1933–2016)
+        lead [enwiki, 1273 ch]: Barbara O'Neill is an Australian alternative health care promoter who advertises unsupported health practices described as misinformation and a risk to health and safety by the New South Wales Health Care Complaints Comm...
+0.456  #29259  Corinna Schumacher  (born 1969) -- German equestrian (born 1969)
+        nearest: Mark Phillips -- English equestrian (born 1948)
+        lead [enwiki, 157 ch]: Corinna Betsch Schumacher (née Betsch; born 2 March 1969) is a German champion equestrian. She is married to German former racing driver Michael Schumacher.
+0.455  #30557  Daniella Pick  (born 1983) -- Israeli singer and model-actress (born 1983)
+        nearest: Quentin Tarantino -- American filmmaker (born 1963)
+        lead [enwiki, 155 ch]: Daniella Pick (Hebrew: דניאלה פיק; born 21 November 1983) is an Israeli singer, model, and actress. She is married to American filmmaker Quentin Tarantino.
+
+
+WITHIN WINDOW: nearest other person in the same window, each person ranked by their smallest distance over the windows they're in
+median 0.257, p99 0.418, max 0.566; 12 of the top 25 are also in the global top 25
+
+by era: median of each person's smallest within-window distance, share in this ranking's top 1%
+         BCE  0.233   0.0%
+       1-999  0.226   0.1%
+   1000-1499  0.228   0.2%
+   1500-1799  0.250   0.7%
+   1800-1899  0.284   1.6%
+   1900-1949  0.276   1.9%
+       1950+  0.269   1.4%
+
+top 25 (window shown: the one where they're least alone)
+0.566  #2799   Nina Ensmann  (born 20, window 2) -- 
+        nearest: Ninmyō -- Emperor of Japan from 833 to 850
+        lead [translated, 89 ch]: Nina Ensmann (born in the 20th century in the Münsterland) is a German actress and model.
+0.523  #19803  Sabrina Pasterski  (born 1993, window 31) -- American physicist (born 1993)
+        nearest: Kaley Cuoco -- American actress (born 1985)
+        lead [enwiki, 196 ch]: Sabrina Gonzalez Pasterski (born June 3, 1993) is an American theoretical physicist specializing in high energy physics and celestial holography at the Perimeter Institute for Theoretical Physics.
+0.513  #20705  Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr.  (born 1904, window 16) -- American typesetter with longest name ever (1914–1997)
+        nearest: Robert Wadlow -- Tallest person in recorded history (1918–1940)
+        lead [enwiki, 2641 ch]: Hubert Blaine Wolfe­schlegel­stein­hausen­berger­dorff Sr. (4 August 1914 – 24 October 1997; surname also given as Wolfstern, Wolfe + 666, Wolfe+585, Wolfe+590, and others) was a German-born American typesetter who held ...
+0.493  #28493  Jesús Maria Tarriba  (born 1962, window 24) -- First Gentleman of Mexico since 2024
+        nearest: Claudia Sheinbaum -- President of Mexico since 2024
+        lead [enwiki, 564 ch]: Jesús María Tarriba Unger (born 1 September 1962) is a Mexican physicist and financial risk management expert who is the First Gentleman of Mexico. He is married to the President of Mexico, Claudia Sheinbaum. As the firs...
+0.493  #21506  Yael Cohen Braun  (born 1986, window 29) -- Canadian activist (born 1986)
+        nearest: Ms. Rachel -- American YouTuber and educator (born 1982)
+        lead [enwiki, 214 ch]: Yael Cohen (formerly Cohen Braun; born 4 November 1986) is a South African–born Canadian health activist. The former wife of Scooter Braun, she is the founder of the organization "Fuck Cancer", a nonprofit charity.
+0.492  #30805  Billy Klapper  (born 1937, window 18) -- American craftsman (1937–2024)
+        nearest: Amanda Blake -- American actress (1929–1989)
+        lead [enwiki, 168 ch]: Billy Ray Klapper (April 19, 1937 – September 10, 2024) was a spur and bit maker known for creating and producing many unique spurs and bits for the ranching community.
+0.491  #13861  Juan Pablo Escobar Henao  (born 1977, window 28) -- Colombian architect and author, son of Pablo Escobar
+        nearest: Dandeny Muñoz Mosquera -- Former chief assassin for the now-defunct Medellín Cartel
+        lead [enwiki, 165 ch]: Juan Sebastián Marroquín Santos (born Juan Pablo Escobar Henao; 24 February 1977) is a Colombian architect, author, and the son of Colombian drug lord Pablo Escobar.
+0.491  #30308  Frane Selak  (born 1929, window 17) -- Croatian man known for near-death stories (1929–2016)
+        nearest: Franciszek Gajowniczek -- Polish Army officer (1901-1995)
+        lead [enwiki, 159 ch]: Frano Selak or Frane Selak (14 June 1929 – 2016) was a Yugoslav music teacher, who was best known for his unverified stories about frequent brushes with death.
+0.491  #23100  Harry R. Truman  (born 1896, window 14) -- American businessman and airman (1896–1980)
+        nearest: Frederick Trump -- German and American businessman (1869–1918)
+        lead [enwiki, 786 ch]: Harry R. Truman (October 30, 1896 – May 18, 1980) was an American businessman, bootlegger, and prospector. He lived near Mount St. Helens, a volcano in the Cascade Range in the state of Washington, and was the owner and ...
+0.490  #5579   Carlo Acutis  (born 1991, window 31) -- Italian saint (1991–2006)
+        nearest: Kai Cenat -- American online streamer (born 2001)
+        lead [enwiki, 1811 ch]: Carlo Acutis (3 May 1991 – 12 October 2006) was an English-born Italian Catholic teenager known for his devotion to the Eucharist and his use of digital media to promote Catholic devotion. Born in London and raised in Mi...
+0.489  #12612  Cooke Maroney  (born 1984, window 29) -- American art gallery director (born 1984)
+        nearest: Kenneth C. Griffin -- American billionaire hedge fund manager (born 1968)
+        lead [enwiki, 182 ch]: Cooke Maroney (born July 3, 1984) is an American art gallery director. He has served as the director of Gladstone Gallery from 2022 to 2025 and previously worked at Gagosian Gallery.
+0.489  #20856  John Allen Chau  (born 1991, window 30) -- American missionary (1991–2018)
+        nearest: Nick Vujicic -- Australian American evangelist (born 1982)
+        lead [enwiki, 1530 ch]: John Allen Chau (December 18, 1991 – November 17, 2018) was an American Christian missionary who was killed by the Sentinelese, a tribe in voluntary isolation, after illegally traveling to North Sentinel Island in an att...
+0.488  #29238  Margret Wittmer  (born 1904, window 15) -- Floreana Island settler
+        nearest: Nicholas Miklouho-Maclay -- Russian explorer and scientist (1846–1888)
+        lead [enwiki, 430 ch]: Margret Wittmer (née Walbroel; 12 July 1904 – 21 March 2000) was a German woman who was an early colonist of Floreana Island. Her experiences living on the island were documented in her 1959 biography Postlagernd Florean...
+0.482  #24212  Lola Van Wagenen  (born 1938, window 18) -- American historian (born 1938)
+        nearest: Howard Zinn -- American historian and socialist philosopher (1922–2010)
+        lead [enwiki, 413 ch]: Lola Van Wagenen (born December 19, 1938) is an American historian and activist. In 1970, she co-founded Consumer Action Now (CAN), a non-profit educational organization. In 1995 she co-founded Clio Visualizing History, ...
+0.480  #27460  Lionel Dahmer  (born 1936, window 18) -- American chemist and author (1936–2023)
+        nearest: Christina Crawford -- American writer and actress
+        lead [enwiki, 453 ch]: Lionel Herbert Dahmer (; July 29, 1936 – December 5, 2023) was an American chemist and author. He is the father of the serial killer Jeffrey Dahmer. In 1994, he wrote A Father's Story, a non-fiction account of his son's ...
+0.479  #25666  Susan Oliver  (born 1932, window 17) -- American actress, author and aviator (1932–1990)
+        nearest: Cliff Robertson -- American actor (1923–2011)
+        lead [enwiki, 137 ch]: Susan Oliver (born Charlotte Gercke; February 13, 1932 – May 10, 1990) was an American actress, television director, aviator, and author.
+0.478  #19951  Yuki Kodama  (born 26, window 3) -- Japanese manga artist
+        nearest: Fujiwara no Yukinari -- calligrapher
+        lead [enwiki, 203 ch]: Yuki Kodama (Japanese: 小玉 ユキ, Hepburn: Kodama Yuki) is a Japanese manga artist. She is best known as the creator of the manga series Kids on the Slope, for which she won a Shogakukan Manga Award in 2011.
+0.478  #27426  Mary McCartney  (born 1969, window 26) -- English photographer and cookbook author (born 1969)
+        nearest: Stella McCartney -- English fashion designer (born 1971)
+        lead [enwiki, 201 ch]: Mary Anna McCartney (born 28 August 1969) is an English photographer, documentary filmmaker, plant-based and vegetarian cookbook author, and activist. She is the Global Ambassador for Meat-Free Monday.
+0.476  #22635  Roy Sullivan  (born 1912, window 16) -- Man struck by lightning 7 times (1912–1983)
+        nearest: Robert Wadlow -- Tallest person in recorded history (1918–1940)
+        lead [enwiki, 433 ch]: Roy Cleveland Sullivan (February 7, 1912 – September 28, 1983) was an American park ranger in Shenandoah National Park in Virginia. Between 1942 and 1977, Sullivan was claimed to have survived being struck by lightning s...
+0.475  #26928  Vitaly Kaloyev  (born 1956, window 25) -- Russian architect (born 1956)
+        nearest: Mohamed Atta -- Egyptian terrorist and 9/11 hijacker (1968–2001)
+        lead [enwiki, 1321 ch]: Vitaly Konstantinovich Kaloyev (Russian: Виталий Константинович Калоев, IPA: [vʲɪˈtalʲɪj kənstɐnʲˈtʲinəvʲɪtɕ kɐˈlojɪf]; Iron Ossetic: Калоты Къостайы фырт Витали, romanized: Kaloty Qostaiy fyrt Vitali, IPA: [kɑloˈtə qost...
+0.474  #16401  Arne Næss, Jr.  (born 1937, window 19) -- Norwegian businessman and mountaineer (1937–2004)
+        nearest: Frédéric Prinz von Anhalt -- German-American businessman
+        lead [enwiki, 202 ch]: Arne Næss Jr. (Urban East Norwegian: [ˈɑ̂ːɳə ˈnɛsː]; born Arne Rudolf Ludvig Raab; 8 December 1937 – 13 January 2004) was a Norwegian businessman and the second husband of actress and singer Diana Ross.
+0.474  #7199   Alexandra Grant  (born 1973, window 27) -- American visual artist (born 1973)
+        nearest: Tracey Emin -- English artist (born 1963)
+        lead [enwiki, 477 ch]: Alexandra Grant (born April 4, 1973) is an American visual artist who examines language and written texts through painting, drawing, sculpture, video, and other media. She uses language and exchanges with writers as a so...
+0.473  #24228  Carisa Hendrix  (born 1987, window 30) -- Canadian magician, comedian, and fire eater
+        nearest: David Blaine -- American illusionist and extreme performer
+        lead [enwiki, 210 ch]: Carisa Hendrix (born 1987) is a Canadian magician, comedian, and fire eater who often performs in the persona of Lucy Darling, inspired by the wisecracking socialite characters from the Golden Age of Hollywood.
+0.473  #7171   Henrietta Lacks  (born 1920, window 16) -- African-American woman (1920–1951), source of HeLa immortal cell line
+        nearest: Vivien Thomas -- American laboratory supervisor (1910–1985)
+        lead [enwiki, 1236 ch]: Henrietta Lacks (née Loretta Pleasant; August 1, 1920 – October 4, 1951) was an African-American woman whose cancer cells are the source of the HeLa cell line, the first immortalized human cell line and one of the most i...
+0.473  #27086  Ricardo López  (born 1975, window 30) -- Uruguayan-American stalker (1975–1996)
+        nearest: Elliot Rodger -- British-American mass murderer (1991–2014)
+        lead [enwiki, 1296 ch]: Ricardo López (January 14, 1975 – September 12, 1996) was a Uruguayan-American man known for stalking and planning an acid attack against Icelandic singer Björk via letter bomb, while videotaping himself in his apartment...
+
+
+2-D: where the layout puts people, by decile of their within-window high-d distance (all slices)
+decile  high-d dist  grey (no coarse region)  no fine label  2-d NN distance pct (median)
+     1  -0.000-0.184                22.2%          17.8%  0.37
+     2  0.184-0.211                22.9%          20.7%  0.42
+     3  0.211-0.231                23.2%          21.5%  0.44
+     4  0.231-0.248                23.5%          22.3%  0.45
+     5  0.248-0.265                23.8%          23.9%  0.48
+     6  0.265-0.282                23.1%          25.8%  0.50
+     7  0.282-0.301                23.5%          28.4%  0.52
+     8  0.301-0.323                22.9%          30.7%  0.56
+     9  0.323-0.355                23.7%          31.0%  0.60
+    10  0.355-0.579                26.1%          35.5%  0.68
+spearman(high-d, 2-d NN distance) within windows: +0.216
+
+global top 10, every window: high-d pct | 2-d NN pct | coarse region | 2-d nearest
+  Jesús Maria Tarriba
+    w24  0.999  0.64  Power Elites  | Steve Bannon
+    w25  1.000  0.22  Power Elites  | Lauren Bessette
+    w26  1.000  0.94  Power Elites  | Oleg Tinkov
+    w27  1.000  0.80  Power Elites  | Rahim Aga Khan
+    w28  1.000  0.98  grey (no fine label)  | Kim Keon Hee
+  Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr.
+    w15  1.000  0.74  grey (no fine label)  | Sarah Knauss
+    w16  1.000  0.93  grey  | Naomi Whitehead
+    w17  1.000  0.10  grey  | John Rogan
+    w18  1.000  0.36  grey (no fine label)  | Robert Wadlow
+    w19  1.000  0.34  grey (no fine label)  | Chandra Bahadur Dangi
+  Frane Selak
+    w17  1.000  0.62  Thinkers and Spiritual Leaders  | Neville Goddard
+    w18  0.999  0.89  Thinkers and Spiritual Leaders  | Sister Lúcia
+    w19  1.000  0.71  Thinkers and Spiritual Leaders  | Sylvia Browne
+    w20  1.000  0.48  grey  | Michel Polnareff
+    w21  1.000  0.65  grey  | Véronique Sanson
+  Harry R. Truman
+    w14  0.999  0.84  Industrialists and Scientists  | George Hearst
+    w15  1.000  0.98  grey (no fine label)  | George Hearst
+    w16  1.000  0.94  grey (no fine label)  | Isabella Stewart Gardner
+    w17  0.999  0.53  Power Elites  | Conrad Hilton, Jr.
+    w18  1.000  0.66  Power Elites  | Robert Maxwell
+  Yael Cohen Braun
+    w29  1.000  0.97  Power Elites (no fine label)  | LaVar Ball
+    w30  0.999  0.93  Power Elites (no fine label)  | Andrew D. Huberman
+    w31  0.999  0.99  Power Elites (no fine label)  | Andrew Tate
+  Lola Van Wagenen
+    w18  0.998  0.76  Thinkers and Spiritual Leaders  | Elijah Muhammad
+    w19  0.998  0.92  Thinkers and Spiritual Leaders  | Betty Friedan
+    w20  0.998  0.84  Anglophone Writers and American Politicians  | Herbert Simon
+    w21  0.998  0.96  Murderers and Public Figures  | Alan Greenspan
+    w22  0.999  0.89  grey  | Manya Surve
+  Susan Oliver
+    w17  0.998  0.98  grey (no fine label)  | Fernanda Montenegro
+    w18  0.997  0.36  American Film and TV Actors  | Lionel Stander
+    w19  0.997  0.66  American Film and TV Actors  | James Cromwell
+    w20  0.997  0.50  American Film and TV Actors  | Dean Stockwell
+    w21  0.999  0.82  American Film and TV Actors (no fine label)  | William Daniels
+  Vitaly Kaloyev
+    w22  0.999  0.38  Heads of State and Government (no fine label)  | Daniel Cohn-Bendit
+    w23  0.999  0.67  Heads of State and Government (no fine label)  | Rigoberta Menchú
+    w24  0.999  0.99  grey (no fine label)  | Akhmad Kadyrov
+    w25  0.999  0.97  Heads of State and Government (no fine label)  | Neerja Bhanot
+    w26  0.998  0.86  Heads of State and Government (no fine label)  | Sergei Krikalev
+  Roy Sullivan
+    w15  0.999  1.00  grey (no fine label)  | Lee Hoi-chuen
+    w16  0.999  0.96  grey  | John Rogan
+    w17  0.998  0.73  grey  | John Rogan
+    w18  0.997  0.61  grey (no fine label)  | Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr.
+    w19  0.997  0.91  grey (no fine label)  | Robert Wadlow
+  Lionel Dahmer
+    w18  0.998  0.91  Anglophone Writers and American Politicians (no fine label)  | Mario Puzo
+    w19  0.998  0.84  Anglophone Writers and American Politicians (no fine label)  | Dominick Dunne
+    w20  0.997  0.79  Anglophone Writers and American Politicians (no fine label)  | Oriana Fallaci
+    w21  0.998  0.81  Murderers and Public Figures  | Christina Crawford
+    w22  0.998  0.80  Murderers and Public Figures  | Jerry Falwell
+
+within-window top 10, every window: high-d pct | 2-d NN pct | coarse region | 2-d nearest
+  Nina Ensmann
+    w0   1.000  0.81  Roman Emperors and Rulers  | Maroboduus
+    w1   1.000  0.06  Roman Emperors and Rulers  | Thumelicus
+    w2   1.000  0.56  Roman Emperors and Rulers  | Aulus Plautius
+    w3   1.000  0.70  Frankish and French Royalty  | Lothair I
+  Sabrina Pasterski
+    w31  1.000  0.42  American Film and TV Actors (no fine label)  | Mayim Bialik
+  Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr.
+    w15  1.000  0.74  grey (no fine label)  | Sarah Knauss
+    w16  1.000  0.93  grey  | Naomi Whitehead
+    w17  1.000  0.10  grey  | John Rogan
+    w18  1.000  0.36  grey (no fine label)  | Robert Wadlow
+    w19  1.000  0.34  grey (no fine label)  | Chandra Bahadur Dangi
+  Jesús Maria Tarriba
+    w24  0.999  0.64  Power Elites  | Steve Bannon
+    w25  1.000  0.22  Power Elites  | Lauren Bessette
+    w26  1.000  0.94  Power Elites  | Oleg Tinkov
+    w27  1.000  0.80  Power Elites  | Rahim Aga Khan
+    w28  1.000  0.98  grey (no fine label)  | Kim Keon Hee
+  Yael Cohen Braun
+    w29  1.000  0.97  Power Elites (no fine label)  | LaVar Ball
+    w30  0.999  0.93  Power Elites (no fine label)  | Andrew D. Huberman
+    w31  0.999  0.99  Power Elites (no fine label)  | Andrew Tate
+  Billy Klapper
+    w18  0.999  0.42  American Classic TV Actors  | Amanda Blake
+    w19  0.999  0.85  grey (no fine label)  | Amanda Blake
+    w20  0.999  0.66  grey (no fine label)  | Amanda Blake
+    w21  0.999  0.64  American Film and TV Actors  | Barbara Feldon
+    w22  0.999  0.77  American Film and TV Actors (no fine label)  | Larry Linville
+  Juan Pablo Escobar Henao
+    w28  0.999  0.25  Heads of State and Government (no fine label)  | Genaro García Luna
+    w29  1.000  0.56  Power Elites (no fine label)  | Nemesio Oseguera Cervantes
+    w30  0.999  0.94  Power Elites (no fine label)  | Katherine Schwarzenegger
+    w31  0.999  0.89  Power Elites (no fine label)  | Katherine Schwarzenegger
+  Frane Selak
+    w17  1.000  0.62  Thinkers and Spiritual Leaders  | Neville Goddard
+    w18  0.999  0.89  Thinkers and Spiritual Leaders  | Sister Lúcia
+    w19  1.000  0.71  Thinkers and Spiritual Leaders  | Sylvia Browne
+    w20  1.000  0.48  grey  | Michel Polnareff
+    w21  1.000  0.65  grey  | Véronique Sanson
+  Harry R. Truman
+    w14  0.999  0.84  Industrialists and Scientists  | George Hearst
+    w15  1.000  0.98  grey (no fine label)  | George Hearst
+    w16  1.000  0.94  grey (no fine label)  | Isabella Stewart Gardner
+    w17  0.999  0.53  Power Elites  | Conrad Hilton, Jr.
+    w18  1.000  0.66  Power Elites  | Robert Maxwell
+  Carlo Acutis
+    w30  1.000  0.99  Power Elites (no fine label)  | Yael Cohen Braun
+    w31  0.998  0.34  Power Elites  | Jiang Xueqin
+
+
+SUSPECT BIRTH YEARS: born before 1500, but the median birth year of their 10 nearest people (global) is 1800 or later
+  #2799   Nina Ensmann  born 20 (P569, precision 9), neighbours' median 1964, bin 3 -- Nina Ensmann (born in the 20th century in the Münsterland) is a German actress and model.
+  #3424   Nomi no Sukune  born -68 (floruit, precision <NA>), neighbours' median 1932, bin 2 -- Nomi no Sukune (野見 宿禰) was a legendary figure in Japanese history who appears in the Nihon Shoki. He is regarded as the founder of sumo wrestling. He 
+  #8210   Cola di Rienzo  born 1313 (P569, precision 9), neighbours' median 1814, bin 10 -- Nicola di Lorenzo Gabrini (1313 – 8 October 1354), commonly known as Cola di Rienzo (Italian: [ˈkɔːla di ˈrjɛntso]) or Rienzi, was an Italian politici
+  #19951  Yuki Kodama  born 26 (P569, precision 9), neighbours' median 1966, bin 3 -- Yuki Kodama (Japanese: 小玉 ユキ, Hepburn: Kodama Yuki) is a Japanese manga artist. She is best known as the creator of the manga series Kids on the Slope
+  #20061  Kanami  born 1333 (P569, precision 9), neighbours' median 1803, bin 10 -- Kan'ami Kiyotsugu (観阿弥 清次; 1333 – June 8, 1384) was a Japanese Noh actor, author, and musician during the Muromachi period. Born Yūzaki Kiyotsugu (結崎 
+  #22980  Rouzbeh Bemani  born 1357 (P569, precision 11), neighbours' median 1928, bin 10 -- Rouzbeh Bemani (born 7 Azar 1358) is an Iranian poet, lyricist, and singer. As a lyricist, he has collaborated with artists such as Dariush, Googoosh,
+  #27344  <NA>  born 1342 (death, precision <NA>), neighbours' median 1803, bin 10 -- Inuō (birth date unknown – May 9, Ōei 20 (June 7, 1413)) was a Noh actor of the Hie troupe of Ōmi sarugaku. A master of sarugaku Noh, he rivaled Kan'a

@@ -875,8 +875,44 @@ Planned next: see "Frontend, what's left".
   kept its shape: as a slider it works at 375 px, only its labels don't fit); whether labels crossfading
   during a drag read as flicker; the palette's tone (bright on dark -- review
   by eye); search over more than names and short descriptions.
+  **For the write-up: the loneliest people** (2026-11-18,
+  `scoping/nn_outliers.py` → `scoping/results/nn_outliers.txt`): farthest
+  nearest neighbour in the map's 4096-d space. No real outliers (NN cosine
+  distance median 0.255, p99.9 0.450, max 0.493: a smooth tail). The top are
+  people famous for one odd thing or through a relative: Jesús María Tarriba
+  (First Gentleman of Mexico → Sheinbaum), Hubert Blaine
+  Wolfeschlegelsteinhausenbergerdorff (→ the father of 87 children), Roy
+  Sullivan (lightning ×7), Lionel Dahmer. Pairings: Samuel Wilson ("Uncle
+  Sam", meat packer) → Jimmy Dean; Sabrina Pasterski → Kaley Cuoco; Carlo
+  Acutis → Kai Cenat (in-window); Kaloyev → Mohamed Atta (handle with care).
+  Not a text-length effect (Spearman with lead length −0.03); the global top
+  1% is 0.1-0.2% of people born before 1500 and ~1.8% of 1800-1949. In 2-d,
+  UMAP tucks them in: grey share is 22-26% in every decile of high-d
+  loneliness, though they lose the fine label (18% → 36%) and sit a bit
+  farther from their 2-d neighbour.
 
 ## Open questions
+
+- **Three more junk birth years, live on the map** (found 2026-11-18 by
+  `scoping/nn_outliers.py`: early-born people whose 10 nearest people have a
+  median birth year of 1800+; the rest of its hits are real, e.g. Cola di
+  Rienzo, Kan'ami, Nomi no Sukune). Nina Ensmann (rank 2,799; P569 = 20 at
+  year precision, the dewiki lead says only "born in the 20th century"),
+  Yuki Kodama (19,951; P569 = 26, a manga artist), Rouzbeh Bemani (22,980;
+  P569 = 1357 at day precision, Solar Hijri: the lead's 7 Azar 1358 is
+  November 1979). The first two sit with the Roman emperors in windows 0-3.
+  Stage 06's warning missed them: no lead gives a Gregorian year. Rows are
+  in `curated/birth_year_overrides.csv` (empty year for the first two, 1979
+  for Bemani, whose 3.5k views × 47 years then fall far below the 1.74M
+  bar), so all three leave the roster on the next run from stage 05. **Not
+  rerun yet**, because of the cost: AlignedUMAP optimizes all windows jointly
+  (umap 0.5.12 `optimize_layout_aligned_euclidean`), so any roster change
+  moves every window's layout, and stage 10 reuses a window's names only if
+  every cluster's member set is unchanged. A rerun therefore re-derives the
+  whole map (clusters, tracks, names, colours, ribbon order) for up to
+  ~$19 of Claude (stage 10 $17.33, 11 $1.65, 11b $0.10 last time, less any
+  identical prompts) and ~1.5 h, then a review by eye. Bundle it with the next
+  change that needs a new layout anyway.
 
 - **English stubs vs rich native articles** (medieval Chinese / Japanese /
   Islamic-world figures): translate the richer article instead? First
